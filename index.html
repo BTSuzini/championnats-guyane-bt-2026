@@ -771,12 +771,13 @@
 </main>
 
 <script type="module">
-  import { auth } from "./assets/js/firebase.js";
+  import { auth } from "./assets/js/firebase.js?v=5";
   import {
-    loginAndRedirect,
+    register,
+    login,
     logout,
     getRoleByUid
-  } from "./assets/js/session.js";
+  } from "./assets/js/session.js?v=5";
 
   import { onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.12.5/firebase-auth.js";
 
@@ -819,21 +820,33 @@
     roleBadge.className = "role-badge none";
   }
 
-  async function ensureUser(){
-  if(!auth.currentUser){
-    await loginAndRedirect();
-    return null;
+  async function askLogin(){
+    const email = prompt("Email organisateur ?");
+    if(!email) return null;
+
+    const password = prompt("Mot de passe ?");
+    if(!password) return null;
+
+    try{
+      const user = await login(email.trim(), password);
+      return user;
+    }catch(error){
+      console.error(error);
+      alert("Connexion impossible : " + (error?.message || "Erreur inconnue"));
+      return null;
+    }
   }
 
-  return auth.currentUser;
-}
- 
+  async function ensureUser(){
+    if(auth.currentUser) return auth.currentUser;
+    return await askLogin();
+  }
+
   async function getCurrentRole(){
     const user = await ensureUser();
     if(!user) return null;
 
     const role = await getRoleByUid(user.uid);
-
     return { user, role };
   }
 
@@ -903,6 +916,28 @@
       setRoleBadge(null);
     }
   });
+
+  window.quickAdmin = async () => {
+    const email = prompt("Email du compte admin à créer ?");
+    if(!email) return;
+
+    const password = prompt("Mot de passe ? Minimum 6 caractères.");
+    if(!password) return;
+
+    try{
+      const user = await register(email.trim(), password);
+      alert(
+        "Compte créé ✅\n\n" +
+        "Email : " + user.email + "\n" +
+        "UID : " + user.uid + "\n\n" +
+        "Prochaine étape : créer le document Firestore roles/" + user.uid
+      );
+    }catch(error){
+      console.error(error);
+      alert("Erreur création compte : " + (error?.message || "Erreur inconnue"));
+    }
+  };
 </script>
+
 </body>
 </html>
