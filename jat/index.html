@@ -1,0 +1,551 @@
+<!doctype html>
+<html lang="fr">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>JAT — Championnats Guyane Beach Tennis</title>
+
+  <style>
+    :root{
+      --clay:#c65a1e;
+      --clay-dark:#8e3a13;
+      --clay-light:#ee8a3a;
+      --sky:#27bced;
+      --aqua:#00a9c8;
+      --blue:#075b9a;
+      --blue-dark:#063b72;
+      --text:#17212b;
+      --muted:#667085;
+      --card:rgba(255,255,255,.94);
+      --shadow:0 16px 40px rgba(16,24,40,.12);
+      --container:1180px;
+      --header-h:150px;
+    }
+
+    *{box-sizing:border-box;}
+
+    body{
+      margin:0;
+      font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;
+      color:var(--text);
+      background:
+        radial-gradient(circle at 20% 0%, rgba(39,188,237,.22), transparent 28%),
+        radial-gradient(circle at 85% 10%, rgba(0,169,200,.16), transparent 26%),
+        linear-gradient(180deg,#f4fcff 0%,#e9f8ff 48%,#ffffff 100%);
+    }
+
+    a{color:inherit;text-decoration:none;}
+    img{display:block;max-width:100%;}
+
+    .container{
+      width:min(var(--container), calc(100% - 28px));
+      margin:0 auto;
+    }
+
+    .site-header{
+      position:fixed;
+      top:0;
+      left:0;
+      right:0;
+      z-index:1000;
+      background:linear-gradient(135deg,var(--clay-dark),var(--clay),var(--clay-light));
+      border-bottom:1px solid rgba(0,0,0,.08);
+      box-shadow:0 10px 26px rgba(142,58,19,.28);
+    }
+
+    .header-inner{
+      min-height:var(--header-h);
+      display:grid;
+      grid-template-columns:80px 1fr 80px;
+      grid-template-rows:auto auto;
+      align-items:center;
+      gap:10px 18px;
+      padding:12px 0;
+    }
+
+    .header-logo{
+      width:80px;
+      height:80px;
+      display:flex;
+      align-items:center;
+      justify-content:center;
+    }
+
+    .header-logo img{
+      max-width:100%;
+      max-height:100%;
+      object-fit:contain;
+      filter:drop-shadow(0 6px 10px rgba(0,0,0,.18));
+    }
+
+    .header-title{
+      text-align:center;
+      color:#fff;
+    }
+
+    .header-title strong{
+      display:block;
+      font-size:clamp(22px,4vw,42px);
+      line-height:.95;
+      letter-spacing:-.04em;
+      text-transform:uppercase;
+      font-weight:1000;
+    }
+
+    .header-title span{
+      display:block;
+      margin-top:5px;
+      font-size:13px;
+      font-weight:900;
+      color:rgba(255,255,255,.88);
+      text-transform:uppercase;
+      letter-spacing:.08em;
+    }
+
+    .header-nav-wrap{
+      grid-column:1 / 4;
+      position:relative;
+      overflow:hidden;
+      padding:0 34px;
+    }
+
+    .header-nav-wrap::before,
+    .header-nav-wrap::after{
+      content:"";
+      position:absolute;
+      top:0;
+      bottom:0;
+      width:40px;
+      z-index:2;
+      pointer-events:none;
+    }
+
+    .header-nav-wrap::before{
+      left:0;
+      background:linear-gradient(90deg, rgba(142,58,19,.98), rgba(142,58,19,0));
+    }
+
+    .header-nav-wrap::after{
+      right:0;
+      background:linear-gradient(270deg, rgba(198,90,30,.98), rgba(198,90,30,0));
+    }
+
+    .nav-arrow{
+      position:absolute;
+      top:50%;
+      transform:translateY(-50%);
+      z-index:3;
+      width:28px;
+      height:28px;
+      border-radius:999px;
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      background:rgba(255,255,255,.88);
+      color:var(--clay-dark);
+      font-size:20px;
+      font-weight:1000;
+      box-shadow:0 6px 14px rgba(0,0,0,.18);
+      pointer-events:none;
+    }
+
+    .nav-arrow.left{left:2px;}
+    .nav-arrow.right{right:2px;}
+
+    .header-nav{
+      display:flex;
+      gap:10px;
+      overflow-x:auto;
+      padding:2px 4px;
+      scrollbar-width:none;
+      -webkit-overflow-scrolling:touch;
+    }
+
+    .header-nav::-webkit-scrollbar{display:none;}
+
+    .nav-link{
+      flex:0 0 auto;
+      min-height:42px;
+      padding:10px 17px;
+      border-radius:999px;
+      background:rgba(255,255,255,.92);
+      color:#344054;
+      font-size:14px;
+      font-weight:900;
+      white-space:nowrap;
+      box-shadow:0 8px 16px rgba(0,0,0,.14);
+    }
+
+    .nav-link.primary{
+      background:linear-gradient(180deg,var(--blue),var(--blue-dark));
+      color:#fff;
+    }
+
+    main{
+      padding-top:calc(var(--header-h) + 24px);
+      padding-bottom:42px;
+    }
+
+    .section{margin-top:22px;}
+
+    .panel{
+      background:var(--card);
+      border:1px solid rgba(255,255,255,.6);
+      border-radius:28px;
+      box-shadow:var(--shadow);
+      padding:20px;
+    }
+
+    .panel-head{
+      display:flex;
+      justify-content:space-between;
+      align-items:flex-start;
+      gap:12px;
+      margin-bottom:16px;
+    }
+
+    .panel-title{
+      margin:0;
+      font-size:28px;
+      line-height:1.05;
+      letter-spacing:-.03em;
+    }
+
+    .panel-text{
+      margin:8px 0 0;
+      color:var(--muted);
+      font-size:15px;
+      line-height:1.55;
+    }
+
+    .panel-tag{
+      flex-shrink:0;
+      padding:8px 13px;
+      border-radius:999px;
+      background:#e4f7ff;
+      color:var(--blue-dark);
+      font-size:12px;
+      font-weight:1000;
+      text-transform:uppercase;
+      letter-spacing:.06em;
+    }
+
+    .grid-main{
+      display:grid;
+      grid-template-columns:1fr;
+      gap:14px;
+    }
+
+    .entry-card{
+      position:relative;
+      overflow:hidden;
+      border-radius:24px;
+      min-height:116px;
+      padding:18px;
+      color:#fff;
+      box-shadow:0 16px 28px rgba(16,24,40,.14);
+      transition:transform .18s ease, box-shadow .18s ease;
+    }
+
+    .entry-card:hover{
+      transform:translateY(-2px);
+      box-shadow:0 20px 34px rgba(16,24,40,.18);
+    }
+
+    .entry-kicker{
+      font-size:13px;
+      font-weight:900;
+      text-transform:uppercase;
+      letter-spacing:.08em;
+      opacity:.9;
+      margin-bottom:8px;
+    }
+
+    .entry-title{
+      font-size:28px;
+      line-height:1.02;
+      letter-spacing:-.03em;
+      font-weight:1000;
+      margin:0 0 8px;
+    }
+
+    .entry-sub{
+      font-size:15px;
+      line-height:1.45;
+      opacity:.96;
+      max-width:92%;
+    }
+
+    .card-clay{background:linear-gradient(135deg,var(--clay-dark),var(--clay),var(--clay-light));}
+    .card-blue{background:linear-gradient(135deg,var(--blue-dark),var(--blue),var(--sky));}
+    .card-aqua{background:linear-gradient(135deg,#008da8,var(--aqua),#62ddf0);}
+    .card-white{
+      color:#12324c;
+      background:linear-gradient(135deg,#ffffff,#e6faff);
+      box-shadow:inset 0 0 0 1px rgba(7,91,154,.12), 0 16px 28px rgba(16,24,40,.10);
+    }
+
+    .status-box{
+      margin-top:14px;
+      padding:14px 16px;
+      border-radius:18px;
+      background:#f8fafc;
+      border:1px solid rgba(16,24,40,.06);
+      color:#475467;
+      font-size:14px;
+      line-height:1.5;
+    }
+
+    .status-box strong{color:#1d2733;}
+
+    .role-badge{
+      display:inline-flex;
+      align-items:center;
+      justify-content:center;
+      padding:6px 12px;
+      border-radius:999px;
+      font-weight:1000;
+      font-size:12px;
+      letter-spacing:.06em;
+      text-transform:uppercase;
+      margin-left:8px;
+      vertical-align:middle;
+    }
+
+    .role-badge.admin{
+      background:linear-gradient(135deg,var(--clay),var(--clay-light));
+      color:#fff;
+    }
+
+    .role-badge.jat{
+      background:linear-gradient(135deg,#5322a8,#a457f0);
+      color:#fff;
+    }
+
+    .role-badge.arbitre{
+      background:linear-gradient(135deg,var(--blue),var(--sky));
+      color:#fff;
+    }
+
+    .role-badge.none{
+      background:#eef2f6;
+      color:#475467;
+    }
+
+    .mini-link{
+      min-height:54px;
+      display:inline-flex;
+      align-items:center;
+      justify-content:center;
+      text-align:center;
+      border-radius:18px;
+      background:#fff;
+      border:1px solid rgba(16,24,40,.06);
+      color:#344054;
+      font-size:15px;
+      font-weight:900;
+      padding:12px 14px;
+      box-shadow:0 8px 18px rgba(16,24,40,.05);
+    }
+
+    @media (min-width:760px){
+      :root{--header-h:158px;}
+      .header-inner{grid-template-columns:100px 1fr 100px;}
+      .header-logo{width:96px;height:80px;}
+      .header-nav{justify-content:center;}
+      .grid-main{grid-template-columns:1fr 1fr;}
+      .panel{padding:24px;}
+    }
+  </style>
+</head>
+
+<body>
+
+<header class="site-header">
+  <div class="container header-inner">
+
+    <div class="header-logo">
+      <img src="../assets/img/logo-lg.png" alt="Ligue Guyane">
+    </div>
+
+    <div class="header-title">
+      <strong>Espace JAT</strong>
+      <span>Championnats Guyane Beach Tennis</span>
+    </div>
+
+    <div class="header-logo">
+      <img src="../assets/img/logo-lg.png" alt="Ligue Guyane">
+    </div>
+
+    <div class="header-nav-wrap">
+      <span class="nav-arrow left">‹</span>
+      <nav class="header-nav" aria-label="Navigation JAT">
+        <a class="nav-link" href="../index.html">🏠 Accueil public</a>
+        <a class="nav-link primary" href="index.html">🎾 JAT</a>
+        <a class="nav-link" href="../public/equipes.html">👥 Équipes</a>
+        <a class="nav-link" href="../public/programmation.html">📅 Programmation</a>
+        <a class="nav-link" href="../public/resultats.html">🏆 Résultats</a>
+        <a class="nav-link" href="../arbitre/index.html">🧑‍⚖️ Arbitre</a>
+        <a class="nav-link" href="#" id="btnLogout">🚪 Déconnexion</a>
+      </nav>
+      <span class="nav-arrow right">›</span>
+    </div>
+
+  </div>
+</header>
+
+<main class="container">
+
+  <section class="section">
+    <div class="panel" id="accessDenied" style="display:none;">
+      <div class="panel-head">
+        <div>
+          <h2 class="panel-title">⛔ Accès refusé</h2>
+          <p class="panel-text">
+            Cette page est réservée au juge-arbitre et aux administrateurs.
+          </p>
+        </div>
+        <div class="panel-tag">Sécurité</div>
+      </div>
+
+      <a class="mini-link" href="../index.html">Retour accueil</a>
+    </div>
+  </section>
+
+  <section class="section">
+    <div class="panel" id="jatUI" style="display:none;">
+      <div class="panel-head">
+        <div>
+          <h2 class="panel-title">🎾 Tableau de bord JAT</h2>
+          <p class="panel-text">
+            Pilotage sportif du championnat : tirage, programmation, résultats et accès arbitres.
+          </p>
+        </div>
+        <div class="panel-tag">JAT</div>
+      </div>
+
+      <div class="grid-main">
+        <a class="entry-card card-clay" href="tirage.html">
+          <div class="entry-kicker">Officiel</div>
+          <h3 class="entry-title">Tirage</h3>
+          <div class="entry-sub">Préparer ou suivre les tirages par catégorie et par épreuve.</div>
+        </a>
+
+        <a class="entry-card card-blue" href="programmation.html">
+          <div class="entry-kicker">Matchs</div>
+          <h3 class="entry-title">Programmation</h3>
+          <div class="entry-sub">Gérer l’ordre des matchs, les terrains et les horaires.</div>
+        </a>
+
+        <a class="entry-card card-aqua" href="resultats.html">
+          <div class="entry-kicker">Scores</div>
+          <h3 class="entry-title">Résultats</h3>
+          <div class="entry-sub">Saisir ou contrôler les résultats sportifs du tournoi.</div>
+        </a>
+
+        <a class="entry-card card-white" href="../arbitre/index.html">
+          <div class="entry-kicker">Terrain</div>
+          <h3 class="entry-title">Espace arbitre</h3>
+          <div class="entry-sub">Accéder aux outils terrain et aux saisies arbitres.</div>
+        </a>
+      </div>
+
+      <div class="status-box">
+        <strong>Statut :</strong>
+        <span id="authHint">Vérification de la connexion…</span>
+        <span id="roleBadge" class="role-badge none" style="display:none;"></span>
+      </div>
+    </div>
+  </section>
+
+</main>
+
+<script type="module">
+  import { auth } from "../assets/js/firebase.js";
+  import {
+    loginAndRedirect,
+    logout,
+    getRoleByEmail
+  } from "../assets/js/session.js";
+
+  import { onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.12.5/firebase-auth.js";
+
+  const accessDenied = document.getElementById("accessDenied");
+  const jatUI = document.getElementById("jatUI");
+  const btnLogout = document.getElementById("btnLogout");
+  const hint = document.getElementById("authHint");
+  const roleBadge = document.getElementById("roleBadge");
+
+  function canAccessJAT(role){
+    return role === "admin" || role === "jat";
+  }
+
+  function setRoleBadge(role){
+    roleBadge.style.display = "inline-flex";
+    roleBadge.className = "role-badge";
+
+    if(role === "admin"){
+      roleBadge.textContent = "ADMIN";
+      roleBadge.classList.add("admin");
+      return;
+    }
+
+    if(role === "jat"){
+      roleBadge.textContent = "JAT";
+      roleBadge.classList.add("jat");
+      return;
+    }
+
+    if(role === "arbitre"){
+      roleBadge.textContent = "ARBITRE";
+      roleBadge.classList.add("arbitre");
+      return;
+    }
+
+    roleBadge.textContent = "AUCUN RÔLE";
+    roleBadge.classList.add("none");
+  }
+
+  function clearRoleBadge(){
+    roleBadge.textContent = "";
+    roleBadge.style.display = "none";
+    roleBadge.className = "role-badge none";
+  }
+
+  btnLogout.onclick = async (event) => {
+    event.preventDefault();
+    await logout();
+    window.location.href = "../index.html";
+  };
+
+  onAuthStateChanged(auth, async (user) => {
+    accessDenied.style.display = "none";
+    jatUI.style.display = "none";
+    clearRoleBadge();
+
+    if(!user){
+      await loginAndRedirect();
+      return;
+    }
+
+    try{
+      const role = await getRoleByEmail(user.email);
+
+      if(!canAccessJAT(role)){
+        accessDenied.style.display = "block";
+        return;
+      }
+
+      jatUI.style.display = "block";
+      hint.textContent = `Connecté : ${user.email}`;
+      setRoleBadge(role);
+
+    }catch(error){
+      console.error(error);
+      accessDenied.style.display = "block";
+    }
+  });
+</script>
+
+</body>
+</html>
