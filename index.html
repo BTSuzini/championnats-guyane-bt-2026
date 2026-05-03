@@ -373,6 +373,12 @@
       padding:18px;
       color:#fff;
       box-shadow:0 16px 28px rgba(16,24,40,.14);
+      transition:transform .18s ease, box-shadow .18s ease;
+    }
+
+    .entry-card:hover{
+      transform:translateY(-2px);
+      box-shadow:0 20px 34px rgba(16,24,40,.18);
     }
 
     .entry-kicker{
@@ -399,11 +405,9 @@
       max-width:92%;
     }
 
+    .card-clay{background:linear-gradient(135deg,var(--clay-dark),var(--clay),var(--clay-light));}
     .card-blue{background:linear-gradient(135deg,var(--blue-dark),var(--blue),var(--sky));}
     .card-aqua{background:linear-gradient(135deg,#008da8,var(--aqua),#62ddf0);}
-    .card-clay{background:linear-gradient(135deg,var(--clay-dark),var(--clay),var(--clay-light));}
-    .card-night{background:linear-gradient(135deg,#0f1e35,#1d3560,#235d94);}
-    .card-violet{background:linear-gradient(135deg,#5322a8,#7b30db,#a457f0);}
     .card-white{
       color:#12324c;
       background:linear-gradient(135deg,#ffffff,#e6faff);
@@ -465,6 +469,40 @@
       font-weight:900;
       padding:12px 14px;
       box-shadow:0 8px 18px rgba(16,24,40,.05);
+    }
+
+    .role-badge{
+      display:inline-flex;
+      align-items:center;
+      justify-content:center;
+      padding:6px 12px;
+      border-radius:999px;
+      font-weight:1000;
+      font-size:12px;
+      letter-spacing:.06em;
+      text-transform:uppercase;
+      margin-left:8px;
+      vertical-align:middle;
+    }
+
+    .role-badge.admin{
+      background:linear-gradient(135deg,var(--clay),var(--clay-light));
+      color:#fff;
+    }
+
+    .role-badge.jat{
+      background:linear-gradient(135deg,#5322a8,#a457f0);
+      color:#fff;
+    }
+
+    .role-badge.arbitre{
+      background:linear-gradient(135deg,var(--blue),var(--sky));
+      color:#fff;
+    }
+
+    .role-badge.none{
+      background:#eef2f6;
+      color:#475467;
     }
 
     @media (min-width:760px){
@@ -653,16 +691,28 @@
       </div>
 
       <div class="grid-main">
-        <a class="entry-card card-blue" href="public/restauration.html">
+        <a class="entry-card card-clay" href="public/restauration.html">
           <div class="entry-kicker">Sur place</div>
           <h3 class="entry-title">Restauration</h3>
           <div class="entry-sub">Repas, buvette et informations restauration du week-end.</div>
         </a>
 
-        <a class="entry-card card-clay" href="public/reglement.html">
+        <a class="entry-card card-blue" href="public/reglement.html">
           <div class="entry-kicker">Compétition</div>
           <h3 class="entry-title">Règlement</h3>
           <div class="entry-sub">Règlement sportif, catégories, formats et conditions de participation.</div>
+        </a>
+
+        <a class="entry-card card-aqua" href="public/contact.html">
+          <div class="entry-kicker">Besoin d’aide</div>
+          <h3 class="entry-title">Contact</h3>
+          <div class="entry-sub">Contacter l’organisation du tournoi.</div>
+        </a>
+
+        <a class="entry-card card-white" href="public/programmation.html">
+          <div class="entry-kicker">Repères</div>
+          <h3 class="entry-title">Horaires</h3>
+          <div class="entry-sub">Retrouver les horaires, rendez-vous et informations de présence.</div>
         </a>
       </div>
     </div>
@@ -681,34 +731,35 @@
       </div>
 
       <div class="grid-main">
-        <a class="entry-card card-night" href="#" id="btnAdmin">
+        <a class="entry-card card-clay" href="#" id="btnAdmin">
           <div class="entry-kicker">Gestion</div>
           <h3 class="entry-title">Admin</h3>
           <div class="entry-sub">Administration générale du tournoi et pilotage des contenus.</div>
         </a>
 
-        <a class="entry-card card-violet" href="#" id="btnJAT">
+        <a class="entry-card card-blue" href="#" id="btnJAT">
           <div class="entry-kicker">Officiel</div>
           <h3 class="entry-title">Juge-arbitre</h3>
           <div class="entry-sub">Accès JAT pour la gestion sportive et le suivi officiel.</div>
         </a>
 
-        <a class="entry-card card-blue" href="#" id="btnArbitre">
+        <a class="entry-card card-aqua" href="#" id="btnArbitre">
           <div class="entry-kicker">Terrain</div>
           <h3 class="entry-title">Arbitre</h3>
           <div class="entry-sub">Accès arbitre pour le suivi terrain et les saisies autorisées.</div>
         </a>
 
-        <a class="entry-card card-white" href="public/contact.html">
-          <div class="entry-kicker">Besoin d’aide</div>
-          <h3 class="entry-title">Contact</h3>
-          <div class="entry-sub">Contacter l’organisation du tournoi.</div>
+        <a class="entry-card card-white" href="public/equipes.html">
+          <div class="entry-kicker">Lecture</div>
+          <h3 class="entry-title">Vue publique</h3>
+          <div class="entry-sub">Retour rapide vers les informations visibles par tous.</div>
         </a>
       </div>
 
       <div class="status-box">
         <strong>Statut :</strong>
         <span id="authHint">Vérification de la connexion…</span>
+        <span id="roleBadge" class="role-badge none" style="display:none;"></span>
       </div>
 
       <div style="margin-top:12px;">
@@ -734,6 +785,39 @@
   const btnArbitre = document.getElementById("btnArbitre");
   const btnLogout = document.getElementById("btnLogout");
   const hint = document.getElementById("authHint");
+  const roleBadge = document.getElementById("roleBadge");
+
+  function setRoleBadge(role){
+    roleBadge.style.display = "inline-flex";
+    roleBadge.className = "role-badge";
+
+    if(role === "admin"){
+      roleBadge.textContent = "ADMIN";
+      roleBadge.classList.add("admin");
+      return;
+    }
+
+    if(role === "jat"){
+      roleBadge.textContent = "JAT";
+      roleBadge.classList.add("jat");
+      return;
+    }
+
+    if(role === "arbitre"){
+      roleBadge.textContent = "ARBITRE";
+      roleBadge.classList.add("arbitre");
+      return;
+    }
+
+    roleBadge.textContent = "AUCUN RÔLE";
+    roleBadge.classList.add("none");
+  }
+
+  function clearRoleBadge(){
+    roleBadge.textContent = "";
+    roleBadge.style.display = "none";
+    roleBadge.className = "role-badge none";
+  }
 
   async function ensureUser(){
     if(!auth.currentUser){
@@ -820,20 +904,24 @@
     event.preventDefault();
     await logout();
     hint.textContent = "Non connecté.";
+    clearRoleBadge();
   };
 
   onAuthStateChanged(auth, async (user) => {
     if(!user){
       hint.textContent = "Non connecté.";
+      clearRoleBadge();
       return;
     }
 
     try{
       const role = await getRoleByEmail(user.email);
-      hint.textContent = `Connecté : ${user.email} — rôle : ${role || "aucun"}`;
+      hint.textContent = `Connecté : ${user.email}`;
+      setRoleBadge(role);
     }catch(error){
       console.error(error);
       hint.textContent = `Connecté : ${user.email} — rôle non trouvé`;
+      setRoleBadge(null);
     }
   });
 </script>
