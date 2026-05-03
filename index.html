@@ -399,18 +399,11 @@
       max-width:92%;
     }
 
-    .card-blue{
-      background:linear-gradient(135deg,var(--blue-dark),var(--blue),var(--sky));
-    }
-
-    .card-aqua{
-      background:linear-gradient(135deg,#008da8,var(--aqua),#62ddf0);
-    }
-
-    .card-clay{
-      background:linear-gradient(135deg,var(--clay-dark),var(--clay),var(--clay-light));
-    }
-
+    .card-blue{background:linear-gradient(135deg,var(--blue-dark),var(--blue),var(--sky));}
+    .card-aqua{background:linear-gradient(135deg,#008da8,var(--aqua),#62ddf0);}
+    .card-clay{background:linear-gradient(135deg,var(--clay-dark),var(--clay),var(--clay-light));}
+    .card-night{background:linear-gradient(135deg,#0f1e35,#1d3560,#235d94);}
+    .card-violet{background:linear-gradient(135deg,#5322a8,#7b30db,#a457f0);}
     .card-white{
       color:#12324c;
       background:linear-gradient(135deg,#ffffff,#e6faff);
@@ -445,29 +438,44 @@
       line-height:1.55;
     }
 
+    .status-box{
+      margin-top:14px;
+      padding:14px 16px;
+      border-radius:18px;
+      background:#f8fafc;
+      border:1px solid rgba(16,24,40,.06);
+      color:#475467;
+      font-size:14px;
+      line-height:1.5;
+    }
+
+    .status-box strong{color:#1d2733;}
+
+    .mini-link{
+      min-height:54px;
+      display:inline-flex;
+      align-items:center;
+      justify-content:center;
+      text-align:center;
+      border-radius:18px;
+      background:#fff;
+      border:1px solid rgba(16,24,40,.06);
+      color:#344054;
+      font-size:15px;
+      font-weight:900;
+      padding:12px 14px;
+      box-shadow:0 8px 18px rgba(16,24,40,.05);
+    }
+
     @media (min-width:760px){
       :root{--header-h:158px;}
 
-      .header-inner{
-        grid-template-columns:100px 1fr 100px;
-      }
+      .header-inner{grid-template-columns:100px 1fr 100px;}
+      .header-logo{width:96px;height:80px;}
+      .header-nav{justify-content:center;}
 
-      .header-logo{
-        width:96px;
-        height:80px;
-      }
-
-      .header-nav{
-        justify-content:center;
-      }
-
-      .hero{
-        padding:34px 30px 32px;
-      }
-
-      .hero-infos{
-        grid-template-columns:1fr 1fr 1fr;
-      }
+      .hero{padding:34px 30px 32px;}
+      .hero-infos{grid-template-columns:1fr 1fr 1fr;}
 
       .hero-actions{
         grid-template-columns:1fr 1fr;
@@ -476,17 +484,9 @@
         margin-right:auto;
       }
 
-      .grid-main{
-        grid-template-columns:1fr 1fr;
-      }
-
-      .category-box{
-        grid-template-columns:repeat(4,1fr);
-      }
-
-      .panel{
-        padding:24px;
-      }
+      .grid-main{grid-template-columns:1fr 1fr;}
+      .category-box{grid-template-columns:repeat(4,1fr);}
+      .panel{padding:24px;}
     }
   </style>
 </head>
@@ -566,8 +566,8 @@
         </div>
 
         <div class="hero-actions">
-          <a class="hero-btn hero-btn-primary" href="pages/inscriptions.html">S’inscrire au tournoi</a>
-          <a class="hero-btn hero-btn-secondary" href="pages/equipes.html">Voir les équipes</a>
+          <a class="hero-btn hero-btn-primary" href="public/inscriptions.html">S’inscrire au tournoi</a>
+          <a class="hero-btn hero-btn-secondary" href="public/equipes.html">Voir les équipes</a>
         </div>
 
       </div>
@@ -594,7 +594,7 @@
       </div>
 
       <div class="note">
-        Les inscriptions se font uniquement par équipe. Le formulaire permettra de choisir
+        Les inscriptions se font uniquement par équipe. Le formulaire permet de choisir
         la catégorie puis l’épreuve, avant de renseigner les deux joueurs.
       </div>
     </div>
@@ -606,32 +606,32 @@
         <div>
           <h2 class="panel-title">Accès rapide</h2>
           <p class="panel-text">
-            Les pages indispensables pour lancer rapidement le tournoi.
+            Les pages indispensables pour suivre le tournoi.
           </p>
         </div>
         <div class="panel-tag">Tournoi</div>
       </div>
 
       <div class="grid-main">
-        <a class="entry-card card-clay" href="pages/inscriptions.html">
+        <a class="entry-card card-clay" href="public/inscriptions.html">
           <div class="entry-kicker">Joueurs</div>
           <h3 class="entry-title">Inscriptions</h3>
           <div class="entry-sub">Inscrire une équipe dans la bonne catégorie et la bonne épreuve.</div>
         </a>
 
-        <a class="entry-card card-blue" href="pages/equipes.html">
+        <a class="entry-card card-blue" href="public/equipes.html">
           <div class="entry-kicker">Participants</div>
           <h3 class="entry-title">Équipes</h3>
           <div class="entry-sub">Visualiser les équipes engagées par catégorie et par épreuve.</div>
         </a>
 
-        <a class="entry-card card-aqua" href="pages/programmation.html">
+        <a class="entry-card card-aqua" href="public/programmation.html">
           <div class="entry-kicker">Matchs</div>
           <h3 class="entry-title">Programmation</h3>
           <div class="entry-sub">Planning des rencontres, horaires et terrains.</div>
         </a>
 
-        <a class="entry-card card-white" href="pages/resultats.html">
+        <a class="entry-card card-white" href="public/resultats.html">
           <div class="entry-kicker">Suivi</div>
           <h3 class="entry-title">Résultats</h3>
           <div class="entry-sub">Résultats, classements et podiums du championnat.</div>
@@ -653,13 +653,13 @@
       </div>
 
       <div class="grid-main">
-        <a class="entry-card card-blue" href="pages/restauration.html">
+        <a class="entry-card card-blue" href="public/restauration.html">
           <div class="entry-kicker">Sur place</div>
           <h3 class="entry-title">Restauration</h3>
           <div class="entry-sub">Repas, buvette et informations restauration du week-end.</div>
         </a>
 
-        <a class="entry-card card-clay" href="pages/reglement.html">
+        <a class="entry-card card-clay" href="public/reglement.html">
           <div class="entry-kicker">Compétition</div>
           <h3 class="entry-title">Règlement</h3>
           <div class="entry-sub">Règlement sportif, catégories, formats et conditions de participation.</div>
@@ -668,7 +668,175 @@
     </div>
   </section>
 
+  <section class="section">
+    <div class="panel">
+      <div class="panel-head">
+        <div>
+          <h2 class="panel-title">Espace organisateurs</h2>
+          <p class="panel-text">
+            Accès sécurisé pour l’administration, le juge-arbitre et les arbitres.
+          </p>
+        </div>
+        <div class="panel-tag">Sécurisé</div>
+      </div>
+
+      <div class="grid-main">
+        <a class="entry-card card-night" href="#" id="btnAdmin">
+          <div class="entry-kicker">Gestion</div>
+          <h3 class="entry-title">Admin</h3>
+          <div class="entry-sub">Administration générale du tournoi et pilotage des contenus.</div>
+        </a>
+
+        <a class="entry-card card-violet" href="#" id="btnJAT">
+          <div class="entry-kicker">Officiel</div>
+          <h3 class="entry-title">Juge-arbitre</h3>
+          <div class="entry-sub">Accès JAT pour la gestion sportive et le suivi officiel.</div>
+        </a>
+
+        <a class="entry-card card-blue" href="#" id="btnArbitre">
+          <div class="entry-kicker">Terrain</div>
+          <h3 class="entry-title">Arbitre</h3>
+          <div class="entry-sub">Accès arbitre pour le suivi terrain et les saisies autorisées.</div>
+        </a>
+
+        <a class="entry-card card-white" href="public/contact.html">
+          <div class="entry-kicker">Besoin d’aide</div>
+          <h3 class="entry-title">Contact</h3>
+          <div class="entry-sub">Contacter l’organisation du tournoi.</div>
+        </a>
+      </div>
+
+      <div class="status-box">
+        <strong>Statut :</strong>
+        <span id="authHint">Vérification de la connexion…</span>
+      </div>
+
+      <div style="margin-top:12px;">
+        <a class="mini-link" href="#" id="btnLogout">🚪 Déconnexion</a>
+      </div>
+    </div>
+  </section>
+
 </main>
+
+<script type="module">
+  import { auth } from "./assets/js/firebase.js";
+  import {
+    loginAndRedirect,
+    logout,
+    getRoleByEmail
+  } from "./assets/js/session.js";
+
+  import { onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.12.5/firebase-auth.js";
+
+  const btnAdmin = document.getElementById("btnAdmin");
+  const btnJAT = document.getElementById("btnJAT");
+  const btnArbitre = document.getElementById("btnArbitre");
+  const btnLogout = document.getElementById("btnLogout");
+  const hint = document.getElementById("authHint");
+
+  async function ensureUser(){
+    if(!auth.currentUser){
+      await loginAndRedirect();
+    }
+
+    const user = auth.currentUser;
+
+    if(!user){
+      alert("Connexion annulée.");
+      return null;
+    }
+
+    return user;
+  }
+
+  async function getCurrentRole(){
+    const user = await ensureUser();
+    if(!user) return null;
+
+    const role = await getRoleByEmail(user.email);
+
+    return {
+      user,
+      role
+    };
+  }
+
+  function canAccessAdmin(role){
+    return role === "admin";
+  }
+
+  function canAccessJAT(role){
+    return role === "admin" || role === "jat";
+  }
+
+  function canAccessArbitre(role){
+    return role === "admin" || role === "jat" || role === "arbitre";
+  }
+
+  btnAdmin.onclick = async (event) => {
+    event.preventDefault();
+
+    const ctx = await getCurrentRole();
+    if(!ctx) return;
+
+    if(!canAccessAdmin(ctx.role)){
+      alert("Accès réservé aux administrateurs.");
+      return;
+    }
+
+    window.location.href = "admin/index.html";
+  };
+
+  btnJAT.onclick = async (event) => {
+    event.preventDefault();
+
+    const ctx = await getCurrentRole();
+    if(!ctx) return;
+
+    if(!canAccessJAT(ctx.role)){
+      alert("Accès réservé au juge-arbitre et aux administrateurs.");
+      return;
+    }
+
+    window.location.href = "jat/index.html";
+  };
+
+  btnArbitre.onclick = async (event) => {
+    event.preventDefault();
+
+    const ctx = await getCurrentRole();
+    if(!ctx) return;
+
+    if(!canAccessArbitre(ctx.role)){
+      alert("Accès réservé aux arbitres, juge-arbitres et administrateurs.");
+      return;
+    }
+
+    window.location.href = "arbitre/index.html";
+  };
+
+  btnLogout.onclick = async (event) => {
+    event.preventDefault();
+    await logout();
+    hint.textContent = "Non connecté.";
+  };
+
+  onAuthStateChanged(auth, async (user) => {
+    if(!user){
+      hint.textContent = "Non connecté.";
+      return;
+    }
+
+    try{
+      const role = await getRoleByEmail(user.email);
+      hint.textContent = `Connecté : ${user.email} — rôle : ${role || "aucun"}`;
+    }catch(error){
+      console.error(error);
+      hint.textContent = `Connecté : ${user.email} — rôle non trouvé`;
+    }
+  });
+</script>
 
 </body>
 </html>
