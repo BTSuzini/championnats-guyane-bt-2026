@@ -29,6 +29,23 @@ export async function getRoleByUid(uid){
 
   if(!snap.exists()) return null;
 
-  const data = snap.data() || {};
-  return data.role || null;
+  return snap.data()?.role || null;
+}
+
+export async function getRoleByEmail(){
+  const user = auth.currentUser;
+  if(!user) return null;
+  return getRoleByUid(user.uid);
+}
+
+export function isAdmin(role){
+  return role === "admin";
+}
+
+export function isJat(role){
+  return role === "admin" || role === "jat";
+}
+
+export function isArbitre(role){
+  return role === "admin" || role === "jat" || role === "arbitre";
 }
