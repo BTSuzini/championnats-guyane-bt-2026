@@ -94,20 +94,55 @@
       font-weight:1000;
     }
 
-    .header-title span{
-      display:block;
-      margin-top:5px;
-      font-size:14px;
-      font-weight:800;
-      color:rgba(255,255,255,.86);
-      letter-spacing:.08em;
-      text-transform:uppercase;
-    }
-
     .header-nav-wrap{
       grid-column:1 / 4;
+      position:relative;
       overflow:hidden;
+      padding:0 34px;
     }
+
+    .header-nav-wrap::before,
+    .header-nav-wrap::after{
+      content:"";
+      position:absolute;
+      top:0;
+      bottom:0;
+      width:40px;
+      z-index:2;
+      pointer-events:none;
+    }
+
+    .header-nav-wrap::before{
+      left:0;
+      background:linear-gradient(90deg, rgba(142,58,19,.98), rgba(142,58,19,0));
+    }
+
+    .header-nav-wrap::after{
+      right:0;
+      background:linear-gradient(270deg, rgba(198,90,30,.98), rgba(198,90,30,0));
+    }
+
+    .nav-arrow{
+      position:absolute;
+      top:50%;
+      transform:translateY(-50%);
+      z-index:3;
+      width:28px;
+      height:28px;
+      border-radius:999px;
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      background:rgba(255,255,255,.88);
+      color:var(--clay-dark);
+      font-size:20px;
+      font-weight:1000;
+      box-shadow:0 6px 14px rgba(0,0,0,.18);
+      pointer-events:none;
+    }
+
+    .nav-arrow.left{left:2px;}
+    .nav-arrow.right{right:2px;}
 
     .header-nav{
       display:flex;
@@ -470,20 +505,22 @@
     </div>
 
     <div class="header-logo">
-      <img src="assets/img/logo-lg.png" alt="FFT">
+      <img src="assets/img/logo-lg.png" alt="Ligue Guyane">
     </div>
 
     <div class="header-nav-wrap">
-      <nav class="header-nav">
+      <span class="nav-arrow left">‹</span>
+      <nav class="header-nav" aria-label="Navigation principale">
         <a class="nav-link primary" href="index.html">🏠 Accueil</a>
         <a class="nav-link" href="pages/inscriptions.html">📝 Inscriptions</a>
         <a class="nav-link" href="pages/equipes.html">👥 Équipes</a>
         <a class="nav-link" href="pages/programmation.html">📅 Programmation</a>
         <a class="nav-link" href="pages/resultats.html">🏆 Résultats</a>
         <a class="nav-link" href="pages/reglement.html">📘 Règlement</a>
-        <a class="nav-link" href="pages/infos.html">ℹ️ Infos</a>
+        <a class="nav-link" href="pages/restauration.html">🍽️ Restauration</a>
         <a class="nav-link" href="pages/contact.html">📩 Contact</a>
       </nav>
+      <span class="nav-arrow right">›</span>
     </div>
 
   </div>
@@ -616,10 +653,10 @@
       </div>
 
       <div class="grid-main">
-        <a class="entry-card card-blue" href="pages/infos.html">
-          <div class="entry-kicker">Organisation</div>
-          <h3 class="entry-title">Infos</h3>
-          <div class="entry-sub">Lieu, horaires, accueil, modalités et contacts utiles.</div>
+        <a class="entry-card card-blue" href="pages/restauration.html">
+          <div class="entry-kicker">Sur place</div>
+          <h3 class="entry-title">Restauration</h3>
+          <div class="entry-sub">Repas, buvette et informations restauration du week-end.</div>
         </a>
 
         <a class="entry-card card-clay" href="pages/reglement.html">
