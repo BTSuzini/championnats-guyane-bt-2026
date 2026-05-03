@@ -775,7 +775,7 @@
   import {
     loginAndRedirect,
     logout,
-    getRoleByEmail
+    getRoleByUid
   } from "./assets/js/session.js";
 
   import { onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.12.5/firebase-auth.js";
@@ -824,38 +824,21 @@
       await loginAndRedirect();
     }
 
-    const user = auth.currentUser;
-
-    if(!user){
+    if(!auth.currentUser){
       alert("Connexion annulée.");
       return null;
     }
 
-    return user;
+    return auth.currentUser;
   }
 
   async function getCurrentRole(){
     const user = await ensureUser();
     if(!user) return null;
 
-    const role = await getRoleByEmail(user.email);
+    const role = await getRoleByUid(user.uid);
 
-    return {
-      user,
-      role
-    };
-  }
-
-  function canAccessAdmin(role){
-    return role === "admin";
-  }
-
-  function canAccessJAT(role){
-    return role === "admin" || role === "jat";
-  }
-
-  function canAccessArbitre(role){
-    return role === "admin" || role === "jat" || role === "arbitre";
+    return { user, role };
   }
 
   btnAdmin.onclick = async (event) => {
@@ -864,7 +847,7 @@
     const ctx = await getCurrentRole();
     if(!ctx) return;
 
-    if(!canAccessAdmin(ctx.role)){
+    if(ctx.role !== "admin"){
       alert("Accès réservé aux administrateurs.");
       return;
     }
@@ -878,7 +861,7 @@
     const ctx = await getCurrentRole();
     if(!ctx) return;
 
-    if(!canAccessJAT(ctx.role)){
+    if(ctx.role !== "admin" && ctx.role !== "jat"){
       alert("Accès réservé au juge-arbitre et aux administrateurs.");
       return;
     }
@@ -892,7 +875,7 @@
     const ctx = await getCurrentRole();
     if(!ctx) return;
 
-    if(!canAccessArbitre(ctx.role)){
+    if(ctx.role !== "admin" && ctx.role !== "jat" && ctx.role !== "arbitre"){
       alert("Accès réservé aux arbitres, juge-arbitres et administrateurs.");
       return;
     }
@@ -915,7 +898,7 @@
     }
 
     try{
-      const role = await getRoleByEmail(user.email);
+      const role = await getRoleByUid(user.uid);
       hint.textContent = `Connecté : ${user.email}`;
       setRoleBadge(role);
     }catch(error){
@@ -925,6 +908,5 @@
     }
   });
 </script>
-
 </body>
 </html>
