@@ -3,7 +3,7 @@ import { getAuth } from "https://www.gstatic.com/firebasejs/10.12.5/firebase-aut
 import { getFirestore } from "https://www.gstatic.com/firebasejs/10.12.5/firebase-firestore.js";
 
 const firebaseConfig = {
-  apiKey: "AIzaSyAdjBE2UpEFRUgkASTaKP5X7vYr0ygzuI",
+  apiKey: "AIzaSyAdjBE2UpEFRUgkASTaKP5X7vYr0ygzUzI",
   authDomain: "championnats-guyane-bt-2026.firebaseapp.com",
   projectId: "championnats-guyane-bt-2026",
   storageBucket: "championnats-guyane-bt-2026.firebasestorage.app",
