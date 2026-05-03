@@ -1,20 +1,52 @@
-import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.5/firebase-app.js";
-import { getFirestore } from "https://www.gstatic.com/firebasejs/10.12.5/firebase-firestore.js";
-import { getAuth } from "https://www.gstatic.com/firebasejs/10.12.5/firebase-auth.js";
+import {
+  GoogleAuthProvider,
+  signInWithPopup,
+  signOut
+} from "https://www.gstatic.com/firebasejs/10.12.5/firebase-auth.js";
 
-// CONFIG DE TON PROJET (OK VALIDÉE)
-const firebaseConfig = {
-  apiKey: "AIzaSyAdjBE2UpEFRUgkASTaKP5X7vYr0ygZuZI",
-  authDomain: "championnats-guyane-bt-2026.firebaseapp.com",
-  projectId: "championnats-guyane-bt-2026",
-  storageBucket: "championnats-guyane-bt-2026.firebasestorage.app",
-  messagingSenderId: "639869315232",
-  appId: "1:639869315232:web:c73adb022414faf1d641c5"
-};
+import {
+  doc,
+  getDoc
+} from "https://www.gstatic.com/firebasejs/10.12.5/firebase-firestore.js";
 
-// INIT
-const app = initializeApp(firebaseConfig);
+import { auth, db } from "./firebase.js";
 
-// EXPORTS
-export const db = getFirestore(app);
-export const auth = getAuth(app);
+const provider = new GoogleAuthProvider();
+
+export async function loginAndRedirect(){
+  await signInWithPopup(auth, provider);
+}
+
+export async function logout(){
+  await signOut(auth);
+}
+
+export async function getRoleByUid(uid){
+  if(!uid) return null;
+
+  const ref = doc(db, "roles", uid);
+  const snap = await getDoc(ref);
+
+  if(!snap.exists()) return null;
+
+  return snap.data()?.role || null;
+}
+
+/* Compatibilité temporaire avec tes fichiers actuels */
+export async function getRoleByEmail(){
+  const user = auth.currentUser;
+  if(!user) return null;
+  return getRoleByUid(user.uid);
+}
+
+export function isAdmin(role){
+  return role === "admin";
+}
+
+export function isJat(role){
+  return role === "admin" || role === "jat";
+}
+
+export function isArbitre(role){
+  return role === "admin" || role === "jat" || role === "arbitre";
+}
