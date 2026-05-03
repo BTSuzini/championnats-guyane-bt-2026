@@ -511,7 +511,7 @@
           <h1 class="hero-title">Inscrire une équipe</h1>
           <p class="hero-sub">
             Choisissez la catégorie, l’épreuve, puis renseignez les deux joueurs.
-            Le paiement sera organisé séparément.
+            Le nom de l’équipe sera généré automatiquement.
           </p>
         </div>
 
@@ -576,11 +576,6 @@
               <label for="epreuveDD">👩 Double Dames</label>
             </div>
           </div>
-        </div>
-
-        <div class="field">
-          <label for="teamName">Nom de l’équipe *</label>
-          <input id="teamName" name="teamName" type="text" required maxlength="40" placeholder="Ex : Les beacheurs">
         </div>
 
         <hr class="sep" />
@@ -663,6 +658,19 @@
     return (value || "").trim();
   }
 
+  function capitalize(value){
+    const v = clean(value).toLowerCase();
+    if(!v) return "";
+    return v.charAt(0).toUpperCase() + v.slice(1);
+  }
+
+  function buildTeamName(p1First, p1Last, p2First, p2Last){
+    const i1 = clean(p1Last).charAt(0).toUpperCase();
+    const i2 = clean(p2Last).charAt(0).toUpperCase();
+
+    return `${capitalize(p1First)} ${i1} - ${capitalize(p2First)} ${i2}`;
+  }
+
   function slugify(value){
     return clean(value)
       .toLowerCase()
@@ -680,7 +688,6 @@
     return {
       categorie: form.querySelector('input[name="categorie"]:checked')?.value || "",
       epreuve: form.querySelector('input[name="epreuve"]:checked')?.value || "",
-      teamName: clean(form.teamName.value),
 
       p1FirstName: clean(form.p1FirstName.value),
       p1LastName: clean(form.p1LastName.value),
@@ -706,12 +713,18 @@
       if(
         !data.categorie ||
         !data.epreuve ||
-        !data.teamName ||
         !data.p1FirstName || !data.p1LastName || !data.p1Licence || !data.p1Phone ||
         !data.p2FirstName || !data.p2LastName || !data.p2Licence || !data.p2Phone
       ){
         throw new Error("Merci de compléter tous les champs obligatoires.");
       }
+
+      const teamName = buildTeamName(
+        data.p1FirstName,
+        data.p1LastName,
+        data.p2FirstName,
+        data.p2LastName
+      );
 
       const privatePayload = {
         eventId: EVENT_ID,
@@ -722,8 +735,8 @@
         categorieKey: slugify(data.categorie),
         epreuveKey: slugify(data.epreuve),
 
-        teamName: data.teamName,
-        teamKey: slugify(data.teamName),
+        teamName: teamName,
+        teamKey: slugify(teamName),
 
         paiement: "placeholder",
         statut: "inscrite",
@@ -759,8 +772,8 @@
         categorieKey: slugify(data.categorie),
         epreuveKey: slugify(data.epreuve),
 
-        teamName: data.teamName,
-        teamKey: slugify(data.teamName),
+        teamName: teamName,
+        teamKey: slugify(teamName),
 
         joueur1FirstName: data.p1FirstName,
         joueur2FirstName: data.p2FirstName,
@@ -777,8 +790,8 @@
       );
 
       form.reset();
-      setStatus("✅ Inscription enregistrée !");
-      alert("✅ Inscription confirmée !\n\nVotre équipe a bien été enregistrée.");
+      setStatus("✅ Inscription enregistrée : " + teamName);
+      alert("✅ Inscription confirmée !\n\nÉquipe enregistrée : " + teamName);
 
     }catch(error){
       console.error(error);
