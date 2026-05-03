@@ -820,18 +820,14 @@
   }
 
   async function ensureUser(){
-    if(!auth.currentUser){
-      await loginAndRedirect();
-    }
-
-    if(!auth.currentUser){
-      alert("Connexion annulée.");
-      return null;
-    }
-
-    return auth.currentUser;
+  if(!auth.currentUser){
+    await loginAndRedirect();
+    return null;
   }
 
+  return auth.currentUser;
+}
+ 
   async function getCurrentRole(){
     const user = await ensureUser();
     if(!user) return null;
