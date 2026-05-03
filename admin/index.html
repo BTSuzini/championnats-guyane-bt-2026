@@ -1,0 +1,531 @@
+<!doctype html>
+<html lang="fr">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Admin — Championnats Guyane Beach Tennis</title>
+
+  <style>
+    :root{
+      --clay:#c65a1e; --clay-dark:#8e3a13; --clay-light:#ee8a3a;
+      --sky:#27bced; --aqua:#00a9c8; --blue:#075b9a; --blue-dark:#063b72;
+      --text:#17212b; --muted:#667085; --card:rgba(255,255,255,.94);
+      --shadow:0 16px 40px rgba(16,24,40,.12);
+      --container:1180px; --header-h:150px;
+    }
+
+    *{box-sizing:border-box;}
+
+    body{
+      margin:0;
+      font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;
+      color:var(--text);
+      background:
+        radial-gradient(circle at 20% 0%, rgba(39,188,237,.22), transparent 28%),
+        radial-gradient(circle at 85% 10%, rgba(0,169,200,.16), transparent 26%),
+        linear-gradient(180deg,#f4fcff 0%,#e9f8ff 48%,#fff 100%);
+    }
+
+    a{color:inherit;text-decoration:none;}
+    img{display:block;max-width:100%;}
+    .container{width:min(var(--container), calc(100% - 28px));margin:0 auto;}
+
+    .site-header{
+      position:fixed;top:0;left:0;right:0;z-index:1000;
+      background:linear-gradient(135deg,var(--clay-dark),var(--clay),var(--clay-light));
+      box-shadow:0 10px 26px rgba(142,58,19,.28);
+    }
+
+    .header-inner{
+      min-height:var(--header-h);
+      display:grid;
+      grid-template-columns:80px 1fr 80px;
+      grid-template-rows:auto auto;
+      align-items:center;
+      gap:10px 18px;
+      padding:12px 0;
+    }
+
+    .header-logo{width:80px;height:80px;display:flex;align-items:center;justify-content:center;}
+    .header-logo img{max-width:100%;max-height:100%;object-fit:contain;filter:drop-shadow(0 6px 10px rgba(0,0,0,.18));}
+
+    .header-title{text-align:center;color:#fff;}
+    .header-title strong{
+      display:block;font-size:clamp(22px,4vw,42px);line-height:.95;
+      letter-spacing:-.04em;text-transform:uppercase;font-weight:1000;
+    }
+    .header-title span{
+      display:block;margin-top:5px;font-size:13px;font-weight:900;
+      color:rgba(255,255,255,.88);text-transform:uppercase;letter-spacing:.08em;
+    }
+
+    .header-nav-wrap{grid-column:1 / 4;position:relative;overflow:hidden;padding:0 34px;}
+    .header-nav-wrap::before,.header-nav-wrap::after{
+      content:"";position:absolute;top:0;bottom:0;width:40px;z-index:2;pointer-events:none;
+    }
+    .header-nav-wrap::before{left:0;background:linear-gradient(90deg, rgba(142,58,19,.98), rgba(142,58,19,0));}
+    .header-nav-wrap::after{right:0;background:linear-gradient(270deg, rgba(198,90,30,.98), rgba(198,90,30,0));}
+
+    .nav-arrow{
+      position:absolute;top:50%;transform:translateY(-50%);z-index:3;
+      width:28px;height:28px;border-radius:999px;display:flex;align-items:center;justify-content:center;
+      background:rgba(255,255,255,.88);color:var(--clay-dark);font-size:20px;font-weight:1000;
+      box-shadow:0 6px 14px rgba(0,0,0,.18);pointer-events:none;
+    }
+    .nav-arrow.left{left:2px;} .nav-arrow.right{right:2px;}
+
+    .header-nav{
+      display:flex;gap:10px;overflow-x:auto;padding:2px 4px;
+      scrollbar-width:none;-webkit-overflow-scrolling:touch;
+    }
+    .header-nav::-webkit-scrollbar{display:none;}
+
+    .nav-link{
+      flex:0 0 auto;min-height:42px;padding:10px 17px;border-radius:999px;
+      background:rgba(255,255,255,.92);color:#344054;font-size:14px;font-weight:900;
+      white-space:nowrap;box-shadow:0 8px 16px rgba(0,0,0,.14);
+    }
+    .nav-link.primary{background:linear-gradient(180deg,var(--blue),var(--blue-dark));color:#fff;}
+
+    main{padding-top:calc(var(--header-h) + 24px);padding-bottom:42px;}
+    .section{margin-top:22px;}
+
+    .panel{
+      background:var(--card);border:1px solid rgba(255,255,255,.6);
+      border-radius:28px;box-shadow:var(--shadow);padding:20px;
+    }
+
+    .panel-head{display:flex;justify-content:space-between;align-items:flex-start;gap:12px;margin-bottom:16px;}
+    .panel-title{margin:0;font-size:28px;line-height:1.05;letter-spacing:-.03em;}
+    .panel-text{margin:8px 0 0;color:var(--muted);font-size:15px;line-height:1.55;}
+    .panel-tag{
+      flex-shrink:0;padding:8px 13px;border-radius:999px;background:#e4f7ff;color:var(--blue-dark);
+      font-size:12px;font-weight:1000;text-transform:uppercase;letter-spacing:.06em;
+    }
+
+    .grid{display:grid;grid-template-columns:1fr;gap:10px;}
+    .field{display:grid;gap:8px;}
+    .field label{font-weight:1000;color:#1c2430;}
+
+    input, textarea, select{
+      width:100%;border-radius:16px;border:1px solid rgba(16,24,40,.10);
+      background:#fff;padding:13px 14px;font-size:16px;color:#17212b;outline:none;
+      font-family:inherit;
+    }
+
+    textarea{resize:vertical;min-height:120px;}
+
+    .btn{
+      appearance:none;border:1px solid rgba(16,24,40,.10);background:#fff;
+      border-radius:18px;min-height:54px;padding:13px 15px;font-size:15px;
+      font-weight:1000;cursor:pointer;color:#1c2430;text-align:center;
+      box-shadow:0 8px 16px rgba(16,24,40,.04);
+      display:flex;align-items:center;justify-content:center;
+    }
+
+    .btn.primary{background:linear-gradient(180deg,var(--blue),var(--blue-dark));color:#fff;border-color:var(--blue);}
+    .btn.clay{background:linear-gradient(135deg,var(--clay),var(--clay-light));color:#fff;border-color:var(--clay);}
+    .btn.danger{background:#fff5f5;color:#8a1f1f;border-color:#f1b2b2;}
+    .btn.disabled,.btn:disabled{opacity:.55;cursor:not-allowed;}
+
+    .status-box{
+      margin-top:12px;padding:14px 16px;border-radius:18px;
+      background:linear-gradient(135deg,rgba(39,188,237,.12),rgba(198,90,30,.08));
+      border:1px solid rgba(39,188,237,.22);color:#475467;font-size:14px;line-height:1.5;
+    }
+
+    .muted{color:var(--muted);font-size:14px;line-height:1.45;}
+    .sep{border:none;border-top:1px solid rgba(16,24,40,.08);margin:18px 0;}
+
+    .info-card{
+      border-radius:20px;padding:16px;background:#fff;border:1px solid rgba(16,24,40,.08);
+      box-shadow:0 8px 18px rgba(16,24,40,.06);
+    }
+
+    @media (min-width:760px){
+      :root{--header-h:158px;}
+      .header-inner{grid-template-columns:100px 1fr 100px;}
+      .header-logo{width:96px;height:80px;}
+      .header-nav{justify-content:center;}
+      .panel{padding:24px;}
+      .grid.two{grid-template-columns:1fr 1fr;}
+      .grid.four{grid-template-columns:repeat(4,1fr);}
+    }
+  </style>
+</head>
+
+<body>
+
+<header class="site-header">
+  <div class="container header-inner">
+    <div class="header-logo">
+      <img src="../assets/img/logo-lg.png" alt="Ligue Guyane">
+    </div>
+
+    <div class="header-title">
+      <strong>Admin<br>Championnats</strong>
+      <span>Guyane Beach Tennis</span>
+    </div>
+
+    <div class="header-logo">
+      <img src="../assets/img/logo-lg.png" alt="Ligue Guyane">
+    </div>
+
+    <div class="header-nav-wrap">
+      <span class="nav-arrow left">‹</span>
+      <nav class="header-nav" aria-label="Navigation admin">
+        <a class="nav-link" href="../index.html">🏠 Accueil public</a>
+        <a class="nav-link primary" href="index.html">🛠️ Admin</a>
+        <a class="nav-link" href="inscriptions.html">📝 Inscriptions</a>
+        <a class="nav-link" href="equipes.html">👥 Équipes</a>
+        <a class="nav-link" href="#" id="btnLogout">🚪 Déconnexion</a>
+      </nav>
+      <span class="nav-arrow right">›</span>
+    </div>
+  </div>
+</header>
+
+<main class="container">
+
+  <section class="section panel" id="accessDenied" style="display:none;">
+    <h2 class="panel-title">⛔ Accès refusé</h2>
+    <p class="panel-text">Cette page est réservée aux administrateurs.</p>
+  </section>
+
+  <section class="section panel" id="pageContent" style="display:none;">
+
+    <div class="panel-head">
+      <div>
+        <h2 class="panel-title">🎛️ Tableau de bord</h2>
+        <p class="panel-text">
+          Administration générale du mini-site des Championnats Guyane Beach Tennis.
+        </p>
+      </div>
+      <div class="panel-tag">Admin</div>
+    </div>
+
+    <div class="grid two">
+      <div class="field">
+        <label for="categorie">Catégorie</label>
+        <select id="categorie">
+          <option value="U14">U14</option>
+          <option value="U18">U18</option>
+          <option value="Seniors">Seniors</option>
+          <option value="45+">45+</option>
+        </select>
+      </div>
+
+      <div class="field">
+        <label for="epreuve">Épreuve</label>
+        <select id="epreuve">
+          <option value="DM">Double Messieurs</option>
+          <option value="DD">Double Dames</option>
+        </select>
+      </div>
+    </div>
+
+    <div class="status-box">
+      Zone sélectionnée : <strong id="zoneLabel">U14 — Double Messieurs</strong>
+    </div>
+
+    <div class="grid four" style="margin-top:14px;">
+      <a class="btn primary" id="goInscriptions" href="#">📝 Inscriptions</a>
+      <a class="btn clay" id="goEquipes" href="#">👥 Équipes</a>
+      <a class="btn" id="goProgrammation" href="../public/programmation.html">📅 Programmation</a>
+      <a class="btn" id="goResultats" href="../public/resultats.html">🏆 Résultats</a>
+    </div>
+
+    <hr class="sep">
+
+    <div id="panelGeneral">
+      <div class="panel-head">
+        <div>
+          <h2 class="panel-title">📰 Infos publiques</h2>
+          <p class="panel-text">
+            Publier une information visible sur le mini-site.
+          </p>
+        </div>
+        <div class="panel-tag">Infos</div>
+      </div>
+
+      <form id="infoForm" class="grid" autocomplete="off">
+        <div class="field">
+          <label for="infoTitle">Titre *</label>
+          <input id="infoTitle" name="infoTitle" required maxlength="80" placeholder="Ex : Inscriptions ouvertes ✅">
+        </div>
+
+        <div class="field">
+          <label for="infoText">Texte *</label>
+          <textarea id="infoText" name="infoText" required maxlength="2000" placeholder="Texte de l’information"></textarea>
+        </div>
+
+        <button class="btn primary" id="publishBtn" type="submit">✅ Publier</button>
+        <p class="muted" id="adminStatus" role="status" aria-live="polite" style="margin:0;"></p>
+      </form>
+
+      <hr class="sep">
+
+      <p class="muted" id="infosCount">Chargement…</p>
+      <div id="infosList" style="display:grid;gap:10px;margin-top:10px;"></div>
+    </div>
+
+  </section>
+
+</main>
+
+<script type="module">
+  import { auth, db } from "../assets/js/firebase.js";
+  import { logout, getRoleByEmail } from "../assets/js/session.js";
+  import { onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.12.5/firebase-auth.js";
+  import {
+    collection,
+    addDoc,
+    deleteDoc,
+    updateDoc,
+    doc,
+    getDoc,
+    serverTimestamp,
+    query,
+    orderBy,
+    onSnapshot
+  } from "https://www.gstatic.com/firebasejs/10.12.5/firebase-firestore.js";
+
+  const EVENT_ID = "championnats-2026";
+
+  const EPREUVE_LABELS = {
+    DM: "Double Messieurs",
+    DD: "Double Dames"
+  };
+
+  const accessDenied = document.getElementById("accessDenied");
+  const pageContent = document.getElementById("pageContent");
+
+  const categorieEl = document.getElementById("categorie");
+  const epreuveEl = document.getElementById("epreuve");
+  const zoneLabel = document.getElementById("zoneLabel");
+
+  const goInscriptions = document.getElementById("goInscriptions");
+  const goEquipes = document.getElementById("goEquipes");
+
+  const infoForm = document.getElementById("infoForm");
+  const publishBtn = document.getElementById("publishBtn");
+  const adminStatus = document.getElementById("adminStatus");
+  const infosCount = document.getElementById("infosCount");
+  const infosList = document.getElementById("infosList");
+
+  const COL_INFOS = `events/${EVENT_ID}/infos`;
+
+  let currentCategorie = "U14";
+  let currentEpreuve = "DM";
+  let unsubscribeInfos = null;
+
+  function esc(str){
+    return (str || "")
+      .replaceAll("&","&amp;")
+      .replaceAll("<","&lt;")
+      .replaceAll(">","&gt;")
+      .replaceAll('"',"&quot;")
+      .replaceAll("'","&#039;");
+  }
+
+  function fmtDate(ts){
+    try{
+      const d = ts?.toDate ? ts.toDate() : null;
+      if(!d) return "—";
+      return d.toLocaleString("fr-FR", {
+        year:"numeric",
+        month:"long",
+        day:"numeric",
+        hour:"2-digit",
+        minute:"2-digit"
+      });
+    }catch{
+      return "—";
+    }
+  }
+
+  function updateZone(){
+    zoneLabel.textContent = `${currentCategorie} — ${EPREUVE_LABELS[currentEpreuve]}`;
+
+    const params = `?categorie=${encodeURIComponent(currentCategorie)}&epreuve=${encodeURIComponent(currentEpreuve)}`;
+    goInscriptions.href = `inscriptions.html${params}`;
+    goEquipes.href = `equipes.html${params}`;
+
+    try{
+      localStorage.setItem("champ_admin_categorie", currentCategorie);
+      localStorage.setItem("champ_admin_epreuve", currentEpreuve);
+    }catch(error){}
+  }
+
+  categorieEl.addEventListener("change", () => {
+    currentCategorie = categorieEl.value;
+    updateZone();
+  });
+
+  epreuveEl.addEventListener("change", () => {
+    currentEpreuve = epreuveEl.value;
+    updateZone();
+  });
+
+  function stopInfos(){
+    if(unsubscribeInfos){
+      unsubscribeInfos();
+      unsubscribeInfos = null;
+    }
+  }
+
+  function startInfos(){
+    if(unsubscribeInfos) return;
+
+    infosCount.textContent = "Chargement…";
+    infosList.innerHTML = "";
+
+    const q = query(collection(db, "events", EVENT_ID, "infos"), orderBy("createdAt", "desc"));
+
+    unsubscribeInfos = onSnapshot(q, (snap) => {
+      const items = snap.docs.map(d => ({ id:d.id, ...d.data() }));
+
+      infosCount.textContent = `📌 ${items.length} info${items.length > 1 ? "s" : ""}`;
+      infosList.innerHTML = "";
+
+      if(items.length === 0){
+        infosList.innerHTML = `<p class="muted" style="margin:0;">Aucune info publiée.</p>`;
+        return;
+      }
+
+      for(const item of items){
+        const title = esc(item.title);
+        const text = esc(item.text).replaceAll("\n","<br>");
+        const date = fmtDate(item.createdAt);
+
+        const card = document.createElement("div");
+        card.className = "info-card";
+        card.innerHTML = `
+          <div style="display:flex;gap:12px;justify-content:space-between;align-items:flex-start;">
+            <div style="min-width:0;">
+              <div style="font-weight:1000;font-size:17px;">${title}</div>
+              <div class="muted" style="margin-top:6px;">🗓️ ${date}</div>
+              <div style="margin-top:8px;line-height:1.45;">${text}</div>
+            </div>
+            <div style="display:flex;flex-direction:column;gap:8px;flex:0 0 auto;">
+              <button class="btn" data-edit="${item.id}" type="button">✏️ Modifier</button>
+              <button class="btn danger" data-del="${item.id}" type="button">🗑️ Supprimer</button>
+            </div>
+          </div>
+        `;
+
+        infosList.appendChild(card);
+      }
+
+      infosList.querySelectorAll("button[data-del]").forEach(btn => {
+        btn.onclick = async () => {
+          const id = btn.dataset.del;
+          const ok = confirm("Supprimer cette info ?\n\nAction irréversible.");
+          if(!ok) return;
+          await deleteDoc(doc(db, "events", EVENT_ID, "infos", id));
+        };
+      });
+
+      infosList.querySelectorAll("button[data-edit]").forEach(btn => {
+        btn.onclick = async () => {
+          const id = btn.dataset.edit;
+          const ref = doc(db, "events", EVENT_ID, "infos", id);
+          const snap = await getDoc(ref);
+
+          if(!snap.exists()) return;
+
+          const cur = snap.data() || {};
+
+          const newTitle = prompt("Modifier le titre :", cur.title || "");
+          if(newTitle === null) return;
+
+          const newText = prompt("Modifier le texte :", cur.text || "");
+          if(newText === null) return;
+
+          await updateDoc(ref, {
+            title:newTitle.trim(),
+            text:newText.trim(),
+            updatedAt:serverTimestamp()
+          });
+        };
+      });
+
+    }, (error) => {
+      console.error(error);
+      infosCount.textContent = "❌ Impossible de charger les infos.";
+    });
+  }
+
+  infoForm.addEventListener("submit", async (event) => {
+    event.preventDefault();
+
+    publishBtn.disabled = true;
+    publishBtn.classList.add("disabled");
+    adminStatus.textContent = "Publication…";
+
+    try{
+      const title = (infoForm.infoTitle.value || "").trim();
+      const text = (infoForm.infoText.value || "").trim();
+
+      if(!title || !text){
+        throw new Error("Titre et texte obligatoires.");
+      }
+
+      await addDoc(collection(db, "events", EVENT_ID, "infos"), {
+        title,
+        text,
+        createdAt:serverTimestamp()
+      });
+
+      infoForm.reset();
+      adminStatus.textContent = "✅ Info publiée.";
+    }catch(error){
+      console.error(error);
+      adminStatus.textContent = "❌ Erreur : " + (error?.message || "Impossible de publier.");
+    }finally{
+      publishBtn.disabled = false;
+      publishBtn.classList.remove("disabled");
+    }
+  });
+
+  document.getElementById("btnLogout").onclick = async (event) => {
+    event.preventDefault();
+    await logout();
+    window.location.href = "../index.html";
+  };
+
+  onAuthStateChanged(auth, async (user) => {
+    accessDenied.style.display = "none";
+    pageContent.style.display = "none";
+    stopInfos();
+
+    if(!user){
+      accessDenied.style.display = "block";
+      return;
+    }
+
+    const role = await getRoleByEmail(user.email);
+    if(role !== "admin"){
+      accessDenied.style.display = "block";
+      return;
+    }
+
+    try{
+      const savedCat = localStorage.getItem("champ_admin_categorie");
+      const savedEpreuve = localStorage.getItem("champ_admin_epreuve");
+
+      if(["U14","U18","Seniors","45+"].includes(savedCat)) currentCategorie = savedCat;
+      if(["DM","DD"].includes(savedEpreuve)) currentEpreuve = savedEpreuve;
+    }catch(error){}
+
+    categorieEl.value = currentCategorie;
+    epreuveEl.value = currentEpreuve;
+    updateZone();
+
+    pageContent.style.display = "block";
+    startInfos();
+  });
+</script>
+
+</body>
+</html>
