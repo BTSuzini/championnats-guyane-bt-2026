@@ -1,0 +1,928 @@
+<!doctype html>
+<html lang="fr">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Équipes — Championnats Guyane Beach Tennis</title>
+
+  <style>
+    :root{
+      --clay:#c65a1e;
+      --clay-dark:#8e3a13;
+      --clay-light:#ee8a3a;
+      --sky:#27bced;
+      --aqua:#00a9c8;
+      --blue:#075b9a;
+      --blue-dark:#063b72;
+      --text:#17212b;
+      --muted:#667085;
+      --card:rgba(255,255,255,.94);
+      --shadow:0 16px 40px rgba(16,24,40,.12);
+      --container:1180px;
+      --header-h:150px;
+    }
+
+    *{box-sizing:border-box;}
+
+    body{
+      margin:0;
+      font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;
+      color:var(--text);
+      background:
+        radial-gradient(circle at 20% 0%, rgba(39,188,237,.22), transparent 28%),
+        radial-gradient(circle at 85% 10%, rgba(0,169,200,.16), transparent 26%),
+        linear-gradient(180deg,#f4fcff 0%,#e9f8ff 48%,#ffffff 100%);
+    }
+
+    a{color:inherit;text-decoration:none;}
+    img{display:block;max-width:100%;}
+
+    .container{
+      width:min(var(--container), calc(100% - 28px));
+      margin:0 auto;
+    }
+
+    .site-header{
+      position:fixed;
+      top:0;
+      left:0;
+      right:0;
+      z-index:1000;
+      background:linear-gradient(135deg,var(--clay-dark),var(--clay),var(--clay-light));
+      border-bottom:1px solid rgba(0,0,0,.08);
+      box-shadow:0 10px 26px rgba(142,58,19,.28);
+    }
+
+    .header-inner{
+      min-height:var(--header-h);
+      display:grid;
+      grid-template-columns:80px 1fr 80px;
+      grid-template-rows:auto auto;
+      align-items:center;
+      gap:10px 18px;
+      padding:12px 0;
+    }
+
+    .header-logo{
+      width:80px;
+      height:80px;
+      display:flex;
+      align-items:center;
+      justify-content:center;
+    }
+
+    .header-logo img{
+      max-width:100%;
+      max-height:100%;
+      object-fit:contain;
+      filter:drop-shadow(0 6px 10px rgba(0,0,0,.18));
+    }
+
+    .header-title{
+      text-align:center;
+      color:#fff;
+    }
+
+    .header-title strong{
+      display:block;
+      font-size:clamp(22px,4vw,42px);
+      line-height:.95;
+      letter-spacing:-.04em;
+      text-transform:uppercase;
+      font-weight:1000;
+    }
+
+    .header-nav-wrap{
+      grid-column:1 / 4;
+      position:relative;
+      overflow:hidden;
+      padding:0 34px;
+    }
+
+    .header-nav-wrap::before,
+    .header-nav-wrap::after{
+      content:"";
+      position:absolute;
+      top:0;
+      bottom:0;
+      width:40px;
+      z-index:2;
+      pointer-events:none;
+    }
+
+    .header-nav-wrap::before{
+      left:0;
+      background:linear-gradient(90deg, rgba(142,58,19,.98), rgba(142,58,19,0));
+    }
+
+    .header-nav-wrap::after{
+      right:0;
+      background:linear-gradient(270deg, rgba(198,90,30,.98), rgba(198,90,30,0));
+    }
+
+    .nav-arrow{
+      position:absolute;
+      top:50%;
+      transform:translateY(-50%);
+      z-index:3;
+      width:28px;
+      height:28px;
+      border-radius:999px;
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      background:rgba(255,255,255,.88);
+      color:var(--clay-dark);
+      font-size:20px;
+      font-weight:1000;
+      box-shadow:0 6px 14px rgba(0,0,0,.18);
+      pointer-events:none;
+    }
+
+    .nav-arrow.left{left:2px;}
+    .nav-arrow.right{right:2px;}
+
+    .header-nav{
+      display:flex;
+      gap:10px;
+      overflow-x:auto;
+      padding:2px 4px;
+      scrollbar-width:none;
+      -webkit-overflow-scrolling:touch;
+    }
+
+    .header-nav::-webkit-scrollbar{display:none;}
+
+    .nav-link{
+      flex:0 0 auto;
+      min-height:42px;
+      padding:10px 17px;
+      border-radius:999px;
+      background:rgba(255,255,255,.92);
+      color:#344054;
+      font-size:14px;
+      font-weight:900;
+      white-space:nowrap;
+      box-shadow:0 8px 16px rgba(0,0,0,.14);
+    }
+
+    .nav-link.primary{
+      background:linear-gradient(180deg,var(--blue),var(--blue-dark));
+      color:#fff;
+    }
+
+    main{
+      padding-top:calc(var(--header-h) + 24px);
+      padding-bottom:42px;
+    }
+
+    .section{margin-top:22px;}
+
+    .hero{
+      position:relative;
+      overflow:hidden;
+      border-radius:32px;
+      padding:28px 22px 24px;
+      color:#fff;
+      background:
+        radial-gradient(circle at 18% 10%, rgba(255,255,255,.42), transparent 24%),
+        radial-gradient(circle at 80% 24%, rgba(255,255,255,.26), transparent 24%),
+        linear-gradient(135deg,#23b7ea 0%,#7fdfff 48%,#f5fdff 100%);
+      box-shadow:var(--shadow);
+    }
+
+    .hero::before{
+      content:"";
+      position:absolute;
+      inset:0;
+      background:
+        linear-gradient(90deg,rgba(6,59,114,.36),rgba(6,59,114,.06)),
+        radial-gradient(circle at 50% 110%,rgba(0,169,200,.28),transparent 36%);
+      pointer-events:none;
+    }
+
+    .hero-inner{
+      position:relative;
+      z-index:1;
+      display:grid;
+      gap:18px;
+      text-align:center;
+    }
+
+    .hero-pills{
+      display:flex;
+      flex-wrap:wrap;
+      justify-content:center;
+      gap:10px;
+    }
+
+    .pill-hero{
+      padding:9px 14px;
+      border-radius:999px;
+      background:rgba(255,255,255,.22);
+      color:#fff;
+      font-size:13px;
+      font-weight:900;
+      box-shadow:inset 0 0 0 1px rgba(255,255,255,.28);
+      backdrop-filter:blur(8px);
+    }
+
+    .hero-title{
+      margin:0;
+      font-size:clamp(32px,6vw,58px);
+      line-height:.95;
+      letter-spacing:-.05em;
+      font-weight:1000;
+      text-transform:uppercase;
+      text-shadow:0 10px 24px rgba(6,59,114,.24);
+    }
+
+    .hero-sub{
+      max-width:760px;
+      margin:12px auto 0;
+      font-size:16px;
+      line-height:1.55;
+      color:#073b68;
+      font-weight:700;
+    }
+
+    .panel{
+      background:var(--card);
+      border:1px solid rgba(255,255,255,.6);
+      border-radius:28px;
+      box-shadow:var(--shadow);
+      padding:20px;
+    }
+
+    .panel-head{
+      display:flex;
+      justify-content:space-between;
+      align-items:flex-start;
+      gap:12px;
+      margin-bottom:16px;
+    }
+
+    .panel-title{
+      margin:0;
+      font-size:28px;
+      line-height:1.05;
+      letter-spacing:-.03em;
+    }
+
+    .panel-text{
+      margin:8px 0 0;
+      color:var(--muted);
+      font-size:15px;
+      line-height:1.55;
+    }
+
+    .panel-tag{
+      flex-shrink:0;
+      padding:8px 13px;
+      border-radius:999px;
+      background:#e4f7ff;
+      color:var(--blue-dark);
+      font-size:12px;
+      font-weight:1000;
+      text-transform:uppercase;
+      letter-spacing:.06em;
+    }
+
+    .status-box{
+      margin-top:12px;
+      padding:14px 16px;
+      border-radius:18px;
+      background:linear-gradient(135deg,rgba(39,188,237,.12),rgba(198,90,30,.08));
+      border:1px solid rgba(39,188,237,.22);
+      color:#475467;
+      font-size:14px;
+      line-height:1.5;
+    }
+
+    .muted{color:var(--muted);}
+
+    .switch-group{
+      display:grid;
+      gap:10px;
+      margin-top:12px;
+    }
+
+    .switch-title{
+      font-size:13px;
+      font-weight:1000;
+      text-transform:uppercase;
+      letter-spacing:.08em;
+      color:var(--blue-dark);
+    }
+
+    .switches{
+      display:grid;
+      grid-template-columns:repeat(2,1fr);
+      gap:10px;
+    }
+
+    .switches.categories{
+      grid-template-columns:repeat(2,1fr);
+    }
+
+    .switch-btn{
+      appearance:none;
+      border:1px solid rgba(16,24,40,.10);
+      background:#fff;
+      border-radius:999px;
+      min-height:50px;
+      padding:12px 14px;
+      font-weight:1000;
+      font-size:15px;
+      color:#1c2430;
+      cursor:pointer;
+      box-shadow:0 8px 16px rgba(16,24,40,.04);
+    }
+
+    .switch-btn[aria-selected="true"]{
+      background:linear-gradient(180deg,var(--blue),var(--blue-dark));
+      color:#fff;
+      border-color:var(--blue);
+      box-shadow:0 12px 22px rgba(7,91,154,.20);
+    }
+
+    .switch-btn.epreuve[aria-selected="true"]{
+      background:linear-gradient(135deg,var(--clay),var(--clay-light));
+      border-color:var(--clay);
+      box-shadow:0 12px 22px rgba(198,90,30,.20);
+    }
+
+    .subtabs{
+      display:flex;
+      gap:10px;
+      flex-wrap:wrap;
+      margin-top:14px;
+    }
+
+    .subtab{
+      appearance:none;
+      border:1px solid rgba(16,24,40,.10);
+      background:#fff;
+      border-radius:999px;
+      padding:10px 14px;
+      font-weight:1000;
+      cursor:pointer;
+      color:#344054;
+    }
+
+    .subtab[aria-selected="true"]{
+      background:#e4f7ff;
+      border-color:rgba(7,91,154,.16);
+      color:var(--blue-dark);
+      box-shadow:0 6px 14px rgba(7,91,154,.08);
+    }
+
+    .teams-list{
+      display:grid;
+      gap:10px;
+      margin-top:12px;
+    }
+
+    .team-card{
+      border:1px solid rgba(16,24,40,.08);
+      border-radius:18px;
+      background:#fff;
+      padding:13px 13px;
+      box-shadow:0 6px 16px rgba(0,0,0,.04);
+      display:flex;
+      gap:12px;
+      align-items:stretch;
+      justify-content:space-between;
+      width:100%;
+      min-width:0;
+    }
+
+    .team-left{
+      min-width:0;
+      flex:1 1 auto;
+      display:flex;
+      flex-direction:column;
+      gap:6px;
+    }
+
+    .team-line1{
+      display:flex;
+      align-items:baseline;
+      gap:10px;
+      flex-wrap:wrap;
+    }
+
+    .team-num{
+      color:#667085;
+      font-variant-numeric:tabular-nums;
+      white-space:nowrap;
+      font-weight:900;
+    }
+
+    .team-name{
+      font-weight:1000;
+      overflow:hidden;
+      text-overflow:ellipsis;
+      white-space:nowrap;
+      max-width:100%;
+    }
+
+    .team-meta{
+      display:inline-flex;
+      align-items:center;
+      gap:6px;
+      padding:4px 10px;
+      border-radius:999px;
+      font-size:12px;
+      border:1px solid #d9e6ff;
+      background:#f3f7ff;
+      color:var(--blue-dark);
+      font-weight:1000;
+      white-space:nowrap;
+    }
+
+    .team-line2{
+      color:#222;
+      font-weight:500;
+      line-height:1.25;
+      overflow:hidden;
+      text-overflow:ellipsis;
+      white-space:nowrap;
+      max-width:100%;
+    }
+
+    .team-right{
+      flex:0 0 auto;
+      display:flex;
+      align-items:flex-start;
+      justify-content:flex-end;
+    }
+
+    .pill{
+      display:inline-block;
+      padding:4px 10px;
+      border-radius:999px;
+      font-size:12px;
+      border:1px solid #eee;
+      background:#fafafa;
+      color:#333;
+      white-space:nowrap;
+      font-weight:1000;
+    }
+
+    .pill.stby{
+      border-color:#ffd37a;
+      background:#fff7e6;
+    }
+
+    @media (min-width:760px){
+      :root{--header-h:158px;}
+
+      .header-inner{
+        grid-template-columns:100px 1fr 100px;
+      }
+
+      .header-logo{
+        width:96px;
+        height:80px;
+      }
+
+      .header-nav{
+        justify-content:center;
+      }
+
+      .switches.categories{
+        grid-template-columns:repeat(4,1fr);
+      }
+
+      .panel{
+        padding:24px;
+      }
+    }
+  </style>
+</head>
+
+<body>
+
+<header class="site-header">
+  <div class="container header-inner">
+
+    <div class="header-logo">
+      <img src="../assets/img/logo-lg.png" alt="Ligue Guyane">
+    </div>
+
+    <div class="header-title">
+      <strong>Championnats Guyane<br>Beach Tennis</strong>
+    </div>
+
+    <div class="header-logo">
+      <img src="../assets/img/logo-lg.png" alt="Ligue Guyane">
+    </div>
+
+    <div class="header-nav-wrap">
+      <span class="nav-arrow left">‹</span>
+      <nav class="header-nav" aria-label="Navigation principale">
+        <a class="nav-link" href="../index.html">🏠 Accueil</a>
+        <a class="nav-link" href="inscriptions.html">📝 Inscriptions</a>
+        <a class="nav-link primary" href="equipes.html">👥 Équipes</a>
+        <a class="nav-link" href="programmation.html">📅 Programmation</a>
+        <a class="nav-link" href="resultats.html">🏆 Résultats</a>
+        <a class="nav-link" href="reglement.html">📘 Règlement</a>
+        <a class="nav-link" href="restauration.html">🍽️ Restauration</a>
+        <a class="nav-link" href="contact.html">📩 Contact</a>
+      </nav>
+      <span class="nav-arrow right">›</span>
+    </div>
+
+  </div>
+</header>
+
+<main class="container">
+
+  <section class="section">
+    <div class="hero">
+      <div class="hero-inner">
+
+        <div class="hero-pills">
+          <span class="pill-hero">09 & 10 mai 2026</span>
+          <span class="pill-hero">Arena TC Suzini</span>
+          <span class="pill-hero">Équipes inscrites</span>
+        </div>
+
+        <div>
+          <h1 class="hero-title">Équipes inscrites</h1>
+          <p class="hero-sub">
+            Consultez les équipes engagées par catégorie et par épreuve.
+          </p>
+        </div>
+
+      </div>
+    </div>
+  </section>
+
+  <section class="section">
+    <div class="panel">
+      <div class="panel-head">
+        <div>
+          <h2 class="panel-title">Liste des équipes</h2>
+          <p class="panel-text">
+            Choisissez une catégorie puis une épreuve.
+          </p>
+        </div>
+        <div class="panel-tag">Direct</div>
+      </div>
+
+      <div class="switch-group">
+        <div class="switch-title">Catégorie</div>
+        <div class="switches categories" role="tablist" aria-label="Choix de la catégorie">
+          <button class="switch-btn category-btn" data-categorie="U14" type="button" aria-selected="true">U14</button>
+          <button class="switch-btn category-btn" data-categorie="U18" type="button" aria-selected="false">U18</button>
+          <button class="switch-btn category-btn" data-categorie="Seniors" type="button" aria-selected="false">Seniors</button>
+          <button class="switch-btn category-btn" data-categorie="45+" type="button" aria-selected="false">45+</button>
+        </div>
+      </div>
+
+      <div class="switch-group">
+        <div class="switch-title">Épreuve</div>
+        <div class="switches" role="tablist" aria-label="Choix de l’épreuve">
+          <button class="switch-btn epreuve epreuve-btn" data-epreuve="DM" type="button" aria-selected="true">👨 Double Messieurs</button>
+          <button class="switch-btn epreuve epreuve-btn" data-epreuve="DD" type="button" aria-selected="false">👩 Double Dames</button>
+        </div>
+      </div>
+
+      <p class="muted" style="margin:14px 0 0;">
+        Affichage : <strong id="currentLabel">U14 — Double Messieurs</strong><br>
+        Total : <strong><span id="totalCount">0</span></strong>
+        — Principale : <strong><span id="mainCount">0</span></strong>
+        — Attente : <strong><span id="waitCount">0</span></strong>
+        — STBY : <strong><span id="stbyCount">0</span></strong>
+      </p>
+
+      <div class="subtabs" role="tablist" aria-label="Affichage équipes">
+        <button class="subtab" id="tabInscrits" type="button" role="tab" aria-selected="true">✅ Inscrits</button>
+        <button class="subtab" id="tabClassees" type="button" role="tab" aria-selected="false">🏷️ Classées</button>
+      </div>
+
+      <div class="status-box" id="status">Connexion…</div>
+    </div>
+  </section>
+
+  <div id="panelInscrits" role="tabpanel">
+
+    <section class="section">
+      <div class="panel">
+        <h2 style="display:flex;align-items:baseline;justify-content:space-between;gap:10px;margin:0;">
+          <span>✅ Liste principale</span>
+          <span class="muted" style="font-weight:700;"><span id="mainCount2">0</span></span>
+        </h2>
+
+        <div id="mainList" class="teams-list"></div>
+      </div>
+    </section>
+
+    <section class="section">
+      <div class="panel">
+        <h2 style="display:flex;align-items:baseline;justify-content:space-between;gap:10px;margin:0;">
+          <span>⏳ Liste d’attente</span>
+          <span class="muted" style="font-weight:700;"><span id="waitCount2">0</span></span>
+        </h2>
+
+        <div id="waitList" class="teams-list"></div>
+      </div>
+    </section>
+
+  </div>
+
+  <div id="panelClassees" style="display:none;" role="tabpanel">
+
+    <section class="section">
+      <div class="panel">
+        <h2 style="display:flex;align-items:baseline;justify-content:space-between;gap:10px;margin:0;">
+          <span>🏷️ Équipes classées</span>
+          <span class="muted" style="font-weight:700;"><span id="rankedCount">0</span> équipe(s)</span>
+        </h2>
+
+        <div id="rankedList" class="teams-list"></div>
+
+        <p class="muted" style="margin:10px 0 0;">
+          ⚠️ Les classements pourront être ajoutés plus tard côté admin.
+        </p>
+      </div>
+    </section>
+
+  </div>
+
+</main>
+
+<script type="module">
+  import { db } from "../assets/js/firebase.js";
+  import {
+    collection,
+    query,
+    orderBy,
+    onSnapshot
+  } from "https://www.gstatic.com/firebasejs/10.12.5/firebase-firestore.js";
+
+  const EVENT_ID = "championnats-2026";
+
+  const EPREUVE_LABELS = {
+    DM: "Double Messieurs",
+    DD: "Double Dames"
+  };
+
+  let currentCategorie = "U14";
+  let currentEpreuve = "DM";
+  let unsubscribeTeams = null;
+
+  const statusEl = document.getElementById("status");
+  const currentLabelEl = document.getElementById("currentLabel");
+
+  const totalCountEl = document.getElementById("totalCount");
+  const mainCountEl = document.getElementById("mainCount");
+  const waitCountEl = document.getElementById("waitCount");
+  const stbyCountEl = document.getElementById("stbyCount");
+  const mainCount2El = document.getElementById("mainCount2");
+  const waitCount2El = document.getElementById("waitCount2");
+  const rankedCountEl = document.getElementById("rankedCount");
+
+  const mainList = document.getElementById("mainList");
+  const waitList = document.getElementById("waitList");
+  const rankedList = document.getElementById("rankedList");
+
+  const tabInscrits = document.getElementById("tabInscrits");
+  const tabClassees = document.getElementById("tabClassees");
+  const panelInscrits = document.getElementById("panelInscrits");
+  const panelClassees = document.getElementById("panelClassees");
+
+  const categoryButtons = [...document.querySelectorAll(".category-btn")];
+  const epreuveButtons = [...document.querySelectorAll(".epreuve-btn")];
+
+  function esc(s){
+    return (s ?? "").toString()
+      .replaceAll("&","&amp;")
+      .replaceAll("<","&lt;")
+      .replaceAll(">","&gt;");
+  }
+
+  function toNum(v){
+    if(v === null || v === undefined || v === "") return null;
+    const n = typeof v === "number" ? v : Number(String(v).replace(",", ".").trim());
+    return Number.isFinite(n) ? n : null;
+  }
+
+  function fmtRank(n){
+    return (n === null || n === undefined) ? "—" : String(n);
+  }
+
+  function statusPill(r){
+    return r.stby
+      ? `<span class="pill stby">STBY</span>`
+      : `<span class="pill">OK</span>`;
+  }
+
+  function cardInscritHtml(idx, r){
+    return `
+      <div class="team-card">
+        <div class="team-left">
+          <div class="team-line1">
+            <span class="team-num">#${idx}</span>
+            <span class="team-name">${esc(r.teamName)}</span>
+            <span class="team-meta">${esc(r.categorie)} • ${esc(r.epreuve)}</span>
+          </div>
+          <div class="team-line2">${esc(r.joueur1FirstName)} / ${esc(r.joueur2FirstName)}</div>
+        </div>
+        <div class="team-right">
+          ${statusPill(r)}
+        </div>
+      </div>
+    `;
+  }
+
+  function cardClasseeHtml(idx, r){
+    const p1 = toNum(r.p1Rank);
+    const p2 = toNum(r.p2Rank);
+    const teamRank = (p1 !== null && p2 !== null) ? (p1 + p2) : null;
+
+    return `
+      <div class="team-card">
+        <div class="team-left">
+          <div class="team-line1">
+            <span class="team-num">#${idx}</span>
+            <span class="team-name">${esc(r.teamName)}</span>
+            <span class="team-meta">🏷️ ${esc(fmtRank(teamRank))}</span>
+          </div>
+          <div class="team-line2">
+            ${esc(r.joueur1FirstName)} (${esc(fmtRank(p1))}) / ${esc(r.joueur2FirstName)} (${esc(fmtRank(p2))})
+          </div>
+        </div>
+        <div class="team-right">
+          ${statusPill(r)}
+        </div>
+      </div>
+    `;
+  }
+
+  function computeLists(rows){
+    rows.sort((a,b) => (a.createdAtMs || 0) - (b.createdAtMs || 0));
+
+    const main = rows.filter(r => r.list !== "wait");
+    const wait = rows.filter(r => r.list === "wait");
+
+    return { main, wait };
+  }
+
+  function render(rows){
+    const filtered = rows.filter(r =>
+      r.categorie === currentCategorie &&
+      r.epreuve === currentEpreuve
+    );
+
+    const { main, wait } = computeLists(filtered);
+
+    totalCountEl.textContent = filtered.length;
+    mainCountEl.textContent = main.length;
+    waitCountEl.textContent = wait.length;
+    stbyCountEl.textContent = filtered.filter(r => r.stby).length;
+    mainCount2El.textContent = main.length;
+    waitCount2El.textContent = wait.length;
+
+    mainList.innerHTML = main.length
+      ? main.map((r,i) => cardInscritHtml(i+1, r)).join("")
+      : `<p class="muted" style="margin:0;">Aucune équipe pour le moment.</p>`;
+
+    waitList.innerHTML = wait.length
+      ? wait.map((r,i) => cardInscritHtml(main.length+i+1, r)).join("")
+      : `<p class="muted" style="margin:0;">Aucune équipe en liste d’attente.</p>`;
+
+    const ranked = [...main].sort((a,b)=>{
+      const a1 = toNum(a.p1Rank), a2 = toNum(a.p2Rank);
+      const b1 = toNum(b.p1Rank), b2 = toNum(b.p2Rank);
+      const at = (a1 !== null && a2 !== null) ? (a1+a2) : Number.POSITIVE_INFINITY;
+      const bt = (b1 !== null && b2 !== null) ? (b1+b2) : Number.POSITIVE_INFINITY;
+      if(at !== bt) return at - bt;
+      return (a.createdAtMs||0) - (b.createdAtMs||0);
+    });
+
+    rankedCountEl.textContent = ranked.length;
+
+    rankedList.innerHTML = ranked.length
+      ? ranked.map((r,i) => cardClasseeHtml(i+1, r)).join("")
+      : `<p class="muted" style="margin:0;">Aucune équipe sur la liste principale.</p>`;
+  }
+
+  function updateButtons(){
+    categoryButtons.forEach(btn => {
+      btn.setAttribute("aria-selected", btn.dataset.categorie === currentCategorie ? "true" : "false");
+    });
+
+    epreuveButtons.forEach(btn => {
+      btn.setAttribute("aria-selected", btn.dataset.epreuve === currentEpreuve ? "true" : "false");
+    });
+
+    currentLabelEl.textContent = `${currentCategorie} — ${EPREUVE_LABELS[currentEpreuve]}`;
+  }
+
+  function showInscrits(){
+    tabInscrits.setAttribute("aria-selected", "true");
+    tabClassees.setAttribute("aria-selected", "false");
+    panelInscrits.style.display = "block";
+    panelClassees.style.display = "none";
+    try{ localStorage.setItem("champ_equipes_view", "inscrits"); }catch(e){}
+  }
+
+  function showClassees(){
+    tabInscrits.setAttribute("aria-selected", "false");
+    tabClassees.setAttribute("aria-selected", "true");
+    panelInscrits.style.display = "none";
+    panelClassees.style.display = "block";
+    try{ localStorage.setItem("champ_equipes_view", "classees"); }catch(e){}
+  }
+
+  function subscribeTeams(){
+    if(unsubscribeTeams){
+      unsubscribeTeams();
+      unsubscribeTeams = null;
+    }
+
+    statusEl.textContent = "Connexion…";
+
+    const q = query(
+      collection(db, "events", EVENT_ID, "equipes"),
+      orderBy("createdAt", "asc")
+    );
+
+    unsubscribeTeams = onSnapshot(q, (snap) => {
+      const rows = [];
+
+      snap.forEach(docSnap => {
+        const d = docSnap.data() || {};
+
+        rows.push({
+          id: docSnap.id,
+          teamName: d.teamName || "",
+          categorie: d.categorie || "",
+          epreuve: d.epreuve || "",
+          joueur1FirstName: d.joueur1FirstName || "",
+          joueur2FirstName: d.joueur2FirstName || "",
+          createdAtMs: d.createdAt?.toMillis ? d.createdAt.toMillis() : 0,
+          list: d.list || "main",
+          stby: d.stby === true,
+          p1Rank: d.p1Rank ?? null,
+          p2Rank: d.p2Rank ?? null
+        });
+      });
+
+      render(rows);
+      statusEl.textContent = `🟢 En direct — ${currentCategorie} / ${EPREUVE_LABELS[currentEpreuve]}`;
+    }, (err) => {
+      console.error(err);
+      statusEl.textContent = "🔴 Erreur de connexion Firestore.";
+    });
+  }
+
+  function refreshSelection(){
+    updateButtons();
+    try{
+      localStorage.setItem("champ_equipes_categorie", currentCategorie);
+      localStorage.setItem("champ_equipes_epreuve", currentEpreuve);
+    }catch(e){}
+    subscribeTeams();
+  }
+
+  categoryButtons.forEach(btn => {
+    btn.addEventListener("click", () => {
+      currentCategorie = btn.dataset.categorie;
+      refreshSelection();
+    });
+  });
+
+  epreuveButtons.forEach(btn => {
+    btn.addEventListener("click", () => {
+      currentEpreuve = btn.dataset.epreuve;
+      refreshSelection();
+    });
+  });
+
+  tabInscrits.addEventListener("click", showInscrits);
+  tabClassees.addEventListener("click", showClassees);
+
+  try{
+    const savedCat = localStorage.getItem("champ_equipes_categorie");
+    const savedEpreuve = localStorage.getItem("champ_equipes_epreuve");
+    const savedView = localStorage.getItem("champ_equipes_view");
+
+    if(["U14","U18","Seniors","45+"].includes(savedCat)) currentCategorie = savedCat;
+    if(["DM","DD"].includes(savedEpreuve)) currentEpreuve = savedEpreuve;
+
+    if(savedView === "classees") showClassees();
+    else showInscrits();
+  }catch(e){
+    showInscrits();
+  }
+
+  updateButtons();
+  subscribeTeams();
+</script>
+
+</body>
+</html>
