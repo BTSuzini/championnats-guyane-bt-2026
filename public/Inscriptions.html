@@ -1,0 +1,793 @@
+<!doctype html>
+<html lang="fr">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Inscriptions — Championnats Guyane Beach Tennis</title>
+
+  <style>
+    :root{
+      --clay:#c65a1e;
+      --clay-dark:#8e3a13;
+      --clay-light:#ee8a3a;
+      --sky:#27bced;
+      --aqua:#00a9c8;
+      --blue:#075b9a;
+      --blue-dark:#063b72;
+      --text:#17212b;
+      --muted:#667085;
+      --card:rgba(255,255,255,.94);
+      --shadow:0 16px 40px rgba(16,24,40,.12);
+      --container:1180px;
+      --header-h:150px;
+    }
+
+    *{box-sizing:border-box;}
+
+    body{
+      margin:0;
+      font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;
+      color:var(--text);
+      background:
+        radial-gradient(circle at 20% 0%, rgba(39,188,237,.22), transparent 28%),
+        radial-gradient(circle at 85% 10%, rgba(0,169,200,.16), transparent 26%),
+        linear-gradient(180deg,#f4fcff 0%,#e9f8ff 48%,#ffffff 100%);
+    }
+
+    a{color:inherit;text-decoration:none;}
+    img{display:block;max-width:100%;}
+
+    .container{
+      width:min(var(--container), calc(100% - 28px));
+      margin:0 auto;
+    }
+
+    .site-header{
+      position:fixed;
+      top:0;
+      left:0;
+      right:0;
+      z-index:1000;
+      background:linear-gradient(135deg,var(--clay-dark),var(--clay),var(--clay-light));
+      border-bottom:1px solid rgba(0,0,0,.08);
+      box-shadow:0 10px 26px rgba(142,58,19,.28);
+    }
+
+    .header-inner{
+      min-height:var(--header-h);
+      display:grid;
+      grid-template-columns:80px 1fr 80px;
+      grid-template-rows:auto auto;
+      align-items:center;
+      gap:10px 18px;
+      padding:12px 0;
+    }
+
+    .header-logo{
+      width:80px;
+      height:80px;
+      display:flex;
+      align-items:center;
+      justify-content:center;
+    }
+
+    .header-logo img{
+      max-width:100%;
+      max-height:100%;
+      object-fit:contain;
+      filter:drop-shadow(0 6px 10px rgba(0,0,0,.18));
+    }
+
+    .header-title{
+      text-align:center;
+      color:#fff;
+    }
+
+    .header-title strong{
+      display:block;
+      font-size:clamp(22px,4vw,42px);
+      line-height:.95;
+      letter-spacing:-.04em;
+      text-transform:uppercase;
+      font-weight:1000;
+    }
+
+    .header-nav-wrap{
+      grid-column:1 / 4;
+      position:relative;
+      overflow:hidden;
+      padding:0 34px;
+    }
+
+    .header-nav-wrap::before,
+    .header-nav-wrap::after{
+      content:"";
+      position:absolute;
+      top:0;
+      bottom:0;
+      width:40px;
+      z-index:2;
+      pointer-events:none;
+    }
+
+    .header-nav-wrap::before{
+      left:0;
+      background:linear-gradient(90deg, rgba(142,58,19,.98), rgba(142,58,19,0));
+    }
+
+    .header-nav-wrap::after{
+      right:0;
+      background:linear-gradient(270deg, rgba(198,90,30,.98), rgba(198,90,30,0));
+    }
+
+    .nav-arrow{
+      position:absolute;
+      top:50%;
+      transform:translateY(-50%);
+      z-index:3;
+      width:28px;
+      height:28px;
+      border-radius:999px;
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      background:rgba(255,255,255,.88);
+      color:var(--clay-dark);
+      font-size:20px;
+      font-weight:1000;
+      box-shadow:0 6px 14px rgba(0,0,0,.18);
+      pointer-events:none;
+    }
+
+    .nav-arrow.left{left:2px;}
+    .nav-arrow.right{right:2px;}
+
+    .header-nav{
+      display:flex;
+      gap:10px;
+      overflow-x:auto;
+      padding:2px 4px;
+      scrollbar-width:none;
+      -webkit-overflow-scrolling:touch;
+    }
+
+    .header-nav::-webkit-scrollbar{display:none;}
+
+    .nav-link{
+      flex:0 0 auto;
+      min-height:42px;
+      padding:10px 17px;
+      border-radius:999px;
+      background:rgba(255,255,255,.92);
+      color:#344054;
+      font-size:14px;
+      font-weight:900;
+      white-space:nowrap;
+      box-shadow:0 8px 16px rgba(0,0,0,.14);
+    }
+
+    .nav-link.primary{
+      background:linear-gradient(180deg,var(--blue),var(--blue-dark));
+      color:#fff;
+    }
+
+    main{
+      padding-top:calc(var(--header-h) + 24px);
+      padding-bottom:42px;
+    }
+
+    .section{margin-top:22px;}
+
+    .hero{
+      position:relative;
+      overflow:hidden;
+      border-radius:32px;
+      padding:28px 22px 24px;
+      color:#fff;
+      background:
+        radial-gradient(circle at 18% 10%, rgba(255,255,255,.42), transparent 24%),
+        radial-gradient(circle at 80% 24%, rgba(255,255,255,.26), transparent 24%),
+        linear-gradient(135deg,#23b7ea 0%,#7fdfff 48%,#f5fdff 100%);
+      box-shadow:var(--shadow);
+    }
+
+    .hero::before{
+      content:"";
+      position:absolute;
+      inset:0;
+      background:
+        linear-gradient(90deg,rgba(6,59,114,.36),rgba(6,59,114,.06)),
+        radial-gradient(circle at 50% 110%,rgba(0,169,200,.28),transparent 36%);
+      pointer-events:none;
+    }
+
+    .hero-inner{
+      position:relative;
+      z-index:1;
+      display:grid;
+      gap:18px;
+      text-align:center;
+    }
+
+    .hero-pills{
+      display:flex;
+      flex-wrap:wrap;
+      justify-content:center;
+      gap:10px;
+    }
+
+    .pill{
+      padding:9px 14px;
+      border-radius:999px;
+      background:rgba(255,255,255,.22);
+      color:#fff;
+      font-size:13px;
+      font-weight:900;
+      box-shadow:inset 0 0 0 1px rgba(255,255,255,.28);
+      backdrop-filter:blur(8px);
+    }
+
+    .hero-title{
+      margin:0;
+      font-size:clamp(32px,6vw,58px);
+      line-height:.95;
+      letter-spacing:-.05em;
+      font-weight:1000;
+      text-transform:uppercase;
+      text-shadow:0 10px 24px rgba(6,59,114,.24);
+    }
+
+    .hero-sub{
+      max-width:760px;
+      margin:12px auto 0;
+      font-size:16px;
+      line-height:1.55;
+      color:#073b68;
+      font-weight:700;
+    }
+
+    .panel{
+      background:var(--card);
+      border:1px solid rgba(255,255,255,.6);
+      border-radius:28px;
+      box-shadow:var(--shadow);
+      padding:20px;
+    }
+
+    .panel-head{
+      display:flex;
+      justify-content:space-between;
+      align-items:flex-start;
+      gap:12px;
+      margin-bottom:16px;
+    }
+
+    .panel-title{
+      margin:0;
+      font-size:28px;
+      line-height:1.05;
+      letter-spacing:-.03em;
+    }
+
+    .panel-text{
+      margin:8px 0 0;
+      color:var(--muted);
+      font-size:15px;
+      line-height:1.55;
+    }
+
+    .panel-tag{
+      flex-shrink:0;
+      padding:8px 13px;
+      border-radius:999px;
+      background:#e4f7ff;
+      color:var(--blue-dark);
+      font-size:12px;
+      font-weight:1000;
+      text-transform:uppercase;
+      letter-spacing:.06em;
+    }
+
+    .status-box{
+      margin-bottom:16px;
+      padding:14px 16px;
+      border-radius:18px;
+      background:linear-gradient(135deg,rgba(39,188,237,.12),rgba(198,90,30,.08));
+      border:1px solid rgba(39,188,237,.22);
+      color:#475467;
+      font-size:14px;
+      line-height:1.5;
+    }
+
+    .form{
+      display:grid;
+      gap:14px;
+    }
+
+    .field{
+      display:grid;
+      gap:8px;
+    }
+
+    .field label,
+    .choice-label{
+      font-weight:900;
+      color:#1c2430;
+    }
+
+    .field input{
+      width:100%;
+      min-height:50px;
+      border-radius:16px;
+      border:1px solid rgba(16,24,40,.10);
+      background:#fff;
+      padding:0 14px;
+      font-size:16px;
+      color:#17212b;
+      outline:none;
+    }
+
+    .field input:focus{
+      border-color:rgba(39,188,237,.65);
+      box-shadow:0 0 0 4px rgba(39,188,237,.14);
+    }
+
+    .choice-block{
+      display:grid;
+      gap:10px;
+    }
+
+    .choice-grid{
+      display:grid;
+      grid-template-columns:1fr;
+      gap:10px;
+    }
+
+    .choice-grid.categories{
+      grid-template-columns:repeat(2,1fr);
+    }
+
+    .choice-card{
+      position:relative;
+    }
+
+    .choice-card input{
+      position:absolute;
+      opacity:0;
+      pointer-events:none;
+    }
+
+    .choice-card label{
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      min-height:56px;
+      padding:12px 14px;
+      border-radius:18px;
+      border:1px solid rgba(16,24,40,.10);
+      background:#fff;
+      font-weight:1000;
+      cursor:pointer;
+      text-align:center;
+      transition:all .18s ease;
+      box-shadow:0 8px 16px rgba(16,24,40,.04);
+    }
+
+    .choice-card input:checked + label{
+      border-color:var(--blue);
+      background:linear-gradient(180deg,var(--blue),var(--blue-dark));
+      color:#fff;
+      box-shadow:0 12px 22px rgba(7,91,154,.22);
+    }
+
+    .choice-card.epreuve input:checked + label{
+      border-color:var(--clay);
+      background:linear-gradient(135deg,var(--clay),var(--clay-light));
+      color:#fff;
+      box-shadow:0 12px 22px rgba(198,90,30,.22);
+    }
+
+    .sep{
+      border:none;
+      border-top:1px solid rgba(16,24,40,.08);
+      margin:4px 0;
+    }
+
+    .player-title{
+      margin:0;
+      font-size:22px;
+      font-weight:1000;
+      color:#1c2430;
+    }
+
+    .btn{
+      appearance:none;
+      border:none;
+      min-height:56px;
+      border-radius:18px;
+      padding:14px 18px;
+      font-size:16px;
+      font-weight:1000;
+      cursor:pointer;
+    }
+
+    .btn-primary{
+      background:linear-gradient(135deg,var(--clay),var(--clay-light));
+      color:#fff;
+      box-shadow:0 12px 22px rgba(198,90,30,.20);
+    }
+
+    .btn:disabled{
+      opacity:.55;
+      cursor:not-allowed;
+    }
+
+    .muted{
+      color:var(--muted);
+      font-size:14px;
+      line-height:1.45;
+    }
+
+    @media (min-width:760px){
+      :root{--header-h:158px;}
+
+      .header-inner{
+        grid-template-columns:100px 1fr 100px;
+      }
+
+      .header-logo{
+        width:96px;
+        height:80px;
+      }
+
+      .header-nav{
+        justify-content:center;
+      }
+
+      .choice-grid{
+        grid-template-columns:1fr 1fr;
+      }
+
+      .choice-grid.categories{
+        grid-template-columns:repeat(4,1fr);
+      }
+
+      .panel{
+        padding:24px;
+      }
+    }
+  </style>
+</head>
+
+<body>
+
+<header class="site-header">
+  <div class="container header-inner">
+
+    <div class="header-logo">
+      <img src="../assets/img/logo-lg.png" alt="Ligue Guyane">
+    </div>
+
+    <div class="header-title">
+      <strong>Championnats Guyane<br>Beach Tennis</strong>
+    </div>
+
+    <div class="header-logo">
+      <img src="../assets/img/logo-lg.png" alt="Ligue Guyane">
+    </div>
+
+    <div class="header-nav-wrap">
+      <span class="nav-arrow left">‹</span>
+      <nav class="header-nav" aria-label="Navigation principale">
+        <a class="nav-link" href="../index.html">🏠 Accueil</a>
+        <a class="nav-link primary" href="inscriptions.html">📝 Inscriptions</a>
+        <a class="nav-link" href="equipes.html">👥 Équipes</a>
+        <a class="nav-link" href="programmation.html">📅 Programmation</a>
+        <a class="nav-link" href="resultats.html">🏆 Résultats</a>
+        <a class="nav-link" href="reglement.html">📘 Règlement</a>
+        <a class="nav-link" href="restauration.html">🍽️ Restauration</a>
+        <a class="nav-link" href="contact.html">📩 Contact</a>
+      </nav>
+      <span class="nav-arrow right">›</span>
+    </div>
+
+  </div>
+</header>
+
+<main class="container">
+
+  <section class="section">
+    <div class="hero">
+      <div class="hero-inner">
+
+        <div class="hero-pills">
+          <span class="pill">09 & 10 mai 2026</span>
+          <span class="pill">Arena TC Suzini</span>
+          <span class="pill">U14 • U18 • Seniors • 45+</span>
+          <span class="pill">DM & DD</span>
+        </div>
+
+        <div>
+          <h1 class="hero-title">Inscrire une équipe</h1>
+          <p class="hero-sub">
+            Choisissez la catégorie, l’épreuve, puis renseignez les deux joueurs.
+            Le paiement sera organisé séparément.
+          </p>
+        </div>
+
+      </div>
+    </div>
+  </section>
+
+  <section class="section">
+    <div class="panel">
+
+      <div class="panel-head">
+        <div>
+          <h2 class="panel-title">Formulaire d’inscription</h2>
+          <p class="panel-text">
+            Inscription uniquement par équipe. Tous les champs marqués d’un astérisque sont obligatoires.
+          </p>
+        </div>
+        <div class="panel-tag">Officiel</div>
+      </div>
+
+      <div class="status-box" id="gateMsg">
+        ✅ Inscriptions ouvertes — paiement à venir.
+      </div>
+
+      <form id="signupForm" class="form" autocomplete="on">
+
+        <div class="choice-block">
+          <div class="choice-label">Catégorie *</div>
+          <div class="choice-grid categories">
+            <div class="choice-card">
+              <input id="catU14" name="categorie" type="radio" value="U14" required>
+              <label for="catU14">U14</label>
+            </div>
+
+            <div class="choice-card">
+              <input id="catU18" name="categorie" type="radio" value="U18" required>
+              <label for="catU18">U18</label>
+            </div>
+
+            <div class="choice-card">
+              <input id="catSeniors" name="categorie" type="radio" value="Seniors" required>
+              <label for="catSeniors">Seniors</label>
+            </div>
+
+            <div class="choice-card">
+              <input id="cat45" name="categorie" type="radio" value="45+" required>
+              <label for="cat45">45+</label>
+            </div>
+          </div>
+        </div>
+
+        <div class="choice-block">
+          <div class="choice-label">Épreuve *</div>
+          <div class="choice-grid">
+            <div class="choice-card epreuve">
+              <input id="epreuveDM" name="epreuve" type="radio" value="DM" required>
+              <label for="epreuveDM">👨 Double Messieurs</label>
+            </div>
+
+            <div class="choice-card epreuve">
+              <input id="epreuveDD" name="epreuve" type="radio" value="DD" required>
+              <label for="epreuveDD">👩 Double Dames</label>
+            </div>
+          </div>
+        </div>
+
+        <div class="field">
+          <label for="teamName">Nom de l’équipe *</label>
+          <input id="teamName" name="teamName" type="text" required maxlength="40" placeholder="Ex : Les beacheurs">
+        </div>
+
+        <hr class="sep" />
+
+        <h3 class="player-title">Joueur / Joueuse 1</h3>
+
+        <div class="field">
+          <label for="p1LastName">Nom *</label>
+          <input id="p1LastName" name="p1LastName" type="text" required placeholder="Nom">
+        </div>
+
+        <div class="field">
+          <label for="p1FirstName">Prénom *</label>
+          <input id="p1FirstName" name="p1FirstName" type="text" required placeholder="Prénom">
+        </div>
+
+        <div class="field">
+          <label for="p1Licence">N° Licence *</label>
+          <input id="p1Licence" name="p1Licence" type="text" required placeholder="Ex : 0123456A">
+        </div>
+
+        <div class="field">
+          <label for="p1Phone">Téléphone *</label>
+          <input id="p1Phone" name="p1Phone" type="tel" required placeholder="Ex : +594... / 06...">
+        </div>
+
+        <hr class="sep" />
+
+        <h3 class="player-title">Joueur / Joueuse 2</h3>
+
+        <div class="field">
+          <label for="p2LastName">Nom *</label>
+          <input id="p2LastName" name="p2LastName" type="text" required placeholder="Nom">
+        </div>
+
+        <div class="field">
+          <label for="p2FirstName">Prénom *</label>
+          <input id="p2FirstName" name="p2FirstName" type="text" required placeholder="Prénom">
+        </div>
+
+        <div class="field">
+          <label for="p2Licence">N° Licence *</label>
+          <input id="p2Licence" name="p2Licence" type="text" required placeholder="Ex : 0123456A">
+        </div>
+
+        <div class="field">
+          <label for="p2Phone">Téléphone *</label>
+          <input id="p2Phone" name="p2Phone" type="tel" required placeholder="Ex : +594... / 06...">
+        </div>
+
+        <button id="submitBtn" class="btn btn-primary" type="submit">
+          ✅ Valider l’inscription
+        </button>
+
+        <p id="status" class="muted" role="status" aria-live="polite" style="margin:0;"></p>
+
+      </form>
+    </div>
+  </section>
+
+</main>
+
+<script type="module">
+  import { db } from "../assets/js/firebase.js";
+  import {
+    collection,
+    addDoc,
+    doc,
+    setDoc,
+    serverTimestamp
+  } from "https://www.gstatic.com/firebasejs/10.12.5/firebase-firestore.js";
+
+  const EVENT_ID = "championnats-2026";
+
+  const form = document.getElementById("signupForm");
+  const statusEl = document.getElementById("status");
+  const submitBtn = document.getElementById("submitBtn");
+
+  function clean(value){
+    return (value || "").trim();
+  }
+
+  function slugify(value){
+    return clean(value)
+      .toLowerCase()
+      .normalize("NFD")
+      .replace(/[\u0300-\u036f]/g, "")
+      .replace(/[^a-z0-9]+/g, "-")
+      .replace(/(^-|-$)/g, "");
+  }
+
+  function setStatus(message){
+    statusEl.textContent = message;
+  }
+
+  function readFormData(){
+    return {
+      categorie: form.querySelector('input[name="categorie"]:checked')?.value || "",
+      epreuve: form.querySelector('input[name="epreuve"]:checked')?.value || "",
+      teamName: clean(form.teamName.value),
+
+      p1FirstName: clean(form.p1FirstName.value),
+      p1LastName: clean(form.p1LastName.value),
+      p1Licence: clean(form.p1Licence.value),
+      p1Phone: clean(form.p1Phone.value),
+
+      p2FirstName: clean(form.p2FirstName.value),
+      p2LastName: clean(form.p2LastName.value),
+      p2Licence: clean(form.p2Licence.value),
+      p2Phone: clean(form.p2Phone.value)
+    };
+  }
+
+  form.addEventListener("submit", async (event) => {
+    event.preventDefault();
+
+    submitBtn.disabled = true;
+    setStatus("Envoi en cours…");
+
+    try{
+      const data = readFormData();
+
+      if(
+        !data.categorie ||
+        !data.epreuve ||
+        !data.teamName ||
+        !data.p1FirstName || !data.p1LastName || !data.p1Licence || !data.p1Phone ||
+        !data.p2FirstName || !data.p2LastName || !data.p2Licence || !data.p2Phone
+      ){
+        throw new Error("Merci de compléter tous les champs obligatoires.");
+      }
+
+      const privatePayload = {
+        eventId: EVENT_ID,
+        createdAt: serverTimestamp(),
+
+        categorie: data.categorie,
+        epreuve: data.epreuve,
+        categorieKey: slugify(data.categorie),
+        epreuveKey: slugify(data.epreuve),
+
+        teamName: data.teamName,
+        teamKey: slugify(data.teamName),
+
+        paiement: "placeholder",
+        statut: "inscrite",
+
+        joueur1: {
+          firstName: data.p1FirstName,
+          lastName: data.p1LastName,
+          licence: data.p1Licence,
+          phone: data.p1Phone
+        },
+
+        joueur2: {
+          firstName: data.p2FirstName,
+          lastName: data.p2LastName,
+          licence: data.p2Licence,
+          phone: data.p2Phone
+        }
+      };
+
+      const privateRef = await addDoc(
+        collection(db, "events", EVENT_ID, "inscriptions"),
+        privatePayload
+      );
+
+      const publicPayload = {
+        eventId: EVENT_ID,
+        createdAt: serverTimestamp(),
+
+        inscriptionId: privateRef.id,
+
+        categorie: data.categorie,
+        epreuve: data.epreuve,
+        categorieKey: slugify(data.categorie),
+        epreuveKey: slugify(data.epreuve),
+
+        teamName: data.teamName,
+        teamKey: slugify(data.teamName),
+
+        joueur1FirstName: data.p1FirstName,
+        joueur2FirstName: data.p2FirstName,
+
+        statut: "inscrite",
+        paiement: "placeholder",
+        list: "main",
+        stby: false
+      };
+
+      await setDoc(
+        doc(db, "events", EVENT_ID, "equipes", privateRef.id),
+        publicPayload
+      );
+
+      form.reset();
+      setStatus("✅ Inscription enregistrée !");
+      alert("✅ Inscription confirmée !\n\nVotre équipe a bien été enregistrée.");
+
+    }catch(error){
+      console.error(error);
+      setStatus("❌ Erreur : " + (error?.message || "Impossible d’enregistrer l’inscription."));
+    }finally{
+      submitBtn.disabled = false;
+    }
+  });
+</script>
+
+</body>
+</html>
