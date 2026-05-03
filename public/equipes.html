@@ -262,6 +262,8 @@
       display:grid;
       gap:10px;
       margin-top:12px;
+      position:relative;
+      z-index:5;
     }
 
     .switch-title{
@@ -276,6 +278,8 @@
       display:grid;
       grid-template-columns:repeat(2,1fr);
       gap:10px;
+      position:relative;
+      z-index:10;
     }
 
     .switch-btn{
@@ -289,6 +293,10 @@
       color:#1c2430;
       cursor:pointer;
       box-shadow:0 8px 16px rgba(16,24,40,.04);
+      position:relative;
+      z-index:20;
+      touch-action:manipulation;
+      -webkit-tap-highlight-color:transparent;
     }
 
     .switch-btn[aria-selected="true"]{
@@ -317,6 +325,8 @@
       font-weight:1000;
       cursor:pointer;
       color:#344054;
+      touch-action:manipulation;
+      -webkit-tap-highlight-color:transparent;
     }
 
     .subtab[aria-selected="true"]{
@@ -526,7 +536,7 @@
         <button class="subtab" id="tabClassees" type="button" aria-selected="false">🏷️ Classées</button>
       </div>
 
-      <div class="status-box" id="status">Connexion…</div>
+      <div class="status-box" id="status">Interface prête — connexion Firestore en cours…</div>
     </div>
   </section>
 
@@ -570,14 +580,6 @@
 </main>
 
 <script type="module">
-  import { db } from "../assets/js/firebase.js";
-  import {
-    collection,
-    query,
-    orderBy,
-    onSnapshot
-  } from "https://www.gstatic.com/firebasejs/10.12.5/firebase-firestore.js";
-
   const EVENT_ID = "championnats-2026";
 
   const EPREUVE_LABELS = {
@@ -727,20 +729,20 @@
     rankedList.innerHTML = ranked.length
       ? ranked.map((r,i) => cardClasseeHtml(i+1, r)).join("")
       : `<p class="muted" style="margin:0;">Aucune équipe sur la liste principale.</p>`;
-
-    statusEl.textContent = `🟢 En direct — ${currentCategorie} / ${EPREUVE_LABELS[currentEpreuve]}`;
   }
 
   function setCategory(categorie){
     currentCategorie = categorie;
     try{ localStorage.setItem("champ_equipes_categorie", currentCategorie); }catch(e){}
     render();
+    statusEl.textContent = `Affichage — ${currentCategorie} / ${EPREUVE_LABELS[currentEpreuve]}`;
   }
 
   function setEpreuve(epreuve){
     currentEpreuve = epreuve;
     try{ localStorage.setItem("champ_equipes_epreuve", currentEpreuve); }catch(e){}
     render();
+    statusEl.textContent = `Affichage — ${currentCategorie} / ${EPREUVE_LABELS[currentEpreuve]}`;
   }
 
   function showInscrits(){
@@ -759,64 +761,97 @@
     try{ localStorage.setItem("champ_equipes_view", "classees"); }catch(e){}
   }
 
-  categoryButtons.forEach(btn => {
-    btn.addEventListener("click", () => setCategory(btn.dataset.categorie));
-  });
-
-  epreuveButtons.forEach(btn => {
-    btn.addEventListener("click", () => setEpreuve(btn.dataset.epreuve));
-  });
-
-  tabInscrits.addEventListener("click", showInscrits);
-  tabClassees.addEventListener("click", showClassees);
-
-  try{
-    const savedCat = localStorage.getItem("champ_equipes_categorie");
-    const savedEpreuve = localStorage.getItem("champ_equipes_epreuve");
-    const savedView = localStorage.getItem("champ_equipes_view");
-
-    if(["U14","U18","Seniors","45+"].includes(savedCat)) currentCategorie = savedCat;
-    if(["DM","DD"].includes(savedEpreuve)) currentEpreuve = savedEpreuve;
-
-    if(savedView === "classees") showClassees();
-    else showInscrits();
-  }catch(e){
-    showInscrits();
-  }
-
-  updateButtons();
-
-  const q = query(
-    collection(db, "events", EVENT_ID, "equipes"),
-    orderBy("createdAt", "asc")
-  );
-
-  onSnapshot(q, (snap) => {
-    allRows = [];
-
-    snap.forEach(docSnap => {
-      const d = docSnap.data() || {};
-
-      allRows.push({
-        id: docSnap.id,
-        teamName: d.teamName || "",
-        categorie: d.categorie || "",
-        epreuve: d.epreuve || "",
-        joueur1FirstName: d.joueur1FirstName || "",
-        joueur2FirstName: d.joueur2FirstName || "",
-        createdAtMs: d.createdAt?.toMillis ? d.createdAt.toMillis() : 0,
-        list: d.list || "main",
-        stby: d.stby === true,
-        p1Rank: d.p1Rank ?? null,
-        p2Rank: d.p2Rank ?? null
-      });
+  function bindUI(){
+    categoryButtons.forEach(btn => {
+      btn.onclick = () => setCategory(btn.dataset.categorie);
+      btn.addEventListener("touchend", (e) => {
+        e.preventDefault();
+        setCategory(btn.dataset.categorie);
+      }, { passive:false });
     });
 
-    render();
-  }, (err) => {
-    console.error(err);
-    statusEl.textContent = "🔴 Erreur de connexion Firestore.";
-  });
+    epreuveButtons.forEach(btn => {
+      btn.onclick = () => setEpreuve(btn.dataset.epreuve);
+      btn.addEventListener("touchend", (e) => {
+        e.preventDefault();
+        setEpreuve(btn.dataset.epreuve);
+      }, { passive:false });
+    });
+
+    tabInscrits.onclick = showInscrits;
+    tabClassees.onclick = showClassees;
+  }
+
+  function restoreState(){
+    try{
+      const savedCat = localStorage.getItem("champ_equipes_categorie");
+      const savedEpreuve = localStorage.getItem("champ_equipes_epreuve");
+      const savedView = localStorage.getItem("champ_equipes_view");
+
+      if(["U14","U18","Seniors","45+"].includes(savedCat)) currentCategorie = savedCat;
+      if(["DM","DD"].includes(savedEpreuve)) currentEpreuve = savedEpreuve;
+
+      if(savedView === "classees") showClassees();
+      else showInscrits();
+    }catch(e){
+      showInscrits();
+    }
+  }
+
+  bindUI();
+  restoreState();
+  render();
+
+  async function connectFirestore(){
+    try{
+      const firebaseModule = await import("../assets/js/firebase.js");
+      const firestoreModule = await import("https://www.gstatic.com/firebasejs/10.12.5/firebase-firestore.js");
+
+      const { db } = firebaseModule;
+      const { collection, query, orderBy, onSnapshot } = firestoreModule;
+
+      statusEl.textContent = "Connexion Firestore…";
+
+      const q = query(
+        collection(db, "events", EVENT_ID, "equipes"),
+        orderBy("createdAt", "asc")
+      );
+
+      onSnapshot(q, (snap) => {
+        allRows = [];
+
+        snap.forEach(docSnap => {
+          const d = docSnap.data() || {};
+
+          allRows.push({
+            id: docSnap.id,
+            teamName: d.teamName || "",
+            categorie: d.categorie || "",
+            epreuve: d.epreuve || "",
+            joueur1FirstName: d.joueur1FirstName || "",
+            joueur2FirstName: d.joueur2FirstName || "",
+            createdAtMs: d.createdAt?.toMillis ? d.createdAt.toMillis() : 0,
+            list: d.list || "main",
+            stby: d.stby === true,
+            p1Rank: d.p1Rank ?? null,
+            p2Rank: d.p2Rank ?? null
+          });
+        });
+
+        render();
+        statusEl.textContent = `🟢 En direct — ${currentCategorie} / ${EPREUVE_LABELS[currentEpreuve]}`;
+      }, (err) => {
+        console.error(err);
+        statusEl.textContent = "🔴 Erreur Firestore : " + (err?.message || "connexion impossible");
+      });
+
+    }catch(error){
+      console.error(error);
+      statusEl.textContent = "🔴 Erreur Firebase : " + (error?.message || "import impossible");
+    }
+  }
+
+  connectFirestore();
 </script>
 
 </body>
