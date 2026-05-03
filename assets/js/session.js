@@ -2,7 +2,8 @@ import { auth, db } from "./firebase.js";
 
 import {
   GoogleAuthProvider,
-  signInWithPopup,
+  signInWithRedirect,
+  getRedirectResult,
   signOut
 } from "https://www.gstatic.com/firebasejs/10.12.5/firebase-auth.js";
 
@@ -14,7 +15,16 @@ import {
 const provider = new GoogleAuthProvider();
 
 export async function loginAndRedirect(){
-  await signInWithPopup(auth, provider);
+  await signInWithRedirect(auth, provider);
+}
+
+export async function handleRedirectResult(){
+  try{
+    return await getRedirectResult(auth);
+  }catch(error){
+    console.error("Erreur retour connexion Google :", error);
+    return null;
+  }
 }
 
 export async function logout(){
