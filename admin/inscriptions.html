@@ -1,0 +1,762 @@
+<!doctype html>
+<html lang="fr">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Admin — Inscriptions — Championnats Guyane Beach Tennis</title>
+
+  <style>
+    :root{
+      --clay:#c65a1e;
+      --clay-dark:#8e3a13;
+      --clay-light:#ee8a3a;
+      --sky:#27bced;
+      --aqua:#00a9c8;
+      --blue:#075b9a;
+      --blue-dark:#063b72;
+      --text:#17212b;
+      --muted:#667085;
+      --card:rgba(255,255,255,.94);
+      --shadow:0 16px 40px rgba(16,24,40,.12);
+      --container:1180px;
+      --header-h:150px;
+    }
+
+    *{box-sizing:border-box;}
+
+    body{
+      margin:0;
+      font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;
+      color:var(--text);
+      background:
+        radial-gradient(circle at 20% 0%, rgba(39,188,237,.22), transparent 28%),
+        radial-gradient(circle at 85% 10%, rgba(0,169,200,.16), transparent 26%),
+        linear-gradient(180deg,#f4fcff 0%,#e9f8ff 48%,#ffffff 100%);
+    }
+
+    a{color:inherit;text-decoration:none;}
+    img{display:block;max-width:100%;}
+
+    .container{
+      width:min(var(--container), calc(100% - 28px));
+      margin:0 auto;
+    }
+
+    .site-header{
+      position:fixed;
+      top:0;
+      left:0;
+      right:0;
+      z-index:1000;
+      background:linear-gradient(135deg,var(--clay-dark),var(--clay),var(--clay-light));
+      border-bottom:1px solid rgba(0,0,0,.08);
+      box-shadow:0 10px 26px rgba(142,58,19,.28);
+    }
+
+    .header-inner{
+      min-height:var(--header-h);
+      display:grid;
+      grid-template-columns:80px 1fr 80px;
+      grid-template-rows:auto auto;
+      align-items:center;
+      gap:10px 18px;
+      padding:12px 0;
+    }
+
+    .header-logo{
+      width:80px;
+      height:80px;
+      display:flex;
+      align-items:center;
+      justify-content:center;
+    }
+
+    .header-logo img{
+      max-width:100%;
+      max-height:100%;
+      object-fit:contain;
+      filter:drop-shadow(0 6px 10px rgba(0,0,0,.18));
+    }
+
+    .header-title{
+      text-align:center;
+      color:#fff;
+    }
+
+    .header-title strong{
+      display:block;
+      font-size:clamp(22px,4vw,42px);
+      line-height:.95;
+      letter-spacing:-.04em;
+      text-transform:uppercase;
+      font-weight:1000;
+    }
+
+    .header-title span{
+      display:block;
+      margin-top:5px;
+      font-size:13px;
+      font-weight:900;
+      color:rgba(255,255,255,.88);
+      text-transform:uppercase;
+      letter-spacing:.08em;
+    }
+
+    .header-nav-wrap{
+      grid-column:1 / 4;
+      position:relative;
+      overflow:hidden;
+      padding:0 34px;
+    }
+
+    .header-nav-wrap::before,
+    .header-nav-wrap::after{
+      content:"";
+      position:absolute;
+      top:0;
+      bottom:0;
+      width:40px;
+      z-index:2;
+      pointer-events:none;
+    }
+
+    .header-nav-wrap::before{
+      left:0;
+      background:linear-gradient(90deg, rgba(142,58,19,.98), rgba(142,58,19,0));
+    }
+
+    .header-nav-wrap::after{
+      right:0;
+      background:linear-gradient(270deg, rgba(198,90,30,.98), rgba(198,90,30,0));
+    }
+
+    .nav-arrow{
+      position:absolute;
+      top:50%;
+      transform:translateY(-50%);
+      z-index:3;
+      width:28px;
+      height:28px;
+      border-radius:999px;
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      background:rgba(255,255,255,.88);
+      color:var(--clay-dark);
+      font-size:20px;
+      font-weight:1000;
+      box-shadow:0 6px 14px rgba(0,0,0,.18);
+      pointer-events:none;
+    }
+
+    .nav-arrow.left{left:2px;}
+    .nav-arrow.right{right:2px;}
+
+    .header-nav{
+      display:flex;
+      gap:10px;
+      overflow-x:auto;
+      padding:2px 4px;
+      scrollbar-width:none;
+      -webkit-overflow-scrolling:touch;
+    }
+
+    .header-nav::-webkit-scrollbar{display:none;}
+
+    .nav-link{
+      flex:0 0 auto;
+      min-height:42px;
+      padding:10px 17px;
+      border-radius:999px;
+      background:rgba(255,255,255,.92);
+      color:#344054;
+      font-size:14px;
+      font-weight:900;
+      white-space:nowrap;
+      box-shadow:0 8px 16px rgba(0,0,0,.14);
+    }
+
+    .nav-link.primary{
+      background:linear-gradient(180deg,var(--blue),var(--blue-dark));
+      color:#fff;
+    }
+
+    main{
+      padding-top:calc(var(--header-h) + 24px);
+      padding-bottom:42px;
+    }
+
+    .section{margin-top:22px;}
+
+    .panel{
+      background:var(--card);
+      border:1px solid rgba(255,255,255,.6);
+      border-radius:28px;
+      box-shadow:var(--shadow);
+      padding:20px;
+    }
+
+    .panel-head{
+      display:flex;
+      justify-content:space-between;
+      align-items:flex-start;
+      gap:12px;
+      margin-bottom:16px;
+    }
+
+    .panel-title{
+      margin:0;
+      font-size:28px;
+      line-height:1.05;
+      letter-spacing:-.03em;
+    }
+
+    .panel-text{
+      margin:8px 0 0;
+      color:var(--muted);
+      font-size:15px;
+      line-height:1.55;
+    }
+
+    .panel-tag{
+      flex-shrink:0;
+      padding:8px 13px;
+      border-radius:999px;
+      background:#e4f7ff;
+      color:var(--blue-dark);
+      font-size:12px;
+      font-weight:1000;
+      text-transform:uppercase;
+      letter-spacing:.06em;
+    }
+
+    .grid{
+      display:grid;
+      grid-template-columns:1fr;
+      gap:10px;
+    }
+
+    .field{
+      display:grid;
+      gap:8px;
+    }
+
+    .field label{
+      font-weight:1000;
+      color:#1c2430;
+    }
+
+    select{
+      width:100%;
+      min-height:50px;
+      border-radius:16px;
+      border:1px solid rgba(16,24,40,.10);
+      background:#fff;
+      padding:0 14px;
+      font-size:16px;
+      font-weight:800;
+      color:#17212b;
+      outline:none;
+    }
+
+    .btn{
+      appearance:none;
+      border:1px solid rgba(16,24,40,.10);
+      background:#fff;
+      border-radius:18px;
+      min-height:54px;
+      padding:13px 15px;
+      font-size:15px;
+      font-weight:1000;
+      cursor:pointer;
+      color:#1c2430;
+      text-align:center;
+      box-shadow:0 8px 16px rgba(16,24,40,.04);
+    }
+
+    .btn.primary{
+      background:linear-gradient(180deg,var(--blue),var(--blue-dark));
+      color:#fff;
+      border-color:var(--blue);
+    }
+
+    .btn.clay{
+      background:linear-gradient(135deg,var(--clay),var(--clay-light));
+      color:#fff;
+      border-color:var(--clay);
+    }
+
+    .btn.danger{
+      border-color:#f1b2b2;
+      background:#fff5f5;
+      color:#8a1f1f;
+    }
+
+    .btn.disabled,
+    .btn:disabled{
+      opacity:.55;
+      cursor:not-allowed;
+    }
+
+    .status-box{
+      margin-top:12px;
+      padding:14px 16px;
+      border-radius:18px;
+      background:linear-gradient(135deg,rgba(39,188,237,.12),rgba(198,90,30,.08));
+      border:1px solid rgba(39,188,237,.22);
+      color:#475467;
+      font-size:14px;
+      line-height:1.5;
+    }
+
+    .muted{
+      color:var(--muted);
+      font-size:14px;
+      line-height:1.45;
+    }
+
+    @media (min-width:760px){
+      :root{--header-h:158px;}
+
+      .header-inner{
+        grid-template-columns:100px 1fr 100px;
+      }
+
+      .header-logo{
+        width:96px;
+        height:80px;
+      }
+
+      .header-nav{
+        justify-content:center;
+      }
+
+      .panel{
+        padding:24px;
+      }
+
+      .grid{
+        grid-template-columns:repeat(2,1fr);
+      }
+
+      .grid.actions{
+        grid-template-columns:repeat(4,1fr);
+      }
+    }
+  </style>
+</head>
+
+<body>
+
+<header class="site-header">
+  <div class="container header-inner">
+    <div class="header-logo">
+      <img src="../assets/img/logo-lg.png" alt="Ligue Guyane">
+    </div>
+
+    <div class="header-title">
+      <strong>Admin<br>Inscriptions</strong>
+      <span>Championnats Guyane Beach Tennis</span>
+    </div>
+
+    <div class="header-logo">
+      <img src="../assets/img/logo-lg.png" alt="Ligue Guyane">
+    </div>
+
+    <div class="header-nav-wrap">
+      <span class="nav-arrow left">‹</span>
+      <nav class="header-nav" aria-label="Navigation admin">
+        <a class="nav-link" href="../index.html">🏠 Accueil public</a>
+        <a class="nav-link primary" href="inscriptions.html">📝 Inscriptions</a>
+        <a class="nav-link" href="equipes.html">👥 Équipes</a>
+        <a class="nav-link" href="#" id="btnLogout">🚪 Déconnexion</a>
+      </nav>
+      <span class="nav-arrow right">›</span>
+    </div>
+  </div>
+</header>
+
+<main class="container">
+
+  <section class="section panel" id="accessDenied" style="display:none;">
+    <h2 class="panel-title">⛔ Accès refusé</h2>
+    <p class="panel-text">Cette page est réservée aux administrateurs.</p>
+  </section>
+
+  <section class="section panel" id="adminUI" style="display:none;">
+    <div class="panel-head">
+      <div>
+        <h2 class="panel-title">🎛️ Zone d’administration</h2>
+        <p class="panel-text">
+          Choisis la catégorie et l’épreuve à piloter.
+        </p>
+      </div>
+      <div class="panel-tag">Admin</div>
+    </div>
+
+    <div class="grid">
+      <div class="field">
+        <label for="categorie">Catégorie</label>
+        <select id="categorie">
+          <option value="U14">U14</option>
+          <option value="U18">U18</option>
+          <option value="Seniors">Seniors</option>
+          <option value="45+">45+</option>
+        </select>
+      </div>
+
+      <div class="field">
+        <label for="epreuve">Épreuve</label>
+        <select id="epreuve">
+          <option value="DM">Double Messieurs</option>
+          <option value="DD">Double Dames</option>
+        </select>
+      </div>
+    </div>
+
+    <div class="status-box">
+      Zone sélectionnée : <strong id="zoneLabel">U14 — Double Messieurs</strong>
+    </div>
+  </section>
+
+  <section class="section panel" id="panelInscriptions" style="display:none;">
+    <div class="panel-head">
+      <div>
+        <h2 class="panel-title">📝 Statut des inscriptions</h2>
+        <p class="panel-text" id="currentState">Chargement…</p>
+      </div>
+      <div class="panel-tag">Statut</div>
+    </div>
+
+    <p class="muted" id="statusMsg"></p>
+
+    <div class="grid actions" style="margin-top:12px;">
+      <button class="btn" id="btnNotOpen">💤 Pas encore ouvertes</button>
+      <button class="btn primary" id="btnOpen">✅ Ouvrir</button>
+      <button class="btn clay" id="btnPause">⏸️ Suspendre</button>
+      <button class="btn" id="btnClose">🔒 Clôturer</button>
+    </div>
+
+    <div class="status-box">
+      ⚠️ Le statut est enregistré par catégorie et par épreuve.
+      <br>
+      Exemple : U14/DM peut être ouvert pendant que Seniors/DD reste fermé.
+    </div>
+  </section>
+
+  <section class="section panel" id="maintenanceUI" style="display:none;">
+    <div class="panel-head">
+      <div>
+        <h2 class="panel-title">🧹 Maintenance — RAZ</h2>
+        <p class="panel-text">
+          Supprime uniquement les inscriptions de la catégorie/épreuve sélectionnée.
+        </p>
+      </div>
+      <div class="panel-tag">Danger</div>
+    </div>
+
+    <div class="status-box">
+      Cette action supprime les documents correspondants dans :
+      <br>
+      <strong>events/championnats-2026/inscriptions</strong>
+      <br>
+      <strong>events/championnats-2026/equipes</strong>
+      <br><br>
+      ⚠️ Action irréversible.
+    </div>
+
+    <div class="grid" style="margin-top:12px;">
+      <button class="btn danger" id="btnRAZ">
+        🧨 RAZ — Supprimer les inscriptions de la zone
+      </button>
+    </div>
+
+    <p class="muted" id="razStatus" style="margin-top:10px;"></p>
+  </section>
+
+</main>
+
+<script type="module">
+  import { auth, db } from "../assets/js/firebase.js";
+  import { logout, getRoleByEmail } from "../assets/js/session.js";
+  import { onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.12.5/firebase-auth.js";
+  import {
+    doc,
+    setDoc,
+    onSnapshot,
+    serverTimestamp,
+    collection,
+    getDocs,
+    writeBatch
+  } from "https://www.gstatic.com/firebasejs/10.12.5/firebase-firestore.js";
+
+  const EVENT_ID = "championnats-2026";
+
+  const EPREUVE_LABELS = {
+    DM: "Double Messieurs",
+    DD: "Double Dames"
+  };
+
+  const accessDenied = document.getElementById("accessDenied");
+  const adminUI = document.getElementById("adminUI");
+  const panelInscriptions = document.getElementById("panelInscriptions");
+  const maintenanceUI = document.getElementById("maintenanceUI");
+
+  const categorieEl = document.getElementById("categorie");
+  const epreuveEl = document.getElementById("epreuve");
+  const zoneLabel = document.getElementById("zoneLabel");
+
+  const currentStateEl = document.getElementById("currentState");
+  const statusMsgEl = document.getElementById("statusMsg");
+  const razStatus = document.getElementById("razStatus");
+
+  const btnNotOpen = document.getElementById("btnNotOpen");
+  const btnOpen = document.getElementById("btnOpen");
+  const btnPause = document.getElementById("btnPause");
+  const btnClose = document.getElementById("btnClose");
+  const btnRAZ = document.getElementById("btnRAZ");
+
+  const cfgRef = doc(db, "events", EVENT_ID, "config", "inscriptions");
+
+  let currentCategorie = "U14";
+  let currentEpreuve = "DM";
+  let lastConfigData = {};
+  let unsubConfig = null;
+
+  function keyFor(categorie, epreuve){
+    return `${categorie}_${epreuve}`.replace("+", "plus");
+  }
+
+  function normState(value){
+    if(value === "suspended") return "paused";
+    return value || "not_open";
+  }
+
+  function labelFor(state){
+    switch(normState(state)){
+      case "not_open": return "💤 Pas encore ouvertes";
+      case "open": return "✅ Ouvertes";
+      case "paused": return "⏸️ Suspendues";
+      case "closed": return "🔒 Clôturées";
+      default: return "—";
+    }
+  }
+
+  function publicMessage(state){
+    switch(normState(state)){
+      case "not_open": return "Le public verra : “Les inscriptions ne sont pas encore ouvertes.”";
+      case "open": return "Le public verra : “Inscriptions ouvertes ✅”.";
+      case "paused": return "Le public verra : “Inscriptions suspendues ⏸️”.";
+      case "closed": return "Le public verra : “Inscriptions clôturées 🔒”.";
+      default: return "";
+    }
+  }
+
+  function updateZoneLabel(){
+    zoneLabel.textContent = `${currentCategorie} — ${EPREUVE_LABELS[currentEpreuve]}`;
+  }
+
+  function currentState(){
+    const key = keyFor(currentCategorie, currentEpreuve);
+    return normState(lastConfigData?.states?.[key] || "not_open");
+  }
+
+  function refreshStateDisplay(){
+    updateZoneLabel();
+
+    const state = currentState();
+    currentStateEl.innerHTML = `Statut actuel : <strong>${labelFor(state)}</strong>`;
+    statusMsgEl.textContent = publicMessage(state);
+
+    btnPause.textContent = state === "paused" ? "▶️ Réactiver" : "⏸️ Suspendre";
+  }
+
+  function setButtonsDisabled(disabled){
+    [btnNotOpen, btnOpen, btnPause, btnClose, btnRAZ].forEach(btn => {
+      btn.disabled = disabled;
+      btn.classList.toggle("disabled", disabled);
+    });
+  }
+
+  async function ensureAdmin(){
+    const user = auth.currentUser;
+    if(!user) return false;
+
+    const role = await getRoleByEmail(user.email);
+    return role === "admin";
+  }
+
+  async function setState(next){
+    const key = keyFor(currentCategorie, currentEpreuve);
+
+    if(next === "closed"){
+      const ok = confirm(`Clôturer les inscriptions pour ${currentCategorie} / ${currentEpreuve} ?`);
+      if(!ok) return;
+    }
+
+    if(next === "not_open"){
+      const ok = confirm(`Mettre “pas encore ouvertes” pour ${currentCategorie} / ${currentEpreuve} ?`);
+      if(!ok) return;
+    }
+
+    setButtonsDisabled(true);
+    statusMsgEl.textContent = "Mise à jour…";
+
+    try{
+      await setDoc(cfgRef, {
+        [`states.${key}`]: next,
+        updatedAt: serverTimestamp()
+      }, { merge:true });
+
+      statusMsgEl.textContent = "✅ Statut mis à jour.";
+    }catch(error){
+      console.error(error);
+      statusMsgEl.textContent = "❌ Erreur : impossible de mettre à jour.";
+    }finally{
+      setButtonsDisabled(false);
+    }
+  }
+
+  async function deleteMatchingDocs(subcollectionName){
+    const snap = await getDocs(collection(db, "events", EVENT_ID, subcollectionName));
+
+    let deleted = 0;
+    let batch = writeBatch(db);
+    let batchCount = 0;
+
+    for(const documentSnap of snap.docs){
+      const data = documentSnap.data() || {};
+      if(data.categorie !== currentCategorie || data.epreuve !== currentEpreuve) continue;
+
+      batch.delete(documentSnap.ref);
+      deleted++;
+      batchCount++;
+
+      if(batchCount >= 450){
+        await batch.commit();
+        batch = writeBatch(db);
+        batchCount = 0;
+      }
+    }
+
+    if(batchCount > 0){
+      await batch.commit();
+    }
+
+    return deleted;
+  }
+
+  async function doRAZ(){
+    const ok1 = confirm(
+      `⚠️ RAZ INSCRIPTIONS\n\nCette action supprime toutes les inscriptions pour :\n${currentCategorie} / ${currentEpreuve}\n\nContinuer ?`
+    );
+
+    if(!ok1) return;
+
+    const typed = prompt('Tape exactement : RAZ\n\nPour confirmer la suppression complète.');
+    if(typed !== "RAZ"){
+      alert("Annulé.");
+      return;
+    }
+
+    setButtonsDisabled(true);
+    razStatus.textContent = "Suppression en cours…";
+
+    try{
+      const key = keyFor(currentCategorie, currentEpreuve);
+
+      await setDoc(cfgRef, {
+        [`states.${key}`]: "not_open",
+        updatedAt: serverTimestamp()
+      }, { merge:true });
+
+      const delPriv = await deleteMatchingDocs("inscriptions");
+      const delPub = await deleteMatchingDocs("equipes");
+
+      razStatus.textContent = `✅ RAZ OK — privé=${delPriv}, public=${delPub}. Statut remis à “Pas encore ouvertes”.`;
+      alert(`RAZ terminé ✅\n\nPrivé : ${delPriv}\nPublic : ${delPub}`);
+    }catch(error){
+      console.error(error);
+      razStatus.textContent = "❌ Erreur pendant le RAZ.";
+      alert("Erreur pendant le RAZ ❌");
+    }finally{
+      setButtonsDisabled(false);
+    }
+  }
+
+  function changeZone(){
+    currentCategorie = categorieEl.value;
+    currentEpreuve = epreuveEl.value;
+
+    try{
+      localStorage.setItem("champ_admin_categorie", currentCategorie);
+      localStorage.setItem("champ_admin_epreuve", currentEpreuve);
+    }catch(error){}
+
+    refreshStateDisplay();
+  }
+
+  document.getElementById("btnLogout").onclick = async (event) => {
+    event.preventDefault();
+    await logout();
+    window.location.href = "../index.html";
+  };
+
+  btnNotOpen.onclick = () => setState("not_open");
+  btnOpen.onclick = () => setState("open");
+  btnPause.onclick = () => {
+    const state = currentState();
+    setState(state === "paused" ? "open" : "paused");
+  };
+  btnClose.onclick = () => setState("closed");
+  btnRAZ.onclick = doRAZ;
+
+  categorieEl.onchange = changeZone;
+  epreuveEl.onchange = changeZone;
+
+  onAuthStateChanged(auth, async (user) => {
+    accessDenied.style.display = "none";
+    adminUI.style.display = "none";
+    panelInscriptions.style.display = "none";
+    maintenanceUI.style.display = "none";
+
+    if(!user){
+      accessDenied.style.display = "block";
+      return;
+    }
+
+    const ok = await ensureAdmin();
+    if(!ok){
+      accessDenied.style.display = "block";
+      return;
+    }
+
+    try{
+      const savedCat = localStorage.getItem("champ_admin_categorie");
+      const savedEpreuve = localStorage.getItem("champ_admin_epreuve");
+
+      if(["U14","U18","Seniors","45+"].includes(savedCat)) currentCategorie = savedCat;
+      if(["DM","DD"].includes(savedEpreuve)) currentEpreuve = savedEpreuve;
+    }catch(error){}
+
+    categorieEl.value = currentCategorie;
+    epreuveEl.value = currentEpreuve;
+
+    adminUI.style.display = "block";
+    panelInscriptions.style.display = "block";
+    maintenanceUI.style.display = "block";
+
+    if(unsubConfig) unsubConfig();
+
+    unsubConfig = onSnapshot(cfgRef, (snap) => {
+      lastConfigData = snap.exists() ? (snap.data() || {}) : {};
+      refreshStateDisplay();
+    }, (error) => {
+      console.error(error);
+      currentStateEl.textContent = "❌ Impossible de lire le statut.";
+    });
+  });
+</script>
+
+</body>
+</html>
