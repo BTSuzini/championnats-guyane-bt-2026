@@ -1,0 +1,165 @@
+<!doctype html>
+<html lang="fr">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Activation compte — Beach Tennis</title>
+
+  <style>
+    body{
+      margin:0;
+      font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto;
+      background:#f4fcff;
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      min-height:100vh;
+    }
+
+    .card{
+      background:#fff;
+      padding:24px;
+      border-radius:20px;
+      width:100%;
+      max-width:380px;
+      box-shadow:0 10px 30px rgba(0,0,0,.1);
+      display:grid;
+      gap:12px;
+    }
+
+    h1{
+      margin:0;
+      font-size:22px;
+      text-align:center;
+    }
+
+    input{
+      padding:12px;
+      border-radius:12px;
+      border:1px solid #ddd;
+      font-size:16px;
+    }
+
+    button{
+      padding:14px;
+      border:none;
+      border-radius:12px;
+      font-weight:900;
+      background:#075b9a;
+      color:#fff;
+      cursor:pointer;
+    }
+
+    .status{
+      font-size:14px;
+      text-align:center;
+      color:#555;
+    }
+  </style>
+</head>
+
+<body>
+
+<div class="card">
+  <h1>🎾 Activation compte</h1>
+
+  <input id="email" type="email" placeholder="Ton email" required>
+  <input id="password" type="password" placeholder="Mot de passe" required>
+
+  <button id="btnCreate">Créer mon compte</button>
+
+  <div class="status" id="status"></div>
+</div>
+
+<script type="module">
+  import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.5/firebase-app.js";
+  import {
+    getAuth,
+    createUserWithEmailAndPassword,
+    signInWithEmailAndPassword
+  } from "https://www.gstatic.com/firebasejs/10.12.5/firebase-auth.js";
+
+  import {
+    getFirestore,
+    doc,
+    getDoc,
+    updateDoc
+  } from "https://www.gstatic.com/firebasejs/10.12.5/firebase-firestore.js";
+
+  const firebaseConfig = {
+    apiKey: "AIzaSyAdjBE2UpEFRUgkASTaKP5X7vYr0ygzUzI",
+    authDomain: "championnats-guyane-bt-2026.firebaseapp.com",
+    projectId: "championnats-guyane-bt-2026",
+    storageBucket: "championnats-guyane-bt-2026.firebasestorage.app",
+    messagingSenderId: "639869315232",
+    appId: "1:639869315232:web:c73adb022414faf1d641c5"
+  };
+
+  const app = initializeApp(firebaseConfig);
+  const auth = getAuth(app);
+  const db = getFirestore(app);
+
+  const status = document.getElementById("status");
+  const btn = document.getElementById("btnCreate");
+
+  // 🔑 récup token URL
+  const params = new URLSearchParams(window.location.search);
+  const invite = params.get("invite");
+
+  if(!invite){
+    status.textContent = "❌ Lien invalide.";
+    btn.disabled = true;
+  }
+
+  btn.onclick = async () => {
+    const email = document.getElementById("email").value.trim();
+    const password = document.getElementById("password").value;
+
+    if(!email || !password){
+      status.textContent = "❌ Email et mot de passe requis.";
+      return;
+    }
+
+    btn.disabled = true;
+    status.textContent = "Création du compte…";
+
+    try{
+      // 🔍 vérifier token
+      const ref = doc(db, "invites", invite);
+      const snap = await getDoc(ref);
+
+      if(!snap.exists()){
+        throw new Error("Invitation invalide");
+      }
+
+      const data = snap.data();
+
+      // 🧠 création user Firebase
+      const cred = await createUserWithEmailAndPassword(auth, email, password);
+      const user = cred.user;
+
+      // 🔗 attacher rôle
+      await updateDoc(doc(db, "roles", data.uid), {
+        email,
+        linked: true
+      });
+
+      status.textContent = "✅ Compte créé ! Redirection…";
+
+      // 🔁 login auto
+      await signInWithEmailAndPassword(auth, email, password);
+
+      setTimeout(() => {
+        window.location.href = "index.html";
+      }, 1500);
+
+    }catch(error){
+      console.error(error);
+      status.textContent = "❌ " + (error.message || "Erreur");
+      btn.disabled = false;
+    }
+  };
+</script>
+
+</body>
+</html>
