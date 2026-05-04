@@ -7,11 +7,18 @@
 
   <style>
     :root{
-      --clay:#c65a1e; --clay-dark:#8e3a13; --clay-light:#ee8a3a;
-      --sky:#27bced; --aqua:#00a9c8; --blue:#075b9a; --blue-dark:#063b72;
-      --text:#17212b; --muted:#667085; --card:rgba(255,255,255,.94);
+      --clay:#c65a1e;
+      --clay-dark:#8e3a13;
+      --clay-light:#ee8a3a;
+      --sky:#27bced;
+      --aqua:#00a9c8;
+      --blue:#075b9a;
+      --blue-dark:#063b72;
+      --text:#17212b;
+      --muted:#667085;
+      --card:rgba(255,255,255,.94);
       --shadow:0 16px 40px rgba(16,24,40,.12);
-      --container:1180px; --header-h:150px;
+      --container:1180px;
     }
 
     *{box-sizing:border-box;}
@@ -27,129 +34,107 @@
     }
 
     a{color:inherit;text-decoration:none;}
-    img{display:block;max-width:100%;}
-    .container{width:min(var(--container), calc(100% - 28px));margin:0 auto;}
 
-    .site-header{
-      position:fixed;top:0;left:0;right:0;z-index:1000;
-      background:linear-gradient(135deg,var(--clay-dark),var(--clay),var(--clay-light));
-      box-shadow:0 10px 26px rgba(142,58,19,.28);
+    .container{
+      width:min(var(--container), calc(100% - 28px));
+      margin:0 auto;
     }
 
-    .header-inner{
-      min-height:var(--header-h);
-      display:grid;
-      grid-template-columns:80px 1fr 80px;
-      grid-template-rows:auto auto;
-      align-items:center;
-      gap:10px 18px;
-      padding:12px 0;
+    main{
+      padding-top:calc(var(--admin-total-top, 276px) + 42px);
+      padding-bottom:42px;
     }
 
-    .header-logo{width:80px;height:80px;display:flex;align-items:center;justify-content:center;}
-    .header-logo img{max-width:100%;max-height:100%;object-fit:contain;filter:drop-shadow(0 6px 10px rgba(0,0,0,.18));}
-
-    .header-title{text-align:center;color:#fff;}
-    .header-title strong{
-      display:block;font-size:clamp(22px,4vw,42px);line-height:.95;
-      letter-spacing:-.04em;text-transform:uppercase;font-weight:1000;
-    }
-    .header-title span{
-      display:block;margin-top:5px;font-size:13px;font-weight:900;
-      color:rgba(255,255,255,.88);text-transform:uppercase;letter-spacing:.08em;
-    }
-
-    .header-nav-wrap{grid-column:1 / 4;position:relative;overflow:hidden;padding:0 34px;}
-    .header-nav-wrap::before,.header-nav-wrap::after{
-      content:"";position:absolute;top:0;bottom:0;width:40px;z-index:2;pointer-events:none;
-    }
-    .header-nav-wrap::before{left:0;background:linear-gradient(90deg, rgba(142,58,19,.98), rgba(142,58,19,0));}
-    .header-nav-wrap::after{right:0;background:linear-gradient(270deg, rgba(198,90,30,.98), rgba(198,90,30,0));}
-
-    .nav-arrow{
-      position:absolute;top:50%;transform:translateY(-50%);z-index:3;
-      width:28px;height:28px;border-radius:999px;display:flex;align-items:center;justify-content:center;
-      background:rgba(255,255,255,.88);color:var(--clay-dark);font-size:20px;font-weight:1000;
-      box-shadow:0 6px 14px rgba(0,0,0,.18);pointer-events:none;
-    }
-    .nav-arrow.left{left:2px;} .nav-arrow.right{right:2px;}
-
-    .header-nav{
-      display:flex;gap:10px;overflow-x:auto;padding:2px 4px;
-      scrollbar-width:none;-webkit-overflow-scrolling:touch;
-    }
-    .header-nav::-webkit-scrollbar{display:none;}
-
-    .nav-link{
-      flex:0 0 auto;min-height:42px;padding:10px 17px;border-radius:999px;
-      background:rgba(255,255,255,.92);color:#344054;font-size:14px;font-weight:900;
-      white-space:nowrap;box-shadow:0 8px 16px rgba(0,0,0,.14);
-    }
-    .nav-link.primary{background:linear-gradient(180deg,var(--blue),var(--blue-dark));color:#fff;}
-
-    main{padding-top:calc(var(--header-h) + 24px);padding-bottom:42px;}
     .section{margin-top:22px;}
 
     .panel{
-      background:var(--card);border:1px solid rgba(255,255,255,.6);
-      border-radius:28px;box-shadow:var(--shadow);padding:20px;
+      background:var(--card);
+      border:1px solid rgba(255,255,255,.6);
+      border-radius:28px;
+      box-shadow:var(--shadow);
+      padding:20px;
     }
 
-    .panel-head{display:flex;justify-content:space-between;align-items:flex-start;gap:12px;margin-bottom:16px;}
-    .panel-title{margin:0;font-size:28px;line-height:1.05;letter-spacing:-.03em;}
-    .panel-text{margin:8px 0 0;color:var(--muted);font-size:15px;line-height:1.55;}
+    .panel-head{
+      display:flex;
+      justify-content:space-between;
+      align-items:flex-start;
+      gap:12px;
+      margin-bottom:16px;
+    }
+
+    .panel-title{
+      margin:0;
+      font-size:28px;
+      line-height:1.05;
+      letter-spacing:-.03em;
+    }
+
+    .panel-text{
+      margin:8px 0 0;
+      color:var(--muted);
+      font-size:15px;
+      line-height:1.55;
+    }
+
     .panel-tag{
-      flex-shrink:0;padding:8px 13px;border-radius:999px;background:#e4f7ff;color:var(--blue-dark);
-      font-size:12px;font-weight:1000;text-transform:uppercase;letter-spacing:.06em;
+      flex-shrink:0;
+      padding:8px 13px;
+      border-radius:999px;
+      background:#e4f7ff;
+      color:var(--blue-dark);
+      font-size:12px;
+      font-weight:1000;
+      text-transform:uppercase;
+      letter-spacing:.06em;
     }
 
-    .grid{display:grid;grid-template-columns:1fr;gap:10px;}
+    .grid{
+      display:grid;
+      grid-template-columns:1fr;
+      gap:10px;
+    }
 
     .btn{
-      appearance:none;border:1px solid rgba(16,24,40,.10);background:#fff;
-      border-radius:18px;min-height:54px;padding:13px 15px;font-size:15px;
-      font-weight:1000;cursor:pointer;color:#1c2430;text-align:center;
+      appearance:none;
+      border:1px solid rgba(16,24,40,.10);
+      background:#fff;
+      border-radius:18px;
+      min-height:54px;
+      padding:13px 15px;
+      font-size:15px;
+      font-weight:1000;
+      cursor:pointer;
+      color:#1c2430;
+      text-align:center;
       box-shadow:0 8px 16px rgba(16,24,40,.04);
-      display:flex;align-items:center;justify-content:center;
+      display:flex;
+      align-items:center;
+      justify-content:center;
     }
 
-    .btn.primary{background:linear-gradient(180deg,var(--blue),var(--blue-dark));color:#fff;border-color:var(--blue);}
-    .btn.clay{background:linear-gradient(135deg,var(--clay),var(--clay-light));color:#fff;border-color:var(--clay);}
-    .btn.danger{background:#fff5f5;color:#8a1f1f;border-color:#f1b2b2;}
-
-    .switch-group{display:grid;gap:10px;margin-top:14px;}
-    .switch-title{
-      font-size:13px;font-weight:1000;text-transform:uppercase;letter-spacing:.08em;color:var(--blue-dark);
-    }
-
-    .switches{display:grid;grid-template-columns:repeat(2,1fr);gap:10px;}
-
-    .switch-btn{
-      appearance:none;border:1px solid rgba(16,24,40,.10);background:#fff;
-      border-radius:999px;min-height:50px;padding:12px 14px;
-      font-weight:1000;font-size:15px;color:#1c2430;cursor:pointer;
-      box-shadow:0 8px 16px rgba(16,24,40,.04);
-    }
-
-    .switch-btn[aria-selected="true"]{
+    .btn.primary{
       background:linear-gradient(180deg,var(--blue),var(--blue-dark));
-      color:#fff;border-color:var(--blue);
-      box-shadow:0 12px 22px rgba(7,91,154,.20);
-    }
-
-    .switch-btn.epreuve[aria-selected="true"]{
-      background:linear-gradient(135deg,var(--clay),var(--clay-light));
-      border-color:var(--clay);
-      box-shadow:0 12px 22px rgba(198,90,30,.20);
+      color:#fff;
+      border-color:var(--blue);
     }
 
     .status-box{
-      margin-top:14px;padding:14px 16px;border-radius:18px;
+      margin-top:14px;
+      padding:14px 16px;
+      border-radius:18px;
       background:linear-gradient(135deg,rgba(39,188,237,.12),rgba(198,90,30,.08));
-      border:1px solid rgba(39,188,237,.22);color:#475467;font-size:14px;line-height:1.5;
+      border:1px solid rgba(39,188,237,.22);
+      color:#475467;
+      font-size:14px;
+      line-height:1.5;
     }
 
-    .muted{color:var(--muted);font-size:14px;line-height:1.45;}
+    .muted{
+      color:var(--muted);
+      font-size:14px;
+      line-height:1.45;
+    }
 
     .team-card{
       border:1px solid rgba(16,24,40,.08);
@@ -175,7 +160,12 @@
       word-break:break-word;
     }
 
-    .badges{display:flex;gap:8px;flex-wrap:wrap;justify-content:flex-end;}
+    .badges{
+      display:flex;
+      gap:8px;
+      flex-wrap:wrap;
+      justify-content:flex-end;
+    }
 
     .pill{
       display:inline-flex;
@@ -190,6 +180,7 @@
       white-space:nowrap;
       font-weight:1000;
     }
+
     .pill.main{border-color:#d9f2df;background:#f3fff6;}
     .pill.wait{border-color:#ffe1a6;background:#fff8e6;}
     .pill.stby{border-color:#ffd37a;background:#fff7e6;}
@@ -212,6 +203,7 @@
       gap:10px;
       flex-wrap:wrap;
     }
+
     .player-title b{font-weight:1000;}
 
     .player-meta{
@@ -231,6 +223,7 @@
       font-size:12px;
       white-space:nowrap;
     }
+
     .kv .k{color:#666;font-weight:800;}
     .kv .v{font-weight:1000;}
 
@@ -249,6 +242,7 @@
       font-weight:1000;
       color:#111;
     }
+
     .btnx:hover{background:#f5f5f5;}
     .btnx.danger{border-color:#f1b2b2;}
     .btnx.danger:hover{background:#ffecec;}
@@ -264,51 +258,19 @@
       font-weight:1000;
       color:var(--blue-dark);
     }
+
     details summary::-webkit-details-marker{display:none;}
 
     @media (min-width:760px){
-      :root{--header-h:158px;}
-      .header-inner{grid-template-columns:100px 1fr 100px;}
-      .header-logo{width:96px;height:80px;}
-      .header-nav{justify-content:center;}
       .panel{padding:24px;}
       .grid.three{grid-template-columns:1fr 1fr 1fr;}
-      .switches.categories{grid-template-columns:repeat(4,1fr);}
     }
   </style>
 </head>
 
-<body>
+<body data-zone-selector="select">
 
-<header class="site-header">
-  <div class="container header-inner">
-    <div class="header-logo">
-      <img src="../assets/img/logo-lg.png" alt="Ligue Guyane">
-    </div>
-
-    <div class="header-title">
-      <strong>Admin<br>Équipes</strong>
-      <span>Championnats Guyane Beach Tennis</span>
-    </div>
-
-    <div class="header-logo">
-      <img src="../assets/img/logo-lg.png" alt="Ligue Guyane">
-    </div>
-
-    <div class="header-nav-wrap">
-      <span class="nav-arrow left">‹</span>
-      <nav class="header-nav" aria-label="Navigation admin">
-        <a class="nav-link" href="../index.html">🏠 Accueil public</a>
-        <a class="nav-link" href="index.html">🛠️ Admin</a>
-        <a class="nav-link" href="inscriptions.html">📝 Inscriptions</a>
-        <a class="nav-link primary" href="equipes.html">👥 Équipes</a>
-        <a class="nav-link" href="roles.html">🔐 Rôles</a>
-        <a class="nav-link" href="#" id="btnLogout">🚪 Déconnexion</a>
-      </nav>
-      <span class="nav-arrow right">›</span>
-    </div>
-  </div>
-</header>
+<div id="adminHeader"></div>
 
 <main class="container">
 
@@ -317,45 +279,17 @@
     <p class="panel-text">Cette page est réservée aux administrateurs.</p>
   </section>
 
-  <section class="section panel" id="adminZone" style="display:none;">
-    <div class="panel-head">
-      <div>
-        <h2 class="panel-title">🎾 Tableau</h2>
-        <p class="panel-text">Choisis la catégorie et l’épreuve à gérer.</p>
-      </div>
-      <div class="panel-tag">Admin</div>
-    </div>
-
-    <div class="switch-group">
-      <div class="switch-title">Catégorie</div>
-      <div class="switches categories">
-        <button class="switch-btn category-btn" data-categorie="U14" type="button" aria-selected="true">U14</button>
-        <button class="switch-btn category-btn" data-categorie="U18" type="button" aria-selected="false">U18</button>
-        <button class="switch-btn category-btn" data-categorie="Seniors" type="button" aria-selected="false">Seniors</button>
-        <button class="switch-btn category-btn" data-categorie="45+" type="button" aria-selected="false">45+</button>
-      </div>
-    </div>
-
-    <div class="switch-group">
-      <div class="switch-title">Épreuve</div>
-      <div class="switches">
-        <button class="switch-btn epreuve epreuve-btn" data-epreuve="DM" type="button" aria-selected="true">👨 Double Messieurs</button>
-        <button class="switch-btn epreuve epreuve-btn" data-epreuve="DD" type="button" aria-selected="false">👩 Double Dames</button>
-      </div>
-    </div>
-
-    <div class="status-box" id="hint">Chargement…</div>
-  </section>
-
   <section class="section panel" id="panelSummary" style="display:none;">
     <div class="panel-head">
       <div>
         <h2 class="panel-title">📌 Résumé</h2>
         <p class="panel-text" id="counts">Chargement…</p>
       </div>
-      <div class="panel-tag">Direct</div>
+      <div class="panel-tag">Équipes</div>
     </div>
-    <p class="muted" id="status">Connexion…</p>
+
+    <div class="status-box" id="hint">Chargement…</div>
+    <p class="muted" id="status" style="margin-top:10px;">Connexion…</p>
   </section>
 
   <section class="section panel" id="panelList" style="display:none;">
@@ -378,9 +312,11 @@
 
 </main>
 
+<script type="module" src="../assets/js/admin-header.js"></script>
+
 <script type="module">
   import { auth, db } from "../assets/js/firebase.js";
-  import { logout, getRoleByUid } from "../assets/js/session.js";
+  import { getRoleByUid } from "../assets/js/session.js";
   import { onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.12.5/firebase-auth.js";
   import {
     collection,
@@ -402,7 +338,6 @@
   };
 
   const accessDenied = document.getElementById("accessDenied");
-  const adminZone = document.getElementById("adminZone");
   const panelSummary = document.getElementById("panelSummary");
   const panelList = document.getElementById("panelList");
 
@@ -415,12 +350,10 @@
   const btnExpand = document.getElementById("btnExpand");
   const btnCollapse = document.getElementById("btnCollapse");
 
-  const categoryButtons = [...document.querySelectorAll(".category-btn")];
-  const epreuveButtons = [...document.querySelectorAll(".epreuve-btn")];
-
   let currentCategorie = "U14";
   let currentEpreuve = "DM";
   let liveRows = [];
+  let isAdminReady = false;
 
   function esc(s){
     return (s ?? "").toString()
@@ -461,15 +394,7 @@
     return currentEpreuve === "DD" ? "👩" : "👨";
   }
 
-  function updateFilterButtons(){
-    categoryButtons.forEach(btn => {
-      btn.setAttribute("aria-selected", btn.dataset.categorie === currentCategorie ? "true" : "false");
-    });
-
-    epreuveButtons.forEach(btn => {
-      btn.setAttribute("aria-selected", btn.dataset.epreuve === currentEpreuve ? "true" : "false");
-    });
-
+  function updateZoneDisplay(){
     hintEl.textContent = `${zoneEmoji()} Zone sélectionnée : ${zoneText()}.`;
   }
 
@@ -622,7 +547,7 @@
 
   async function refresh(){
     try{
-      updateFilterButtons();
+      updateZoneDisplay();
       const rows = await fetchMerged();
       render(rows);
       statusEl.textContent = `✅ OK — ${zoneText()}`;
@@ -751,41 +676,30 @@
   btnCollapse.onclick = () => document.querySelectorAll("details").forEach(d => d.open = false);
   btnRefresh.onclick = refresh;
 
-  categoryButtons.forEach(btn => {
-    btn.addEventListener("click", async () => {
-      currentCategorie = btn.dataset.categorie;
-      try{ localStorage.setItem("champ_admin_categorie", currentCategorie); }catch(e){}
-      await refresh();
-    });
-  });
+  document.addEventListener("adminZoneChange", async (event) => {
+    const detail = event.detail || {};
 
-  epreuveButtons.forEach(btn => {
-    btn.addEventListener("click", async () => {
-      currentEpreuve = btn.dataset.epreuve;
-      try{ localStorage.setItem("champ_admin_epreuve", currentEpreuve); }catch(e){}
+    if(!detail.categorie || !detail.epreuve) return;
+
+    currentCategorie = detail.categorie;
+    currentEpreuve = detail.epreuve;
+
+    if(isAdminReady){
       await refresh();
-    });
+    }
   });
 
   function showDenied(){
     accessDenied.style.display = "block";
-    adminZone.style.display = "none";
     panelSummary.style.display = "none";
     panelList.style.display = "none";
   }
 
   function showAdmin(){
     accessDenied.style.display = "none";
-    adminZone.style.display = "block";
     panelSummary.style.display = "block";
     panelList.style.display = "block";
   }
-
-  document.getElementById("btnLogout").onclick = async (e) => {
-    e.preventDefault();
-    await logout();
-    window.location.href = "../index.html";
-  };
 
   onAuthStateChanged(auth, async (user) => {
     if(!user){
@@ -801,14 +715,7 @@
         return;
       }
 
-      try{
-        const savedCat = localStorage.getItem("champ_admin_categorie");
-        const savedEpreuve = localStorage.getItem("champ_admin_epreuve");
-
-        if(["U14","U18","Seniors","45+"].includes(savedCat)) currentCategorie = savedCat;
-        if(["DM","DD"].includes(savedEpreuve)) currentEpreuve = savedEpreuve;
-      }catch(e){}
-
+      isAdminReady = true;
       showAdmin();
       await refresh();
 
