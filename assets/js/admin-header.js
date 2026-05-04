@@ -70,8 +70,9 @@ function injectStyles(){
       --container:1180px;
 
       --admin-header-h:158px;
+      --admin-zone-gap:14px;
       --admin-zone-h:104px;
-      --admin-total-top:262px;
+      --admin-total-top:276px;
     }
 
     .admin-container{
@@ -220,36 +221,44 @@ function injectStyles(){
 
     .admin-zonebar{
       position:fixed;
-      top:var(--admin-header-h);
+      top:calc(var(--admin-header-h) + var(--admin-zone-gap));
       left:0;
       right:0;
-      z-index:999;
+      z-index:998;
       background:linear-gradient(135deg,#dff7ff,#effcff);
+      border-top:1px solid rgba(255,255,255,.65);
       border-bottom:1px solid rgba(7,91,154,.10);
       box-shadow:0 8px 18px rgba(16,24,40,.06);
-      padding:14px 0 16px;
+      padding:12px 0 14px;
+    }
+
+    .admin-zone-inner{
+      display:grid;
+      gap:8px;
+      justify-items:center;
     }
 
     .admin-zone-line{
+      width:100%;
       display:flex;
       align-items:center;
+      justify-content:center;
       gap:10px;
       overflow-x:auto;
       scrollbar-width:none;
       -webkit-overflow-scrolling:touch;
-      padding:3px 2px;
-    }
-
-    .admin-zone-line + .admin-zone-line{
-      margin-top:8px;
+      padding:2px 8px;
+      scroll-padding-left:14px;
+      scroll-padding-right:14px;
     }
 
     .admin-zone-line::-webkit-scrollbar{display:none;}
 
     .admin-zone-btn{
       flex:0 0 auto;
-      min-height:34px;
-      padding:7px 18px;
+      min-width:88px;
+      min-height:36px;
+      padding:8px 18px;
       border-radius:999px;
       border:1px solid rgba(7,91,154,.14);
       background:#fff;
@@ -258,6 +267,8 @@ function injectStyles(){
       font-weight:1000;
       cursor:pointer;
       box-shadow:0 5px 12px rgba(16,24,40,.05);
+      text-align:center;
+      white-space:nowrap;
     }
 
     .admin-zone-btn[aria-selected="true"]{
@@ -298,8 +309,13 @@ function injectStyles(){
     @media (max-width:759px){
       :root{
         --admin-header-h:150px;
+        --admin-zone-gap:14px;
         --admin-zone-h:104px;
-        --admin-total-top:254px;
+        --admin-total-top:268px;
+      }
+
+      .admin-zone-line{
+        justify-content:flex-start;
       }
     }
   `;
@@ -345,7 +361,7 @@ function renderHeader(){
     </header>
 
     <section class="admin-zonebar">
-      <div class="admin-container">
+      <div class="admin-container admin-zone-inner">
         <div class="admin-zone-line" aria-label="Sélection catégorie">
           ${CATEGORIES.map(cat => `
             <button
