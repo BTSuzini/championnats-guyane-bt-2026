@@ -3,162 +3,423 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>Activation compte — Beach Tennis</title>
+  <title>Activation compte — Championnats Guyane Beach Tennis</title>
 
   <style>
+    :root{
+      --clay:#c65a1e;
+      --clay-dark:#8e3a13;
+      --clay-light:#ee8a3a;
+      --blue:#075b9a;
+      --blue-dark:#063b72;
+      --sky:#27bced;
+      --text:#17212b;
+      --muted:#667085;
+      --shadow:0 16px 40px rgba(16,24,40,.12);
+      --header-h:150px;
+      --container:1180px;
+    }
+
+    *{box-sizing:border-box;}
+
     body{
       margin:0;
-      font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto;
-      background:#f4fcff;
-      display:flex;
-      align-items:center;
-      justify-content:center;
+      font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;
+      color:var(--text);
+      background:
+        radial-gradient(circle at 20% 0%, rgba(39,188,237,.22), transparent 28%),
+        radial-gradient(circle at 85% 10%, rgba(0,169,200,.16), transparent 26%),
+        linear-gradient(180deg,#f4fcff 0%,#e9f8ff 48%,#fff 100%);
       min-height:100vh;
     }
 
-    .card{
-      background:#fff;
-      padding:24px;
-      border-radius:20px;
-      width:100%;
-      max-width:380px;
-      box-shadow:0 10px 30px rgba(0,0,0,.1);
+    img{display:block;max-width:100%;}
+
+    .container{
+      width:min(var(--container), calc(100% - 28px));
+      margin:0 auto;
+    }
+
+    .site-header{
+      position:fixed;
+      top:0;
+      left:0;
+      right:0;
+      z-index:1000;
+      background:linear-gradient(135deg,var(--clay-dark),var(--clay),var(--clay-light));
+      box-shadow:0 10px 26px rgba(142,58,19,.28);
+    }
+
+    .header-inner{
+      min-height:var(--header-h);
       display:grid;
-      gap:12px;
+      grid-template-columns:80px 1fr 80px;
+      align-items:center;
+      gap:10px 18px;
+      padding:12px 0;
+    }
+
+    .header-logo{
+      width:80px;
+      height:80px;
+      display:flex;
+      align-items:center;
+      justify-content:center;
+    }
+
+    .header-logo img{
+      max-width:100%;
+      max-height:100%;
+      object-fit:contain;
+      filter:drop-shadow(0 6px 10px rgba(0,0,0,.18));
+    }
+
+    .header-title{
+      text-align:center;
+      color:#fff;
+    }
+
+    .header-title strong{
+      display:block;
+      font-size:clamp(24px,5vw,44px);
+      line-height:.95;
+      letter-spacing:-.04em;
+      text-transform:uppercase;
+      font-weight:1000;
+    }
+
+    .header-title span{
+      display:block;
+      margin-top:8px;
+      font-size:13px;
+      font-weight:900;
+      color:rgba(255,255,255,.88);
+      text-transform:uppercase;
+      letter-spacing:.14em;
+    }
+
+    main{
+      min-height:100vh;
+      padding-top:calc(var(--header-h) + 28px);
+      padding-bottom:38px;
+      display:flex;
+      align-items:center;
+      justify-content:center;
+    }
+
+    .card{
+      width:min(520px, 100%);
+      background:rgba(255,255,255,.96);
+      border:1px solid rgba(255,255,255,.65);
+      border-radius:30px;
+      box-shadow:var(--shadow);
+      padding:24px;
+      display:grid;
+      gap:16px;
+    }
+
+    .card-head{
+      text-align:center;
+      display:grid;
+      gap:8px;
     }
 
     h1{
       margin:0;
-      font-size:22px;
-      text-align:center;
+      font-size:clamp(28px,7vw,42px);
+      line-height:1;
+      letter-spacing:-.04em;
+      font-weight:1000;
+    }
+
+    .sub{
+      margin:0;
+      color:var(--muted);
+      font-size:15px;
+      line-height:1.45;
+      font-weight:700;
+    }
+
+    .field{
+      display:grid;
+      gap:8px;
+    }
+
+    .field label{
+      font-weight:1000;
+      color:#1c2430;
     }
 
     input{
-      padding:12px;
-      border-radius:12px;
-      border:1px solid #ddd;
+      width:100%;
+      min-height:56px;
+      border-radius:18px;
+      border:1px solid rgba(16,24,40,.12);
+      background:#fff;
+      padding:0 15px;
       font-size:16px;
+      color:#17212b;
+      outline:none;
+      font-family:inherit;
+      font-weight:700;
     }
 
-    button{
-      padding:14px;
+    input:focus{
+      border-color:rgba(39,188,237,.65);
+      box-shadow:0 0 0 4px rgba(39,188,237,.14);
+    }
+
+    .password-wrap{
+      position:relative;
+    }
+
+    .password-wrap input{
+      padding-right:58px;
+    }
+
+    .eye-btn{
+      position:absolute;
+      right:8px;
+      top:50%;
+      transform:translateY(-50%);
+      width:42px;
+      height:42px;
       border:none;
-      border-radius:12px;
-      font-weight:900;
-      background:#075b9a;
-      color:#fff;
+      border-radius:999px;
+      background:#f3f7ff;
+      color:var(--blue-dark);
+      font-size:20px;
       cursor:pointer;
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      box-shadow:none;
+      padding:0;
+    }
+
+    .btn{
+      appearance:none;
+      border:none;
+      min-height:58px;
+      border-radius:18px;
+      padding:14px 18px;
+      font-size:16px;
+      font-weight:1000;
+      cursor:pointer;
+      background:linear-gradient(180deg,var(--blue),var(--blue-dark));
+      color:#fff;
+      box-shadow:0 12px 22px rgba(7,91,154,.20);
+    }
+
+    .btn:disabled{
+      opacity:.55;
+      cursor:not-allowed;
     }
 
     .status{
-      font-size:14px;
+      min-height:22px;
       text-align:center;
-      color:#555;
+      color:var(--muted);
+      font-size:15px;
+      font-weight:800;
+      line-height:1.45;
+    }
+
+    .status.ok{color:#087a35;}
+    .status.err{color:#a32323;}
+
+    @media (min-width:760px){
+      :root{--header-h:158px;}
+
+      .header-inner{
+        grid-template-columns:100px 1fr 100px;
+      }
+
+      .header-logo{
+        width:96px;
+        height:80px;
+      }
+
+      .card{
+        padding:28px;
+      }
     }
   </style>
 </head>
 
 <body>
 
-<div class="card">
-  <h1>🎾 Activation compte</h1>
+<header class="site-header">
+  <div class="container header-inner">
+    <div class="header-logo">
+      <img src="assets/img/logo-lg.png" alt="Ligue Guyane">
+    </div>
 
-  <input id="email" type="email" placeholder="Ton email" required>
-  <input id="password" type="password" placeholder="Mot de passe" required>
+    <div class="header-title">
+      <strong>Activation<br>Compte</strong>
+      <span>Championnats Guyane Beach Tennis</span>
+    </div>
 
-  <button id="btnCreate">Créer mon compte</button>
+    <div class="header-logo">
+      <img src="assets/img/logo-lg.png" alt="Ligue Guyane">
+    </div>
+  </div>
+</header>
 
-  <div class="status" id="status"></div>
-</div>
+<main class="container">
+  <div class="card">
+
+    <div class="card-head">
+      <h1>🎾 Activation compte</h1>
+      <p class="sub">
+        Renseigne ton email et choisis ton mot de passe pour activer ton accès organisateur.
+      </p>
+    </div>
+
+    <div class="field">
+      <label for="email">Email</label>
+      <input id="email" type="email" placeholder="ton.email@exemple.com" autocomplete="email" required>
+    </div>
+
+    <div class="field">
+      <label for="password">Mot de passe</label>
+      <div class="password-wrap">
+        <input id="password" type="password" placeholder="Minimum 6 caractères" autocomplete="new-password" required>
+        <button class="eye-btn" id="togglePassword" type="button" aria-label="Afficher ou masquer le mot de passe">👁️</button>
+      </div>
+    </div>
+
+    <button class="btn" id="btnCreate">Créer mon compte</button>
+
+    <div class="status" id="status"></div>
+  </div>
+</main>
 
 <script type="module">
-  import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.5/firebase-app.js";
+  import { auth, db } from "./assets/js/firebase.js?v=join2";
+
   import {
-    getAuth,
-    createUserWithEmailAndPassword,
-    signInWithEmailAndPassword
+    createUserWithEmailAndPassword
   } from "https://www.gstatic.com/firebasejs/10.12.5/firebase-auth.js";
 
   import {
-    getFirestore,
     doc,
     getDoc,
-    updateDoc
+    setDoc,
+    updateDoc,
+    serverTimestamp
   } from "https://www.gstatic.com/firebasejs/10.12.5/firebase-firestore.js";
 
-  const firebaseConfig = {
-    apiKey: "AIzaSyAdjBE2UpEFRUgkASTaKP5X7vYr0ygzUzI",
-    authDomain: "championnats-guyane-bt-2026.firebaseapp.com",
-    projectId: "championnats-guyane-bt-2026",
-    storageBucket: "championnats-guyane-bt-2026.firebasestorage.app",
-    messagingSenderId: "639869315232",
-    appId: "1:639869315232:web:c73adb022414faf1d641c5"
-  };
-
-  const app = initializeApp(firebaseConfig);
-  const auth = getAuth(app);
-  const db = getFirestore(app);
-
-  const status = document.getElementById("status");
+  const statusEl = document.getElementById("status");
   const btn = document.getElementById("btnCreate");
+  const emailEl = document.getElementById("email");
+  const passwordEl = document.getElementById("password");
+  const togglePassword = document.getElementById("togglePassword");
 
-  // 🔑 récup token URL
   const params = new URLSearchParams(window.location.search);
-  const invite = params.get("invite");
+  const inviteId = params.get("invite");
 
-  if(!invite){
-    status.textContent = "❌ Lien invalide.";
+  function setStatus(message, type = ""){
+    statusEl.textContent = message;
+    statusEl.className = "status";
+    if(type) statusEl.classList.add(type);
+  }
+
+  togglePassword.addEventListener("click", () => {
+    const visible = passwordEl.type === "text";
+    passwordEl.type = visible ? "password" : "text";
+    togglePassword.textContent = visible ? "👁️" : "🙈";
+  });
+
+  if(!inviteId){
+    setStatus("❌ Lien d’invitation invalide.", "err");
     btn.disabled = true;
   }
 
-  btn.onclick = async () => {
-    const email = document.getElementById("email").value.trim();
-    const password = document.getElementById("password").value;
+  btn.addEventListener("click", async () => {
+    const email = emailEl.value.trim();
+    const password = passwordEl.value;
 
     if(!email || !password){
-      status.textContent = "❌ Email et mot de passe requis.";
+      setStatus("❌ Email et mot de passe requis.", "err");
+      return;
+    }
+
+    if(password.length < 6){
+      setStatus("❌ Le mot de passe doit contenir au moins 6 caractères.", "err");
       return;
     }
 
     btn.disabled = true;
-    status.textContent = "Création du compte…";
+    btn.textContent = "Activation en cours…";
+    setStatus("Vérification de l’invitation…");
 
     try{
-      // 🔍 vérifier token
-      const ref = doc(db, "invites", invite);
-      const snap = await getDoc(ref);
+      const inviteRef = doc(db, "invites", inviteId);
+      const inviteSnap = await getDoc(inviteRef);
 
-      if(!snap.exists()){
-        throw new Error("Invitation invalide");
+      if(!inviteSnap.exists()){
+        throw new Error("Invitation introuvable ou expirée.");
       }
 
-      const data = snap.data();
+      const invite = inviteSnap.data() || {};
 
-      // 🧠 création user Firebase
+      if(invite.status && invite.status !== "pending"){
+        throw new Error("Cette invitation a déjà été utilisée.");
+      }
+
+      setStatus("Création du compte…");
+
       const cred = await createUserWithEmailAndPassword(auth, email, password);
       const user = cred.user;
 
-      // 🔗 attacher rôle
-      await updateDoc(doc(db, "roles", data.uid), {
-        email,
-        linked: true
+      setStatus("Attribution du rôle…");
+
+      await setDoc(doc(db, "roles", user.uid), {
+        uid: user.uid,
+        email: email,
+        label: invite.label || "",
+        role: invite.role || "arbitre",
+        inviteId: inviteId,
+        createdAt: serverTimestamp(),
+        updatedAt: serverTimestamp()
       });
 
-      status.textContent = "✅ Compte créé ! Redirection…";
+      await updateDoc(inviteRef, {
+        status: "used",
+        usedAt: serverTimestamp(),
+        usedBy: user.uid,
+        email: email
+      });
 
-      // 🔁 login auto
-      await signInWithEmailAndPassword(auth, email, password);
+      setStatus("✅ Compte activé ! Redirection…", "ok");
 
       setTimeout(() => {
         window.location.href = "index.html";
-      }, 1500);
+      }, 1200);
 
     }catch(error){
       console.error(error);
-      status.textContent = "❌ " + (error.message || "Erreur");
+
+      let message = error?.message || "Erreur inconnue.";
+
+      if(error?.code === "auth/email-already-in-use"){
+        message = "Cet email est déjà utilisé. Essaie de te connecter avec ce compte.";
+      }
+
+      if(error?.code === "auth/invalid-email"){
+        message = "Adresse email invalide.";
+      }
+
+      if(error?.code === "auth/weak-password"){
+        message = "Mot de passe trop faible : minimum 6 caractères.";
+      }
+
+      setStatus("❌ " + message, "err");
       btn.disabled = false;
+      btn.textContent = "Créer mon compte";
     }
-  };
+  });
 </script>
 
 </body>
