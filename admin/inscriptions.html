@@ -11,6 +11,7 @@
       --clay-dark:#8e3a13;
       --clay-light:#ee8a3a;
       --sky:#27bced;
+      --sky-soft:#e4f7ff;
       --aqua:#00a9c8;
       --blue:#075b9a;
       --blue-dark:#063b72;
@@ -236,60 +237,26 @@
       gap:10px;
     }
 
-    .field{
-      display:grid;
-      gap:8px;
-    }
-
-    .field label{
-      font-weight:1000;
-      color:#1c2430;
-    }
-
-    select{
-      width:100%;
-      min-height:50px;
-      border-radius:16px;
-      border:1px solid rgba(16,24,40,.10);
-      background:#fff;
-      padding:0 14px;
-      font-size:16px;
-      font-weight:800;
-      color:#17212b;
-      outline:none;
-    }
-
     .btn{
       appearance:none;
-      border:1px solid rgba(16,24,40,.10);
-      background:#fff;
+      border:1px solid rgba(39,188,237,.28);
+      background:linear-gradient(180deg,#e4f7ff,#c9f0ff);
       border-radius:18px;
       min-height:54px;
       padding:13px 15px;
       font-size:15px;
       font-weight:1000;
       cursor:pointer;
-      color:#1c2430;
+      color:var(--blue-dark);
       text-align:center;
       box-shadow:0 8px 16px rgba(16,24,40,.04);
     }
 
-    .btn.primary{
+    .btn.active{
       background:linear-gradient(180deg,var(--blue),var(--blue-dark));
       color:#fff;
       border-color:var(--blue);
-    }
-
-    .btn.clay{
-      background:linear-gradient(135deg,var(--clay),var(--clay-light));
-      color:#fff;
-      border-color:var(--clay);
-    }
-
-    .btn.danger{
-      border-color:#f1b2b2;
-      background:#fff5f5;
-      color:#8a1f1f;
+      box-shadow:0 10px 22px rgba(7,91,154,.22);
     }
 
     .btn.disabled,
@@ -335,10 +302,6 @@
         padding:24px;
       }
 
-      .grid{
-        grid-template-columns:repeat(2,1fr);
-      }
-
       .grid.actions{
         grid-template-columns:repeat(4,1fr);
       }
@@ -367,8 +330,10 @@
       <span class="nav-arrow left">‹</span>
       <nav class="header-nav" aria-label="Navigation admin">
         <a class="nav-link" href="../index.html">🏠 Accueil public</a>
+        <a class="nav-link" href="index.html">🛠️ Admin</a>
         <a class="nav-link primary" href="inscriptions.html">📝 Inscriptions</a>
         <a class="nav-link" href="equipes.html">👥 Équipes</a>
+        <a class="nav-link" href="roles.html">🔐 Rôles</a>
         <a class="nav-link" href="#" id="btnLogout">🚪 Déconnexion</a>
       </nav>
       <span class="nav-arrow right">›</span>
@@ -383,149 +348,63 @@
     <p class="panel-text">Cette page est réservée aux administrateurs.</p>
   </section>
 
-  <section class="section panel" id="adminUI" style="display:none;">
-    <div class="panel-head">
-      <div>
-        <h2 class="panel-title">🎛️ Zone d’administration</h2>
-        <p class="panel-text">
-          Choisis la catégorie et l’épreuve à piloter.
-        </p>
-      </div>
-      <div class="panel-tag">Admin</div>
-    </div>
-
-    <div class="grid">
-      <div class="field">
-        <label for="categorie">Catégorie</label>
-        <select id="categorie">
-          <option value="U14">U14</option>
-          <option value="U18">U18</option>
-          <option value="Seniors">Seniors</option>
-          <option value="45+">45+</option>
-        </select>
-      </div>
-
-      <div class="field">
-        <label for="epreuve">Épreuve</label>
-        <select id="epreuve">
-          <option value="DM">Double Messieurs</option>
-          <option value="DD">Double Dames</option>
-        </select>
-      </div>
-    </div>
-
-    <div class="status-box">
-      Zone sélectionnée : <strong id="zoneLabel">U14 — Double Messieurs</strong>
-    </div>
-  </section>
-
   <section class="section panel" id="panelInscriptions" style="display:none;">
     <div class="panel-head">
       <div>
-        <h2 class="panel-title">📝 Statut des inscriptions</h2>
+        <h2 class="panel-title">📝 Statut global des inscriptions</h2>
         <p class="panel-text" id="currentState">Chargement…</p>
       </div>
-      <div class="panel-tag">Statut</div>
+      <div class="panel-tag">Global</div>
     </div>
 
     <p class="muted" id="statusMsg"></p>
 
     <div class="grid actions" style="margin-top:12px;">
       <button class="btn" id="btnNotOpen">💤 Pas encore ouvertes</button>
-      <button class="btn primary" id="btnOpen">✅ Ouvrir</button>
-      <button class="btn clay" id="btnPause">⏸️ Suspendre</button>
+      <button class="btn" id="btnOpen">✅ Ouvrir</button>
+      <button class="btn" id="btnPause">⏸️ Suspendre</button>
       <button class="btn" id="btnClose">🔒 Clôturer</button>
     </div>
 
     <div class="status-box">
-      ⚠️ Le statut est enregistré par catégorie et par épreuve.
+      Ce statut est valable pour <strong>toutes les catégories</strong> et <strong>toutes les épreuves</strong>.
       <br>
-      Exemple : U14/DM peut être ouvert pendant que Seniors/DD reste fermé.
-    </div>
-  </section>
-
-  <section class="section panel" id="maintenanceUI" style="display:none;">
-    <div class="panel-head">
-      <div>
-        <h2 class="panel-title">🧹 Maintenance — RAZ</h2>
-        <p class="panel-text">
-          Supprime uniquement les inscriptions de la catégorie/épreuve sélectionnée.
-        </p>
-      </div>
-      <div class="panel-tag">Danger</div>
-    </div>
-
-    <div class="status-box">
-      Cette action supprime les documents correspondants dans :
+      Il est enregistré dans :
       <br>
-      <strong>events/championnats-2026/inscriptions</strong>
-      <br>
-      <strong>events/championnats-2026/equipes</strong>
-      <br><br>
-      ⚠️ Action irréversible.
+      <strong>events/championnats-2026/config/inscriptions</strong>
     </div>
-
-    <div class="grid" style="margin-top:12px;">
-      <button class="btn danger" id="btnRAZ">
-        🧨 RAZ — Supprimer les inscriptions de la zone
-      </button>
-    </div>
-
-    <p class="muted" id="razStatus" style="margin-top:10px;"></p>
   </section>
 
 </main>
 
 <script type="module">
   import { auth, db } from "../assets/js/firebase.js";
-  import { logout, getRoleByEmail } from "../assets/js/session.js";
+  import { logout, getRoleByUid } from "../assets/js/session.js";
   import { onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.12.5/firebase-auth.js";
   import {
     doc,
     setDoc,
     onSnapshot,
-    serverTimestamp,
-    collection,
-    getDocs,
-    writeBatch
+    serverTimestamp
   } from "https://www.gstatic.com/firebasejs/10.12.5/firebase-firestore.js";
 
   const EVENT_ID = "championnats-2026";
 
-  const EPREUVE_LABELS = {
-    DM: "Double Messieurs",
-    DD: "Double Dames"
-  };
-
   const accessDenied = document.getElementById("accessDenied");
-  const adminUI = document.getElementById("adminUI");
   const panelInscriptions = document.getElementById("panelInscriptions");
-  const maintenanceUI = document.getElementById("maintenanceUI");
-
-  const categorieEl = document.getElementById("categorie");
-  const epreuveEl = document.getElementById("epreuve");
-  const zoneLabel = document.getElementById("zoneLabel");
 
   const currentStateEl = document.getElementById("currentState");
   const statusMsgEl = document.getElementById("statusMsg");
-  const razStatus = document.getElementById("razStatus");
 
   const btnNotOpen = document.getElementById("btnNotOpen");
   const btnOpen = document.getElementById("btnOpen");
   const btnPause = document.getElementById("btnPause");
   const btnClose = document.getElementById("btnClose");
-  const btnRAZ = document.getElementById("btnRAZ");
 
   const cfgRef = doc(db, "events", EVENT_ID, "config", "inscriptions");
 
-  let currentCategorie = "U14";
-  let currentEpreuve = "DM";
-  let lastConfigData = {};
+  let currentState = "not_open";
   let unsubConfig = null;
-
-  function keyFor(categorie, epreuve){
-    return `${categorie}_${epreuve}`.replace("+", "plus");
-  }
 
   function normState(value){
     if(value === "suspended") return "paused";
@@ -552,50 +431,44 @@
     }
   }
 
-  function updateZoneLabel(){
-    zoneLabel.textContent = `${currentCategorie} — ${EPREUVE_LABELS[currentEpreuve]}`;
-  }
+  function refreshButtons(){
+    const buttons = [
+      { el: btnNotOpen, state: "not_open" },
+      { el: btnOpen, state: "open" },
+      { el: btnPause, state: "paused" },
+      { el: btnClose, state: "closed" }
+    ];
 
-  function currentState(){
-    const key = keyFor(currentCategorie, currentEpreuve);
-    return normState(lastConfigData?.states?.[key] || "not_open");
+    buttons.forEach(item => {
+      item.el.classList.toggle("active", currentState === item.state);
+    });
   }
 
   function refreshStateDisplay(){
-    updateZoneLabel();
-
-    const state = currentState();
-    currentStateEl.innerHTML = `Statut actuel : <strong>${labelFor(state)}</strong>`;
-    statusMsgEl.textContent = publicMessage(state);
-
-    btnPause.textContent = state === "paused" ? "▶️ Réactiver" : "⏸️ Suspendre";
+    currentStateEl.innerHTML = `Statut actuel : <strong>${labelFor(currentState)}</strong>`;
+    statusMsgEl.textContent = publicMessage(currentState);
+    refreshButtons();
   }
 
   function setButtonsDisabled(disabled){
-    [btnNotOpen, btnOpen, btnPause, btnClose, btnRAZ].forEach(btn => {
+    [btnNotOpen, btnOpen, btnPause, btnClose].forEach(btn => {
       btn.disabled = disabled;
       btn.classList.toggle("disabled", disabled);
     });
   }
 
-  async function ensureAdmin(){
-    const user = auth.currentUser;
-    if(!user) return false;
-
-    const role = await getRoleByEmail(user.email);
-    return role === "admin";
-  }
-
   async function setState(next){
-    const key = keyFor(currentCategorie, currentEpreuve);
+    if(next === currentState){
+      return;
+    }
 
     if(next === "closed"){
-      const ok = confirm(`Clôturer les inscriptions pour ${currentCategorie} / ${currentEpreuve} ?`);
+      const ok = confirm("Clôturer les inscriptions pour toutes les catégories et toutes les épreuves ?");
       if(!ok) return;
     }
 
     if(next === "not_open"){
-      const ok = confirm(`Mettre “pas encore ouvertes” pour ${currentCategorie} / ${currentEpreuve} ?`);
+      const ok = confirm("Remettre le statut global sur “pas encore ouvertes” ?");
       if(!ok) return;
     }
 
@@ -604,8 +477,9 @@
 
     try{
       await setDoc(cfgRef, {
-        [`states.${key}`]: next,
-        updatedAt: serverTimestamp()
+        state: next,
+        updatedAt: serverTimestamp(),
+        updatedBy: auth.currentUser?.uid || null
       }, { merge:true });
 
       statusMsgEl.textContent = "✅ Statut mis à jour.";
@@ -617,85 +491,6 @@
     }
   }
 
-  async function deleteMatchingDocs(subcollectionName){
-    const snap = await getDocs(collection(db, "events", EVENT_ID, subcollectionName));
-
-    let deleted = 0;
-    let batch = writeBatch(db);
-    let batchCount = 0;
-
-    for(const documentSnap of snap.docs){
-      const data = documentSnap.data() || {};
-      if(data.categorie !== currentCategorie || data.epreuve !== currentEpreuve) continue;
-
-      batch.delete(documentSnap.ref);
-      deleted++;
-      batchCount++;
-
-      if(batchCount >= 450){
-        await batch.commit();
-        batch = writeBatch(db);
-        batchCount = 0;
-      }
-    }
-
-    if(batchCount > 0){
-      await batch.commit();
-    }
-
-    return deleted;
-  }
-
-  async function doRAZ(){
-    const ok1 = confirm(
-      `⚠️ RAZ INSCRIPTIONS\n\nCette action supprime toutes les inscriptions pour :\n${currentCategorie} / ${currentEpreuve}\n\nContinuer ?`
-    );
-
-    if(!ok1) return;
-
-    const typed = prompt('Tape exactement : RAZ\n\nPour confirmer la suppression complète.');
-    if(typed !== "RAZ"){
-      alert("Annulé.");
-      return;
-    }
-
-    setButtonsDisabled(true);
-    razStatus.textContent = "Suppression en cours…";
-
-    try{
-      const key = keyFor(currentCategorie, currentEpreuve);
-
-      await setDoc(cfgRef, {
-        [`states.${key}`]: "not_open",
-        updatedAt: serverTimestamp()
-      }, { merge:true });
-
-      const delPriv = await deleteMatchingDocs("inscriptions");
-      const delPub = await deleteMatchingDocs("equipes");
-
-      razStatus.textContent = `✅ RAZ OK — privé=${delPriv}, public=${delPub}. Statut remis à “Pas encore ouvertes”.`;
-      alert(`RAZ terminé ✅\n\nPrivé : ${delPriv}\nPublic : ${delPub}`);
-    }catch(error){
-      console.error(error);
-      razStatus.textContent = "❌ Erreur pendant le RAZ.";
-      alert("Erreur pendant le RAZ ❌");
-    }finally{
-      setButtonsDisabled(false);
-    }
-  }
-
-  function changeZone(){
-    currentCategorie = categorieEl.value;
-    currentEpreuve = epreuveEl.value;
-
-    try{
-      localStorage.setItem("champ_admin_categorie", currentCategorie);
-      localStorage.setItem("champ_admin_epreuve", currentEpreuve);
-    }catch(error){}
-
-    refreshStateDisplay();
-  }
-
   document.getElementById("btnLogout").onclick = async (event) => {
     event.preventDefault();
     await logout();
@@ -704,52 +499,35 @@
 
   btnNotOpen.onclick = () => setState("not_open");
   btnOpen.onclick = () => setState("open");
-  btnPause.onclick = () => {
-    const state = currentState();
-    setState(state === "paused" ? "open" : "paused");
-  };
+  btnPause.onclick = () => setState("paused");
   btnClose.onclick = () => setState("closed");
-  btnRAZ.onclick = doRAZ;
-
-  categorieEl.onchange = changeZone;
-  epreuveEl.onchange = changeZone;
 
   onAuthStateChanged(auth, async (user) => {
     accessDenied.style.display = "none";
-    adminUI.style.display = "none";
     panelInscriptions.style.display = "none";
-    maintenanceUI.style.display = "none";
+
+    if(unsubConfig){
+      unsubConfig();
+      unsubConfig = null;
+    }
 
     if(!user){
       accessDenied.style.display = "block";
       return;
     }
 
-    const ok = await ensureAdmin();
-    if(!ok){
+    const role = await getRoleByUid(user.uid);
+
+    if(role !== "admin"){
       accessDenied.style.display = "block";
       return;
     }
 
-    try{
-      const savedCat = localStorage.getItem("champ_admin_categorie");
-      const savedEpreuve = localStorage.getItem("champ_admin_epreuve");
-
-      if(["U14","U18","Seniors","45+"].includes(savedCat)) currentCategorie = savedCat;
-      if(["DM","DD"].includes(savedEpreuve)) currentEpreuve = savedEpreuve;
-    }catch(error){}
-
-    categorieEl.value = currentCategorie;
-    epreuveEl.value = currentEpreuve;
-
-    adminUI.style.display = "block";
     panelInscriptions.style.display = "block";
-    maintenanceUI.style.display = "block";
-
-    if(unsubConfig) unsubConfig();
 
     unsubConfig = onSnapshot(cfgRef, (snap) => {
-      lastConfigData = snap.exists() ? (snap.data() || {}) : {};
+      const data = snap.exists() ? (snap.data() || {}) : {};
+      currentState = normState(data.state || "not_open");
       refreshStateDisplay();
     }, (error) => {
       console.error(error);
