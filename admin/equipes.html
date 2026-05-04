@@ -1,0 +1,823 @@
+<!doctype html>
+<html lang="fr">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Admin — Équipes — Championnats Guyane Beach Tennis</title>
+
+  <style>
+    :root{
+      --clay:#c65a1e; --clay-dark:#8e3a13; --clay-light:#ee8a3a;
+      --sky:#27bced; --aqua:#00a9c8; --blue:#075b9a; --blue-dark:#063b72;
+      --text:#17212b; --muted:#667085; --card:rgba(255,255,255,.94);
+      --shadow:0 16px 40px rgba(16,24,40,.12);
+      --container:1180px; --header-h:150px;
+    }
+
+    *{box-sizing:border-box;}
+
+    body{
+      margin:0;
+      font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;
+      color:var(--text);
+      background:
+        radial-gradient(circle at 20% 0%, rgba(39,188,237,.22), transparent 28%),
+        radial-gradient(circle at 85% 10%, rgba(0,169,200,.16), transparent 26%),
+        linear-gradient(180deg,#f4fcff 0%,#e9f8ff 48%,#fff 100%);
+    }
+
+    a{color:inherit;text-decoration:none;}
+    img{display:block;max-width:100%;}
+    .container{width:min(var(--container), calc(100% - 28px));margin:0 auto;}
+
+    .site-header{
+      position:fixed;top:0;left:0;right:0;z-index:1000;
+      background:linear-gradient(135deg,var(--clay-dark),var(--clay),var(--clay-light));
+      box-shadow:0 10px 26px rgba(142,58,19,.28);
+    }
+
+    .header-inner{
+      min-height:var(--header-h);
+      display:grid;
+      grid-template-columns:80px 1fr 80px;
+      grid-template-rows:auto auto;
+      align-items:center;
+      gap:10px 18px;
+      padding:12px 0;
+    }
+
+    .header-logo{width:80px;height:80px;display:flex;align-items:center;justify-content:center;}
+    .header-logo img{max-width:100%;max-height:100%;object-fit:contain;filter:drop-shadow(0 6px 10px rgba(0,0,0,.18));}
+
+    .header-title{text-align:center;color:#fff;}
+    .header-title strong{
+      display:block;font-size:clamp(22px,4vw,42px);line-height:.95;
+      letter-spacing:-.04em;text-transform:uppercase;font-weight:1000;
+    }
+    .header-title span{
+      display:block;margin-top:5px;font-size:13px;font-weight:900;
+      color:rgba(255,255,255,.88);text-transform:uppercase;letter-spacing:.08em;
+    }
+
+    .header-nav-wrap{grid-column:1 / 4;position:relative;overflow:hidden;padding:0 34px;}
+    .header-nav-wrap::before,.header-nav-wrap::after{
+      content:"";position:absolute;top:0;bottom:0;width:40px;z-index:2;pointer-events:none;
+    }
+    .header-nav-wrap::before{left:0;background:linear-gradient(90deg, rgba(142,58,19,.98), rgba(142,58,19,0));}
+    .header-nav-wrap::after{right:0;background:linear-gradient(270deg, rgba(198,90,30,.98), rgba(198,90,30,0));}
+
+    .nav-arrow{
+      position:absolute;top:50%;transform:translateY(-50%);z-index:3;
+      width:28px;height:28px;border-radius:999px;display:flex;align-items:center;justify-content:center;
+      background:rgba(255,255,255,.88);color:var(--clay-dark);font-size:20px;font-weight:1000;
+      box-shadow:0 6px 14px rgba(0,0,0,.18);pointer-events:none;
+    }
+    .nav-arrow.left{left:2px;} .nav-arrow.right{right:2px;}
+
+    .header-nav{
+      display:flex;gap:10px;overflow-x:auto;padding:2px 4px;
+      scrollbar-width:none;-webkit-overflow-scrolling:touch;
+    }
+    .header-nav::-webkit-scrollbar{display:none;}
+
+    .nav-link{
+      flex:0 0 auto;min-height:42px;padding:10px 17px;border-radius:999px;
+      background:rgba(255,255,255,.92);color:#344054;font-size:14px;font-weight:900;
+      white-space:nowrap;box-shadow:0 8px 16px rgba(0,0,0,.14);
+    }
+    .nav-link.primary{background:linear-gradient(180deg,var(--blue),var(--blue-dark));color:#fff;}
+
+    main{padding-top:calc(var(--header-h) + 24px);padding-bottom:42px;}
+    .section{margin-top:22px;}
+
+    .panel{
+      background:var(--card);border:1px solid rgba(255,255,255,.6);
+      border-radius:28px;box-shadow:var(--shadow);padding:20px;
+    }
+
+    .panel-head{display:flex;justify-content:space-between;align-items:flex-start;gap:12px;margin-bottom:16px;}
+    .panel-title{margin:0;font-size:28px;line-height:1.05;letter-spacing:-.03em;}
+    .panel-text{margin:8px 0 0;color:var(--muted);font-size:15px;line-height:1.55;}
+    .panel-tag{
+      flex-shrink:0;padding:8px 13px;border-radius:999px;background:#e4f7ff;color:var(--blue-dark);
+      font-size:12px;font-weight:1000;text-transform:uppercase;letter-spacing:.06em;
+    }
+
+    .grid{display:grid;grid-template-columns:1fr;gap:10px;}
+
+    .btn{
+      appearance:none;border:1px solid rgba(16,24,40,.10);background:#fff;
+      border-radius:18px;min-height:54px;padding:13px 15px;font-size:15px;
+      font-weight:1000;cursor:pointer;color:#1c2430;text-align:center;
+      box-shadow:0 8px 16px rgba(16,24,40,.04);
+      display:flex;align-items:center;justify-content:center;
+    }
+
+    .btn.primary{background:linear-gradient(180deg,var(--blue),var(--blue-dark));color:#fff;border-color:var(--blue);}
+    .btn.clay{background:linear-gradient(135deg,var(--clay),var(--clay-light));color:#fff;border-color:var(--clay);}
+    .btn.danger{background:#fff5f5;color:#8a1f1f;border-color:#f1b2b2;}
+
+    .switch-group{display:grid;gap:10px;margin-top:14px;}
+    .switch-title{
+      font-size:13px;font-weight:1000;text-transform:uppercase;letter-spacing:.08em;color:var(--blue-dark);
+    }
+
+    .switches{display:grid;grid-template-columns:repeat(2,1fr);gap:10px;}
+
+    .switch-btn{
+      appearance:none;border:1px solid rgba(16,24,40,.10);background:#fff;
+      border-radius:999px;min-height:50px;padding:12px 14px;
+      font-weight:1000;font-size:15px;color:#1c2430;cursor:pointer;
+      box-shadow:0 8px 16px rgba(16,24,40,.04);
+    }
+
+    .switch-btn[aria-selected="true"]{
+      background:linear-gradient(180deg,var(--blue),var(--blue-dark));
+      color:#fff;border-color:var(--blue);
+      box-shadow:0 12px 22px rgba(7,91,154,.20);
+    }
+
+    .switch-btn.epreuve[aria-selected="true"]{
+      background:linear-gradient(135deg,var(--clay),var(--clay-light));
+      border-color:var(--clay);
+      box-shadow:0 12px 22px rgba(198,90,30,.20);
+    }
+
+    .status-box{
+      margin-top:14px;padding:14px 16px;border-radius:18px;
+      background:linear-gradient(135deg,rgba(39,188,237,.12),rgba(198,90,30,.08));
+      border:1px solid rgba(39,188,237,.22);color:#475467;font-size:14px;line-height:1.5;
+    }
+
+    .muted{color:var(--muted);font-size:14px;line-height:1.45;}
+
+    .team-card{
+      border:1px solid rgba(16,24,40,.08);
+      border-radius:20px;
+      background:#fff;
+      box-shadow:0 8px 18px rgba(16,24,40,.06);
+      padding:14px;
+      display:grid;
+      gap:10px;
+    }
+
+    .team-head{
+      display:flex;
+      align-items:flex-start;
+      justify-content:space-between;
+      gap:10px;
+    }
+
+    .team-name{
+      font-weight:1000;
+      font-size:18px;
+      line-height:1.15;
+      word-break:break-word;
+    }
+
+    .badges{display:flex;gap:8px;flex-wrap:wrap;justify-content:flex-end;}
+
+    .pill{
+      display:inline-flex;
+      align-items:center;
+      gap:6px;
+      padding:4px 10px;
+      border-radius:999px;
+      font-size:12px;
+      border:1px solid #eee;
+      background:#fafafa;
+      color:#333;
+      white-space:nowrap;
+      font-weight:1000;
+    }
+    .pill.main{border-color:#d9f2df;background:#f3fff6;}
+    .pill.wait{border-color:#ffe1a6;background:#fff8e6;}
+    .pill.stby{border-color:#ffd37a;background:#fff7e6;}
+    .pill.rank{border-color:#d9e6ff;background:#f3f7ff;color:var(--blue-dark);}
+    .pill.cat{border-color:#e4dbff;background:#f7f3ff;}
+
+    .player{
+      display:grid;
+      gap:6px;
+      padding:10px;
+      border:1px solid #f1f1f1;
+      border-radius:14px;
+      background:#fcfcfc;
+    }
+
+    .player-title{
+      display:flex;
+      align-items:baseline;
+      justify-content:space-between;
+      gap:10px;
+      flex-wrap:wrap;
+    }
+    .player-title b{font-weight:1000;}
+
+    .player-meta{
+      display:flex;
+      gap:8px;
+      flex-wrap:wrap;
+      line-height:1.25;
+    }
+
+    .kv{
+      display:inline-flex;
+      gap:6px;
+      padding:4px 10px;
+      border-radius:999px;
+      border:1px solid #eee;
+      background:#fff;
+      font-size:12px;
+      white-space:nowrap;
+    }
+    .kv .k{color:#666;font-weight:800;}
+    .kv .v{font-weight:1000;}
+
+    .actions{
+      display:flex;
+      gap:8px;
+      flex-wrap:wrap;
+    }
+
+    .btnx{
+      padding:9px 12px;
+      border-radius:999px;
+      border:1px solid #ddd;
+      background:#fff;
+      cursor:pointer;
+      font-weight:1000;
+      color:#111;
+    }
+    .btnx:hover{background:#f5f5f5;}
+    .btnx.danger{border-color:#f1b2b2;}
+    .btnx.danger:hover{background:#ffecec;}
+
+    details{
+      border-top:1px solid rgba(16,24,40,.08);
+      padding-top:8px;
+    }
+
+    details summary{
+      cursor:pointer;
+      list-style:none;
+      font-weight:1000;
+      color:var(--blue-dark);
+    }
+    details summary::-webkit-details-marker{display:none;}
+
+    @media (min-width:760px){
+      :root{--header-h:158px;}
+      .header-inner{grid-template-columns:100px 1fr 100px;}
+      .header-logo{width:96px;height:80px;}
+      .header-nav{justify-content:center;}
+      .panel{padding:24px;}
+      .grid.three{grid-template-columns:1fr 1fr 1fr;}
+      .switches.categories{grid-template-columns:repeat(4,1fr);}
+    }
+  </style>
+</head>
+
+<body>
+
+<header class="site-header">
+  <div class="container header-inner">
+    <div class="header-logo">
+      <img src="../assets/img/logo-lg.png" alt="Ligue Guyane">
+    </div>
+
+    <div class="header-title">
+      <strong>Admin<br>Équipes</strong>
+      <span>Championnats Guyane Beach Tennis</span>
+    </div>
+
+    <div class="header-logo">
+      <img src="../assets/img/logo-lg.png" alt="Ligue Guyane">
+    </div>
+
+    <div class="header-nav-wrap">
+      <span class="nav-arrow left">‹</span>
+      <nav class="header-nav" aria-label="Navigation admin">
+        <a class="nav-link" href="../index.html">🏠 Accueil public</a>
+        <a class="nav-link" href="index.html">🛠️ Admin</a>
+        <a class="nav-link" href="inscriptions.html">📝 Inscriptions</a>
+        <a class="nav-link primary" href="equipes.html">👥 Équipes</a>
+        <a class="nav-link" href="roles.html">🔐 Rôles</a>
+        <a class="nav-link" href="#" id="btnLogout">🚪 Déconnexion</a>
+      </nav>
+      <span class="nav-arrow right">›</span>
+    </div>
+  </div>
+</header>
+
+<main class="container">
+
+  <section class="section panel" id="accessDenied" style="display:none;">
+    <h2 class="panel-title">⛔ Accès refusé</h2>
+    <p class="panel-text">Cette page est réservée aux administrateurs.</p>
+  </section>
+
+  <section class="section panel" id="adminZone" style="display:none;">
+    <div class="panel-head">
+      <div>
+        <h2 class="panel-title">🎾 Tableau</h2>
+        <p class="panel-text">Choisis la catégorie et l’épreuve à gérer.</p>
+      </div>
+      <div class="panel-tag">Admin</div>
+    </div>
+
+    <div class="switch-group">
+      <div class="switch-title">Catégorie</div>
+      <div class="switches categories">
+        <button class="switch-btn category-btn" data-categorie="U14" type="button" aria-selected="true">U14</button>
+        <button class="switch-btn category-btn" data-categorie="U18" type="button" aria-selected="false">U18</button>
+        <button class="switch-btn category-btn" data-categorie="Seniors" type="button" aria-selected="false">Seniors</button>
+        <button class="switch-btn category-btn" data-categorie="45+" type="button" aria-selected="false">45+</button>
+      </div>
+    </div>
+
+    <div class="switch-group">
+      <div class="switch-title">Épreuve</div>
+      <div class="switches">
+        <button class="switch-btn epreuve epreuve-btn" data-epreuve="DM" type="button" aria-selected="true">👨 Double Messieurs</button>
+        <button class="switch-btn epreuve epreuve-btn" data-epreuve="DD" type="button" aria-selected="false">👩 Double Dames</button>
+      </div>
+    </div>
+
+    <div class="status-box" id="hint">Chargement…</div>
+  </section>
+
+  <section class="section panel" id="panelSummary" style="display:none;">
+    <div class="panel-head">
+      <div>
+        <h2 class="panel-title">📌 Résumé</h2>
+        <p class="panel-text" id="counts">Chargement…</p>
+      </div>
+      <div class="panel-tag">Direct</div>
+    </div>
+    <p class="muted" id="status">Connexion…</p>
+  </section>
+
+  <section class="section panel" id="panelList" style="display:none;">
+    <div class="panel-head">
+      <div>
+        <h2 class="panel-title">👥 Équipes</h2>
+        <p class="panel-text">Gestion des inscriptions privées et de l’affichage public.</p>
+      </div>
+      <div class="panel-tag">Liste</div>
+    </div>
+
+    <div class="grid three" style="margin-bottom:12px;">
+      <button class="btn" id="btnRefresh">🔄 Rafraîchir</button>
+      <button class="btn" id="btnExpand">🧩 Tout développer</button>
+      <button class="btn" id="btnCollapse">🧊 Tout réduire</button>
+    </div>
+
+    <div id="list" style="display:grid;gap:12px;"></div>
+  </section>
+
+</main>
+
+<script type="module">
+  import { auth, db } from "../assets/js/firebase.js";
+  import { logout, getRoleByUid } from "../assets/js/session.js";
+  import { onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.12.5/firebase-auth.js";
+  import {
+    collection,
+    getDocs,
+    query,
+    orderBy,
+    doc,
+    setDoc,
+    updateDoc,
+    deleteDoc,
+    serverTimestamp
+  } from "https://www.gstatic.com/firebasejs/10.12.5/firebase-firestore.js";
+
+  const EVENT_ID = "championnats-2026";
+
+  const EPREUVE_LABELS = {
+    DM: "Double Messieurs",
+    DD: "Double Dames"
+  };
+
+  const accessDenied = document.getElementById("accessDenied");
+  const adminZone = document.getElementById("adminZone");
+  const panelSummary = document.getElementById("panelSummary");
+  const panelList = document.getElementById("panelList");
+
+  const hintEl = document.getElementById("hint");
+  const countsEl = document.getElementById("counts");
+  const statusEl = document.getElementById("status");
+  const listEl = document.getElementById("list");
+
+  const btnRefresh = document.getElementById("btnRefresh");
+  const btnExpand = document.getElementById("btnExpand");
+  const btnCollapse = document.getElementById("btnCollapse");
+
+  const categoryButtons = [...document.querySelectorAll(".category-btn")];
+  const epreuveButtons = [...document.querySelectorAll(".epreuve-btn")];
+
+  let currentCategorie = "U14";
+  let currentEpreuve = "DM";
+  let liveRows = [];
+
+  function esc(s){
+    return (s ?? "").toString()
+      .replaceAll("&","&amp;")
+      .replaceAll("<","&lt;")
+      .replaceAll(">","&gt;")
+      .replaceAll('"',"&quot;")
+      .replaceAll("'","&#039;");
+  }
+
+  function fmt(v){
+    const t = (v ?? "").toString().trim();
+    return t === "" ? "—" : t;
+  }
+
+  function toNum(v){
+    if(v === null || v === undefined || v === "") return null;
+    const n = typeof v === "number" ? v : Number(String(v).replace(",", ".").trim());
+    return Number.isFinite(n) ? n : null;
+  }
+
+  function fmtRank(v){
+    const n = toNum(v);
+    return n === null ? "—" : String(n);
+  }
+
+  function teamRank(p1, p2){
+    const a = toNum(p1), b = toNum(p2);
+    if(a === null || b === null) return null;
+    return a + b;
+  }
+
+  function zoneText(){
+    return `${currentCategorie} — ${EPREUVE_LABELS[currentEpreuve]}`;
+  }
+
+  function zoneEmoji(){
+    return currentEpreuve === "DD" ? "👩" : "👨";
+  }
+
+  function updateFilterButtons(){
+    categoryButtons.forEach(btn => {
+      btn.setAttribute("aria-selected", btn.dataset.categorie === currentCategorie ? "true" : "false");
+    });
+
+    epreuveButtons.forEach(btn => {
+      btn.setAttribute("aria-selected", btn.dataset.epreuve === currentEpreuve ? "true" : "false");
+    });
+
+    hintEl.textContent = `${zoneEmoji()} Zone sélectionnée : ${zoneText()}.`;
+  }
+
+  function pillList(list){
+    if(list === "main") return `<span class="pill main">MAIN</span>`;
+    if(list === "wait") return `<span class="pill wait">WAIT</span>`;
+    return `<span class="pill">AUTO</span>`;
+  }
+
+  function pillStby(stby){
+    return stby ? `<span class="pill stby">STBY</span>` : `<span class="pill">OK</span>`;
+  }
+
+  function computeCounts(rows){
+    const total = rows.length;
+    const main = rows.filter(r => r.list === "main" && !r.stby).length;
+    const wait = rows.filter(r => r.list === "wait" && !r.stby).length;
+    const auto = rows.filter(r => !r.list && !r.stby).length;
+    const stby = rows.filter(r => r.stby).length;
+    return { total, main, wait, auto, stby };
+  }
+
+  function playerLineHtml(label, p){
+    return `
+      <div class="player">
+        <div class="player-title">
+          <b>${label}</b>
+          <span class="pill rank">🏷️ ${esc(fmtRank(p.rank))}</span>
+        </div>
+
+        <div class="player-meta">
+          <span class="kv"><span class="k">Nom</span><span class="v">${esc(fmt(p.lastName))}</span></span>
+          <span class="kv"><span class="k">Prénom</span><span class="v">${esc(fmt(p.firstName))}</span></span>
+          <span class="kv"><span class="k">Licence</span><span class="v">${esc(fmt(p.licence))}</span></span>
+          <span class="kv"><span class="k">Tél</span><span class="v">${esc(fmt(p.phone))}</span></span>
+        </div>
+      </div>
+    `;
+  }
+
+  function render(rows){
+    liveRows = rows.slice();
+
+    const c = computeCounts(rows);
+    countsEl.innerHTML =
+      `${zoneEmoji()} <b>${zoneText()}</b> — Total : <b>${c.total}</b> — MAIN : <b>${c.main}</b> — WAIT : <b>${c.wait}</b> — AUTO : <b>${c.auto}</b> — STBY : <b>${c.stby}</b>`;
+
+    listEl.innerHTML = rows.length ? rows.map((r, i) => {
+      const tr = teamRank(r.p1Rank, r.p2Rank);
+
+      return `
+        <div class="team-card" data-id="${esc(r.id)}">
+          <div class="team-head">
+            <div>
+              <div class="team-name">${esc(fmt(r.teamName))}</div>
+              <div class="muted" style="margin-top:6px;">
+                #${i+1} • ID : <span style="font-variant-numeric:tabular-nums;">${esc(r.id)}</span>
+                ${tr === null ? "" : ` • <span class="pill rank">🏷️ Rang équipe : ${esc(String(tr))}</span>`}
+              </div>
+            </div>
+
+            <div class="badges">
+              <span class="pill cat">${esc(zoneText())}</span>
+              ${pillList(r.list)}
+              ${pillStby(r.stby)}
+            </div>
+          </div>
+
+          ${playerLineHtml("Joueur/Joueuse 1", {
+            firstName: r.p1FirstName, lastName: r.p1LastName, licence: r.p1Licence, phone: r.p1Phone, rank: r.p1Rank
+          })}
+
+          ${playerLineHtml("Joueur/Joueuse 2", {
+            firstName: r.p2FirstName, lastName: r.p2LastName, licence: r.p2Licence, phone: r.p2Phone, rank: r.p2Rank
+          })}
+
+          <details>
+            <summary>⚙️ Actions / Modifier</summary>
+            <div style="margin-top:10px;display:grid;gap:10px;">
+              <div class="actions">
+                <button class="btnx" data-act="edit" data-id="${esc(r.id)}">✏️ Modifier équipe</button>
+                <button class="btnx" data-act="ranks" data-id="${esc(r.id)}">🏷️ Classements</button>
+              </div>
+
+              <div class="actions">
+                <button class="btnx" data-act="main" data-id="${esc(r.id)}">⬆️ MAIN</button>
+                <button class="btnx" data-act="wait" data-id="${esc(r.id)}">⬇️ WAIT</button>
+                <button class="btnx" data-act="auto" data-id="${esc(r.id)}">🌀 AUTO</button>
+                <button class="btnx" data-act="stby" data-id="${esc(r.id)}">${r.stby ? "✅ Activer" : "⏸️ STBY"}</button>
+              </div>
+
+              <div class="actions">
+                <button class="btnx danger" data-act="del" data-id="${esc(r.id)}">🗑️ Supprimer</button>
+              </div>
+            </div>
+          </details>
+        </div>
+      `;
+    }).join("") : `<p class="muted" style="margin:0;">Aucune équipe pour ${esc(zoneText())}.</p>`;
+  }
+
+  async function fetchMerged(){
+    statusEl.textContent = "Chargement…";
+
+    const [privSnap, pubSnap] = await Promise.all([
+      getDocs(query(collection(db, "events", EVENT_ID, "inscriptions"), orderBy("createdAt", "asc"))),
+      getDocs(query(collection(db, "events", EVENT_ID, "equipes"), orderBy("createdAt", "asc")))
+    ]);
+
+    const pubById = new Map();
+    pubSnap.forEach(d => pubById.set(d.id, d.data() || {}));
+
+    const rows = [];
+
+    privSnap.forEach(d => {
+      const x = d.data() || {};
+      const p = pubById.get(d.id) || {};
+
+      const categorie = x.categorie || p.categorie || "";
+      const epreuve = x.epreuve || p.epreuve || "";
+
+      if(categorie !== currentCategorie || epreuve !== currentEpreuve) return;
+
+      rows.push({
+        id: d.id,
+        createdAtMs: x.createdAt?.toMillis ? x.createdAt.toMillis() : 0,
+
+        teamName: x.teamName || p.teamName || "",
+
+        p1FirstName: x.joueur1?.firstName || x.p1FirstName || p.joueur1FirstName || "",
+        p1LastName: x.joueur1?.lastName || x.p1LastName || "",
+        p1Licence: x.joueur1?.licence || x.p1Licence || "",
+        p1Phone: x.joueur1?.phone || x.p1Phone || "",
+        p1Rank: p.p1Rank ?? null,
+
+        p2FirstName: x.joueur2?.firstName || x.p2FirstName || p.joueur2FirstName || "",
+        p2LastName: x.joueur2?.lastName || x.p2LastName || "",
+        p2Licence: x.joueur2?.licence || x.p2Licence || "",
+        p2Phone: x.joueur2?.phone || x.p2Phone || "",
+        p2Rank: p.p2Rank ?? null,
+
+        list: p.list || null,
+        stby: p.stby === true
+      });
+    });
+
+    rows.sort((a,b)=> (a.createdAtMs || 0) - (b.createdAtMs || 0));
+    return rows;
+  }
+
+  async function refresh(){
+    try{
+      updateFilterButtons();
+      const rows = await fetchMerged();
+      render(rows);
+      statusEl.textContent = `✅ OK — ${zoneText()}`;
+    }catch(err){
+      console.error(err);
+      statusEl.textContent = `❌ Erreur ${zoneText()} — voir console`;
+    }
+  }
+
+  async function patchPublic(id, patch){
+    await setDoc(doc(db, "events", EVENT_ID, "equipes", id), {
+      ...patch,
+      updatedAt: serverTimestamp(),
+      updatedBy: auth.currentUser?.uid || null
+    }, { merge:true });
+  }
+
+  async function patchPrivate(id, patch){
+    await updateDoc(doc(db, "events", EVENT_ID, "inscriptions", id), {
+      ...patch,
+      updatedAt: serverTimestamp(),
+      updatedBy: auth.currentUser?.uid || null
+    });
+  }
+
+  async function editTeam(row){
+    const teamName = prompt("Nom d’équipe :", row.teamName || "");
+    if(teamName === null) return;
+
+    const p1LastName = prompt("J1 — Nom :", row.p1LastName || "");
+    if(p1LastName === null) return;
+    const p1FirstName = prompt("J1 — Prénom :", row.p1FirstName || "");
+    if(p1FirstName === null) return;
+    const p1Licence = prompt("J1 — Licence :", row.p1Licence || "");
+    if(p1Licence === null) return;
+    const p1Phone = prompt("J1 — Téléphone :", row.p1Phone || "");
+    if(p1Phone === null) return;
+
+    const p2LastName = prompt("J2 — Nom :", row.p2LastName || "");
+    if(p2LastName === null) return;
+    const p2FirstName = prompt("J2 — Prénom :", row.p2FirstName || "");
+    if(p2FirstName === null) return;
+    const p2Licence = prompt("J2 — Licence :", row.p2Licence || "");
+    if(p2Licence === null) return;
+    const p2Phone = prompt("J2 — Téléphone :", row.p2Phone || "");
+    if(p2Phone === null) return;
+
+    await patchPrivate(row.id, {
+      teamName,
+      joueur1: {
+        firstName: p1FirstName,
+        lastName: p1LastName,
+        licence: p1Licence,
+        phone: p1Phone
+      },
+      joueur2: {
+        firstName: p2FirstName,
+        lastName: p2LastName,
+        licence: p2Licence,
+        phone: p2Phone
+      }
+    });
+
+    await patchPublic(row.id, {
+      teamName,
+      joueur1FirstName: p1FirstName,
+      joueur2FirstName: p2FirstName
+    });
+  }
+
+  async function editRanks(row){
+    const n1 = prompt("Classement BT Joueur/Joueuse 1 :", String(row.p1Rank ?? ""));
+    if(n1 === null) return;
+
+    const n2 = prompt("Classement BT Joueur/Joueuse 2 :", String(row.p2Rank ?? ""));
+    if(n2 === null) return;
+
+    const p1t = String(n1).trim();
+    const p2t = String(n2).trim();
+
+    const p1 = p1t === "" ? null : toNum(p1t);
+    const p2 = p2t === "" ? null : toNum(p2t);
+
+    if(p1t !== "" && p1 === null) return alert("Classement J1 invalide.");
+    if(p2t !== "" && p2 === null) return alert("Classement J2 invalide.");
+
+    await patchPublic(row.id, { p1Rank:p1, p2Rank:p2 });
+  }
+
+  async function deleteTeam(id){
+    const ok = confirm("Supprimer cette équipe ?\n\n⚠️ Action irréversible.");
+    if(!ok) return;
+
+    await deleteDoc(doc(db, "events", EVENT_ID, "inscriptions", id));
+    await deleteDoc(doc(db, "events", EVENT_ID, "equipes", id));
+  }
+
+  listEl.addEventListener("click", async (e) => {
+    const btn = e.target.closest("button[data-act]");
+    if(!btn) return;
+
+    const act = btn.dataset.act;
+    const id = btn.dataset.id;
+    const row = liveRows.find(r => r.id === id);
+
+    if(!row) return alert("Équipe introuvable. Rafraîchis la page.");
+
+    try{
+      if(act === "main") await patchPublic(id, { list:"main" });
+      if(act === "wait") await patchPublic(id, { list:"wait" });
+      if(act === "auto") await patchPublic(id, { list:null });
+      if(act === "stby") await patchPublic(id, { stby:!row.stby });
+
+      if(act === "ranks") await editRanks(row);
+      if(act === "edit") await editTeam(row);
+      if(act === "del") await deleteTeam(id);
+
+      await refresh();
+    }catch(err){
+      console.error(err);
+      alert("Erreur ❌ — voir console.");
+    }
+  });
+
+  btnExpand.onclick = () => document.querySelectorAll("details").forEach(d => d.open = true);
+  btnCollapse.onclick = () => document.querySelectorAll("details").forEach(d => d.open = false);
+  btnRefresh.onclick = refresh;
+
+  categoryButtons.forEach(btn => {
+    btn.addEventListener("click", async () => {
+      currentCategorie = btn.dataset.categorie;
+      try{ localStorage.setItem("champ_admin_categorie", currentCategorie); }catch(e){}
+      await refresh();
+    });
+  });
+
+  epreuveButtons.forEach(btn => {
+    btn.addEventListener("click", async () => {
+      currentEpreuve = btn.dataset.epreuve;
+      try{ localStorage.setItem("champ_admin_epreuve", currentEpreuve); }catch(e){}
+      await refresh();
+    });
+  });
+
+  function showDenied(){
+    accessDenied.style.display = "block";
+    adminZone.style.display = "none";
+    panelSummary.style.display = "none";
+    panelList.style.display = "none";
+  }
+
+  function showAdmin(){
+    accessDenied.style.display = "none";
+    adminZone.style.display = "block";
+    panelSummary.style.display = "block";
+    panelList.style.display = "block";
+  }
+
+  document.getElementById("btnLogout").onclick = async (e) => {
+    e.preventDefault();
+    await logout();
+    window.location.href = "../index.html";
+  };
+
+  onAuthStateChanged(auth, async (user) => {
+    if(!user){
+      showDenied();
+      return;
+    }
+
+    try{
+      const role = await getRoleByUid(user.uid);
+
+      if(role !== "admin"){
+        showDenied();
+        return;
+      }
+
+      try{
+        const savedCat = localStorage.getItem("champ_admin_categorie");
+        const savedEpreuve = localStorage.getItem("champ_admin_epreuve");
+
+        if(["U14","U18","Seniors","45+"].includes(savedCat)) currentCategorie = savedCat;
+        if(["DM","DD"].includes(savedEpreuve)) currentEpreuve = savedEpreuve;
+      }catch(e){}
+
+      showAdmin();
+      await refresh();
+
+    }catch(err){
+      console.error(err);
+      showDenied();
+    }
+  });
+</script>
+
+</body>
+</html>
