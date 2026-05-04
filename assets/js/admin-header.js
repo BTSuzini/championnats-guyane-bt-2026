@@ -1,6 +1,4 @@
-import { auth } from "./firebase.js";
 import { logout } from "./session.js";
-import { onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.12.5/firebase-auth.js";
 
 const EPREUVE_LABELS = {
   DM: "Double Messieurs",
@@ -13,7 +11,6 @@ const EPREUVES = ["DM", "DD"];
 const headerMount = document.getElementById("adminHeader");
 
 const currentPage = location.pathname.split("/").pop() || "index.html";
-
 const needsZoneSelector = document.body.dataset.zoneSelector !== "none";
 
 function navClass(page){
@@ -71,9 +68,10 @@ function injectStyles(){
       --card:rgba(255,255,255,.94);
       --shadow:0 16px 40px rgba(16,24,40,.12);
       --container:1180px;
+
       --admin-header-h:158px;
-      --admin-zone-h:126px;
-      --admin-total-top:284px;
+      --admin-zone-h:104px;
+      --admin-total-top:262px;
     }
 
     .admin-container{
@@ -98,7 +96,7 @@ function injectStyles(){
       grid-template-rows:auto auto;
       align-items:center;
       gap:10px 18px;
-      padding:12px 0;
+      padding:12px 0 14px;
     }
 
     .admin-header-logo{
@@ -229,39 +227,29 @@ function injectStyles(){
       background:linear-gradient(135deg,#dff7ff,#effcff);
       border-bottom:1px solid rgba(7,91,154,.10);
       box-shadow:0 8px 18px rgba(16,24,40,.06);
-      padding:8px 0 10px;
-    }
-
-    .admin-zonebar.hidden{
-      display:none;
+      padding:14px 0 16px;
     }
 
     .admin-zone-line{
       display:flex;
       align-items:center;
-      gap:8px;
+      gap:10px;
       overflow-x:auto;
       scrollbar-width:none;
       -webkit-overflow-scrolling:touch;
       padding:3px 2px;
     }
 
-    .admin-zone-line::-webkit-scrollbar{display:none;}
-
-    .admin-zone-label{
-      flex:0 0 auto;
-      min-width:92px;
-      font-size:12px;
-      font-weight:1000;
-      color:var(--blue-dark);
-      text-transform:uppercase;
-      letter-spacing:.08em;
+    .admin-zone-line + .admin-zone-line{
+      margin-top:8px;
     }
+
+    .admin-zone-line::-webkit-scrollbar{display:none;}
 
     .admin-zone-btn{
       flex:0 0 auto;
       min-height:34px;
-      padding:7px 16px;
+      padding:7px 18px;
       border-radius:999px;
       border:1px solid rgba(7,91,154,.14);
       background:#fff;
@@ -310,8 +298,8 @@ function injectStyles(){
     @media (max-width:759px){
       :root{
         --admin-header-h:150px;
-        --admin-zone-h:126px;
-        --admin-total-top:276px;
+        --admin-zone-h:104px;
+        --admin-total-top:254px;
       }
     }
   `;
@@ -356,10 +344,9 @@ function renderHeader(){
       </div>
     </header>
 
-    <section class="admin-zonebar ${needsZoneSelector ? "" : ""}">
+    <section class="admin-zonebar">
       <div class="admin-container">
         <div class="admin-zone-line" aria-label="Sélection catégorie">
-          <div class="admin-zone-label">Catégorie</div>
           ${CATEGORIES.map(cat => `
             <button
               class="admin-zone-btn ${needsZoneSelector ? "" : "all-active"}"
@@ -371,7 +358,6 @@ function renderHeader(){
         </div>
 
         <div class="admin-zone-line" aria-label="Sélection épreuve">
-          <div class="admin-zone-label">Épreuve</div>
           <button
             class="admin-zone-btn ${needsZoneSelector ? "" : "all-active"}"
             type="button"
