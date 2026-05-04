@@ -1,0 +1,607 @@
+<!doctype html>
+<html lang="fr">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Admin — Rôles — Championnats Guyane Beach Tennis</title>
+
+  <style>
+    :root{
+      --clay:#c65a1e; --clay-dark:#8e3a13; --clay-light:#ee8a3a;
+      --sky:#27bced; --aqua:#00a9c8; --blue:#075b9a; --blue-dark:#063b72;
+      --text:#17212b; --muted:#667085; --card:rgba(255,255,255,.94);
+      --shadow:0 16px 40px rgba(16,24,40,.12);
+      --container:1180px; --header-h:150px;
+    }
+
+    *{box-sizing:border-box;}
+
+    body{
+      margin:0;
+      font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;
+      color:var(--text);
+      background:
+        radial-gradient(circle at 20% 0%, rgba(39,188,237,.22), transparent 28%),
+        radial-gradient(circle at 85% 10%, rgba(0,169,200,.16), transparent 26%),
+        linear-gradient(180deg,#f4fcff 0%,#e9f8ff 48%,#fff 100%);
+    }
+
+    a{color:inherit;text-decoration:none;}
+    img{display:block;max-width:100%;}
+    .container{width:min(var(--container), calc(100% - 28px));margin:0 auto;}
+
+    .site-header{
+      position:fixed;top:0;left:0;right:0;z-index:1000;
+      background:linear-gradient(135deg,var(--clay-dark),var(--clay),var(--clay-light));
+      box-shadow:0 10px 26px rgba(142,58,19,.28);
+    }
+
+    .header-inner{
+      min-height:var(--header-h);
+      display:grid;
+      grid-template-columns:80px 1fr 80px;
+      grid-template-rows:auto auto;
+      align-items:center;
+      gap:10px 18px;
+      padding:12px 0;
+    }
+
+    .header-logo{width:80px;height:80px;display:flex;align-items:center;justify-content:center;}
+    .header-logo img{max-width:100%;max-height:100%;object-fit:contain;filter:drop-shadow(0 6px 10px rgba(0,0,0,.18));}
+
+    .header-title{text-align:center;color:#fff;}
+    .header-title strong{
+      display:block;font-size:clamp(22px,4vw,42px);line-height:.95;
+      letter-spacing:-.04em;text-transform:uppercase;font-weight:1000;
+    }
+    .header-title span{
+      display:block;margin-top:5px;font-size:13px;font-weight:900;
+      color:rgba(255,255,255,.88);text-transform:uppercase;letter-spacing:.08em;
+    }
+
+    .header-nav-wrap{grid-column:1 / 4;position:relative;overflow:hidden;padding:0 34px;}
+    .header-nav-wrap::before,.header-nav-wrap::after{
+      content:"";position:absolute;top:0;bottom:0;width:40px;z-index:2;pointer-events:none;
+    }
+    .header-nav-wrap::before{left:0;background:linear-gradient(90deg, rgba(142,58,19,.98), rgba(142,58,19,0));}
+    .header-nav-wrap::after{right:0;background:linear-gradient(270deg, rgba(198,90,30,.98), rgba(198,90,30,0));}
+
+    .nav-arrow{
+      position:absolute;top:50%;transform:translateY(-50%);z-index:3;
+      width:28px;height:28px;border-radius:999px;display:flex;align-items:center;justify-content:center;
+      background:rgba(255,255,255,.88);color:var(--clay-dark);font-size:20px;font-weight:1000;
+      box-shadow:0 6px 14px rgba(0,0,0,.18);pointer-events:none;
+    }
+    .nav-arrow.left{left:2px;} .nav-arrow.right{right:2px;}
+
+    .header-nav{
+      display:flex;gap:10px;overflow-x:auto;padding:2px 4px;
+      scrollbar-width:none;-webkit-overflow-scrolling:touch;
+    }
+    .header-nav::-webkit-scrollbar{display:none;}
+
+    .nav-link{
+      flex:0 0 auto;min-height:42px;padding:10px 17px;border-radius:999px;
+      background:rgba(255,255,255,.92);color:#344054;font-size:14px;font-weight:900;
+      white-space:nowrap;box-shadow:0 8px 16px rgba(0,0,0,.14);
+    }
+    .nav-link.primary{background:linear-gradient(180deg,var(--blue),var(--blue-dark));color:#fff;}
+
+    main{padding-top:calc(var(--header-h) + 24px);padding-bottom:42px;}
+    .section{margin-top:22px;}
+
+    .panel{
+      background:var(--card);border:1px solid rgba(255,255,255,.6);
+      border-radius:28px;box-shadow:var(--shadow);padding:20px;
+    }
+
+    .panel-head{display:flex;justify-content:space-between;align-items:flex-start;gap:12px;margin-bottom:16px;}
+    .panel-title{margin:0;font-size:28px;line-height:1.05;letter-spacing:-.03em;}
+    .panel-text{margin:8px 0 0;color:var(--muted);font-size:15px;line-height:1.55;}
+    .panel-tag{
+      flex-shrink:0;padding:8px 13px;border-radius:999px;background:#e4f7ff;color:var(--blue-dark);
+      font-size:12px;font-weight:1000;text-transform:uppercase;letter-spacing:.06em;
+    }
+
+    .grid{display:grid;grid-template-columns:1fr;gap:10px;}
+    .field{display:grid;gap:8px;}
+    .field label{font-weight:1000;color:#1c2430;}
+
+    input, select{
+      width:100%;border-radius:16px;border:1px solid rgba(16,24,40,.10);
+      background:#fff;padding:13px 14px;font-size:16px;color:#17212b;outline:none;
+      font-family:inherit;
+    }
+
+    .btn{
+      appearance:none;border:1px solid rgba(16,24,40,.10);background:#fff;
+      border-radius:18px;min-height:54px;padding:13px 15px;font-size:15px;
+      font-weight:1000;cursor:pointer;color:#1c2430;text-align:center;
+      box-shadow:0 8px 16px rgba(16,24,40,.04);
+      display:flex;align-items:center;justify-content:center;
+    }
+
+    .btn.primary{background:linear-gradient(180deg,var(--blue),var(--blue-dark));color:#fff;border-color:var(--blue);}
+    .btn.clay{background:linear-gradient(135deg,var(--clay),var(--clay-light));color:#fff;border-color:var(--clay);}
+    .btn.danger{background:#fff5f5;color:#8a1f1f;border-color:#f1b2b2;}
+    .btn:disabled{opacity:.55;cursor:not-allowed;}
+
+    .status-box{
+      margin-top:12px;padding:14px 16px;border-radius:18px;
+      background:linear-gradient(135deg,rgba(39,188,237,.12),rgba(198,90,30,.08));
+      border:1px solid rgba(39,188,237,.22);color:#475467;font-size:14px;line-height:1.5;
+    }
+
+    .muted{color:var(--muted);font-size:14px;line-height:1.45;}
+    .sep{border:none;border-top:1px solid rgba(16,24,40,.08);margin:18px 0;}
+
+    .role-card{
+      border-radius:20px;
+      padding:14px;
+      background:#fff;
+      border:1px solid rgba(16,24,40,.08);
+      box-shadow:0 8px 18px rgba(16,24,40,.06);
+      display:grid;
+      gap:10px;
+    }
+
+    .role-top{
+      display:flex;
+      justify-content:space-between;
+      align-items:flex-start;
+      gap:12px;
+    }
+
+    .role-name{
+      font-size:18px;
+      font-weight:1000;
+      line-height:1.15;
+    }
+
+    .role-email{
+      margin-top:4px;
+      color:#475467;
+      font-size:14px;
+      font-weight:800;
+      word-break:break-word;
+    }
+
+    .role-uid{
+      margin-top:6px;
+      color:#667085;
+      font-size:12px;
+      font-family:ui-monospace,SFMono-Regular,Menlo,Monaco,Consolas,monospace;
+      word-break:break-all;
+    }
+
+    .badge{
+      display:inline-flex;
+      align-items:center;
+      justify-content:center;
+      padding:6px 10px;
+      border-radius:999px;
+      font-size:12px;
+      font-weight:1000;
+      text-transform:uppercase;
+      white-space:nowrap;
+    }
+
+    .badge.admin{background:linear-gradient(135deg,var(--clay),var(--clay-light));color:#fff;}
+    .badge.jat{background:linear-gradient(135deg,#5322a8,#a457f0);color:#fff;}
+    .badge.arbitre{background:linear-gradient(135deg,var(--blue),var(--sky));color:#fff;}
+
+    .role-actions{
+      display:grid;
+      grid-template-columns:1fr;
+      gap:8px;
+    }
+
+    @media (min-width:760px){
+      :root{--header-h:158px;}
+      .header-inner{grid-template-columns:100px 1fr 100px;}
+      .header-logo{width:96px;height:80px;}
+      .header-nav{justify-content:center;}
+      .panel{padding:24px;}
+      .grid.two{grid-template-columns:1fr 1fr;}
+      .grid.three{grid-template-columns:1fr 1fr 1fr;}
+      .role-actions{grid-template-columns:1fr 1fr 1fr;}
+    }
+  </style>
+</head>
+
+<body>
+
+<header class="site-header">
+  <div class="container header-inner">
+    <div class="header-logo">
+      <img src="../assets/img/logo-lg.png" alt="Ligue Guyane">
+    </div>
+
+    <div class="header-title">
+      <strong>Admin<br>Rôles</strong>
+      <span>Championnats Guyane Beach Tennis</span>
+    </div>
+
+    <div class="header-logo">
+      <img src="../assets/img/logo-lg.png" alt="Ligue Guyane">
+    </div>
+
+    <div class="header-nav-wrap">
+      <span class="nav-arrow left">‹</span>
+      <nav class="header-nav" aria-label="Navigation admin">
+        <a class="nav-link" href="../index.html">🏠 Accueil public</a>
+        <a class="nav-link" href="index.html">🛠️ Admin</a>
+        <a class="nav-link" href="inscriptions.html">📝 Inscriptions</a>
+        <a class="nav-link" href="equipes.html">👥 Équipes</a>
+        <a class="nav-link primary" href="roles.html">🔐 Rôles</a>
+        <a class="nav-link" href="#" id="btnLogout">🚪 Déconnexion</a>
+      </nav>
+      <span class="nav-arrow right">›</span>
+    </div>
+  </div>
+</header>
+
+<main class="container">
+
+  <section class="section panel" id="accessDenied" style="display:none;">
+    <h2 class="panel-title">⛔ Accès refusé</h2>
+    <p class="panel-text">Cette page est réservée aux administrateurs.</p>
+  </section>
+
+  <section class="section panel" id="pageContent" style="display:none;">
+    <div class="panel-head">
+      <div>
+        <h2 class="panel-title">🔐 Gestion des accès</h2>
+        <p class="panel-text">
+          Crée les comptes organisateurs et attribue les rôles Admin, JAT ou Arbitre.
+        </p>
+      </div>
+      <div class="panel-tag">Admin</div>
+    </div>
+
+    <div class="status-box" id="adminStatus">
+      Connexion administrateur vérifiée.
+    </div>
+
+    <hr class="sep">
+
+    <h2 class="panel-title" style="font-size:24px;">➕ Créer un utilisateur</h2>
+    <p class="panel-text">
+      Le compte sera créé dans Firebase Authentication, puis le rôle sera automatiquement ajouté dans Firestore.
+    </p>
+
+    <form id="createUserForm" class="grid" autocomplete="off" style="margin-top:14px;">
+      <div class="grid two">
+        <div class="field">
+          <label for="email">Email *</label>
+          <input id="email" name="email" type="email" required placeholder="exemple@email.com">
+        </div>
+
+        <div class="field">
+          <label for="password">Mot de passe temporaire *</label>
+          <input id="password" name="password" type="password" required minlength="6" placeholder="Minimum 6 caractères">
+        </div>
+      </div>
+
+      <div class="grid two">
+        <div class="field">
+          <label for="label">Nom / label</label>
+          <input id="label" name="label" type="text" placeholder="Ex : Fabrice, JAT, Table 1…">
+        </div>
+
+        <div class="field">
+          <label for="role">Rôle *</label>
+          <select id="role" name="role" required>
+            <option value="arbitre">Arbitre</option>
+            <option value="jat">Juge-arbitre</option>
+            <option value="admin">Admin</option>
+          </select>
+        </div>
+      </div>
+
+      <button class="btn clay" id="createBtn" type="submit">✅ Créer l’utilisateur et le rôle</button>
+      <p class="muted" id="createStatus" role="status" aria-live="polite" style="margin:0;"></p>
+    </form>
+
+    <hr class="sep">
+
+    <h2 class="panel-title" style="font-size:24px;">👥 Rôles existants</h2>
+    <p class="panel-text">
+      Modifier un rôle change immédiatement les droits associés à cet UID.
+    </p>
+
+    <p class="muted" id="rolesCount" style="margin-top:12px;">Chargement…</p>
+    <div id="rolesList" class="grid" style="margin-top:12px;"></div>
+  </section>
+
+</main>
+
+<script type="module">
+  import { auth, db } from "../assets/js/firebase.js?v=roles1";
+  import { logout, getRoleByUid } from "../assets/js/session.js?v=roles1";
+
+  import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.5/firebase-app.js";
+  import {
+    getAuth,
+    createUserWithEmailAndPassword,
+    signOut,
+    sendPasswordResetEmail,
+    onAuthStateChanged
+  } from "https://www.gstatic.com/firebasejs/10.12.5/firebase-auth.js";
+
+  import {
+    collection,
+    doc,
+    setDoc,
+    updateDoc,
+    deleteDoc,
+    serverTimestamp,
+    query,
+    orderBy,
+    onSnapshot
+  } from "https://www.gstatic.com/firebasejs/10.12.5/firebase-firestore.js";
+
+  const firebaseConfig = {
+    apiKey: "AIzaSyAdjBE2UpEFRUgkASTaKP5X7vYr0ygzUzI",
+    authDomain: "championnats-guyane-bt-2026.firebaseapp.com",
+    projectId: "championnats-guyane-bt-2026",
+    storageBucket: "championnats-guyane-bt-2026.firebasestorage.app",
+    messagingSenderId: "639869315232",
+    appId: "1:639869315232:web:c73adb022414faf1d641c5"
+  };
+
+  const secondaryApp = initializeApp(firebaseConfig, "secondary-auth-roles");
+  const secondaryAuth = getAuth(secondaryApp);
+
+  const accessDenied = document.getElementById("accessDenied");
+  const pageContent = document.getElementById("pageContent");
+  const adminStatus = document.getElementById("adminStatus");
+
+  const createUserForm = document.getElementById("createUserForm");
+  const createBtn = document.getElementById("createBtn");
+  const createStatus = document.getElementById("createStatus");
+
+  const rolesCount = document.getElementById("rolesCount");
+  const rolesList = document.getElementById("rolesList");
+
+  let unsubscribeRoles = null;
+
+  function esc(str){
+    return (str || "")
+      .toString()
+      .replaceAll("&","&amp;")
+      .replaceAll("<","&lt;")
+      .replaceAll(">","&gt;")
+      .replaceAll('"',"&quot;")
+      .replaceAll("'","&#039;");
+  }
+
+  function badgeClass(role){
+    if(role === "admin") return "admin";
+    if(role === "jat") return "jat";
+    return "arbitre";
+  }
+
+  function roleLabel(role){
+    if(role === "admin") return "Admin";
+    if(role === "jat") return "JAT";
+    return "Arbitre";
+  }
+
+  function setCreateLoading(isLoading){
+    createBtn.disabled = isLoading;
+    createBtn.textContent = isLoading ? "Création en cours…" : "✅ Créer l’utilisateur et le rôle";
+  }
+
+  function stopRoles(){
+    if(unsubscribeRoles){
+      unsubscribeRoles();
+      unsubscribeRoles = null;
+    }
+  }
+
+  function startRoles(){
+    stopRoles();
+
+    rolesCount.textContent = "Chargement…";
+    rolesList.innerHTML = "";
+
+    const q = query(collection(db, "roles"), orderBy("role", "asc"));
+
+    unsubscribeRoles = onSnapshot(q, (snap) => {
+      const items = snap.docs.map(d => ({ uid:d.id, ...d.data() }));
+
+      rolesCount.textContent = `📌 ${items.length} rôle${items.length > 1 ? "s" : ""}`;
+
+      if(items.length === 0){
+        rolesList.innerHTML = `<p class="muted" style="margin:0;">Aucun rôle pour le moment.</p>`;
+        return;
+      }
+
+      rolesList.innerHTML = items.map(item => {
+        const role = item.role || "arbitre";
+        const email = item.email || "";
+        const label = item.label || email || item.uid;
+
+        return `
+          <div class="role-card" data-uid="${esc(item.uid)}">
+            <div class="role-top">
+              <div style="min-width:0;">
+                <div class="role-name">${esc(label)}</div>
+                <div class="role-email">${esc(email || "Email non renseigné")}</div>
+                <div class="role-uid">${esc(item.uid)}</div>
+              </div>
+              <span class="badge ${badgeClass(role)}">${esc(roleLabel(role))}</span>
+            </div>
+
+            <div class="grid two">
+              <div class="field">
+                <label>Modifier le rôle</label>
+                <select class="role-select">
+                  <option value="arbitre" ${role === "arbitre" ? "selected" : ""}>Arbitre</option>
+                  <option value="jat" ${role === "jat" ? "selected" : ""}>Juge-arbitre</option>
+                  <option value="admin" ${role === "admin" ? "selected" : ""}>Admin</option>
+                </select>
+              </div>
+
+              <div class="field">
+                <label>Modifier le label</label>
+                <input class="label-input" type="text" value="${esc(item.label || "")}" placeholder="Nom / fonction">
+              </div>
+            </div>
+
+            <div class="role-actions">
+              <button class="btn primary btn-save" type="button">💾 Enregistrer</button>
+              <button class="btn btn-reset" type="button" data-email="${esc(email)}">🔑 Mail reset password</button>
+              <button class="btn danger btn-delete" type="button">🗑️ Supprimer le rôle</button>
+            </div>
+          </div>
+        `;
+      }).join("");
+
+      rolesList.querySelectorAll(".role-card").forEach(card => {
+        const uid = card.dataset.uid;
+        const select = card.querySelector(".role-select");
+        const labelInput = card.querySelector(".label-input");
+        const btnSave = card.querySelector(".btn-save");
+        const btnDelete = card.querySelector(".btn-delete");
+        const btnReset = card.querySelector(".btn-reset");
+
+        btnSave.onclick = async () => {
+          btnSave.disabled = true;
+          btnSave.textContent = "Enregistrement…";
+
+          try{
+            await updateDoc(doc(db, "roles", uid), {
+              role: select.value,
+              label: labelInput.value.trim(),
+              updatedAt: serverTimestamp(),
+              updatedBy: auth.currentUser?.uid || null
+            });
+          }catch(error){
+            console.error(error);
+            alert("Erreur : impossible de modifier ce rôle.");
+          }finally{
+            btnSave.disabled = false;
+            btnSave.textContent = "💾 Enregistrer";
+          }
+        };
+
+        btnDelete.onclick = async () => {
+          const ok = confirm(
+            "Supprimer ce rôle ?\n\n" +
+            "Attention : cela ne supprime PAS l’utilisateur Firebase Auth, seulement son accès au site."
+          );
+          if(!ok) return;
+
+          try{
+            await deleteDoc(doc(db, "roles", uid));
+          }catch(error){
+            console.error(error);
+            alert("Erreur : impossible de supprimer ce rôle.");
+          }
+        };
+
+        btnReset.onclick = async () => {
+          const email = btnReset.dataset.email || "";
+          if(!email){
+            alert("Aucun email enregistré pour cet utilisateur.");
+            return;
+          }
+
+          try{
+            await sendPasswordResetEmail(auth, email);
+            alert("Mail de réinitialisation envoyé ✅\n\n" + email);
+          }catch(error){
+            console.error(error);
+            alert("Erreur envoi reset password : " + (error?.message || "Erreur inconnue"));
+          }
+        };
+      });
+
+    }, (error) => {
+      console.error(error);
+      rolesCount.textContent = "❌ Impossible de charger les rôles.";
+    });
+  }
+
+  createUserForm.addEventListener("submit", async (event) => {
+    event.preventDefault();
+
+    setCreateLoading(true);
+    createStatus.textContent = "Création de l’utilisateur…";
+
+    try{
+      const email = createUserForm.email.value.trim();
+      const password = createUserForm.password.value;
+      const role = createUserForm.role.value;
+      const label = createUserForm.label.value.trim();
+
+      if(!email || !password || !role){
+        throw new Error("Email, mot de passe et rôle obligatoires.");
+      }
+
+      const cred = await createUserWithEmailAndPassword(secondaryAuth, email, password);
+      const user = cred.user;
+
+      await setDoc(doc(db, "roles", user.uid), {
+        uid: user.uid,
+        email,
+        label,
+        role,
+        createdAt: serverTimestamp(),
+        updatedAt: serverTimestamp(),
+        createdBy: auth.currentUser?.uid || null,
+        updatedBy: auth.currentUser?.uid || null
+      });
+
+      await signOut(secondaryAuth);
+
+      createUserForm.reset();
+      createStatus.textContent = `✅ Utilisateur créé : ${email} — rôle ${roleLabel(role)}. UID : ${user.uid}`;
+
+    }catch(error){
+      console.error(error);
+      createStatus.textContent = "❌ Erreur : " + (error?.message || "Impossible de créer l’utilisateur.");
+    }finally{
+      setCreateLoading(false);
+    }
+  });
+
+  document.getElementById("btnLogout").onclick = async (event) => {
+    event.preventDefault();
+    await logout();
+    window.location.href = "../index.html";
+  };
+
+  onAuthStateChanged(auth, async (user) => {
+    accessDenied.style.display = "none";
+    pageContent.style.display = "none";
+    stopRoles();
+
+    if(!user){
+      accessDenied.style.display = "block";
+      return;
+    }
+
+    try{
+      const role = await getRoleByUid(user.uid);
+
+      if(role !== "admin"){
+        accessDenied.style.display = "block";
+        return;
+      }
+
+      adminStatus.textContent = `✅ Connecté admin : ${user.email}`;
+      pageContent.style.display = "block";
+      startRoles();
+
+    }catch(error){
+      console.error(error);
+      accessDenied.style.display = "block";
+    }
+  });
+</script>
+
+</body>
+</html>
