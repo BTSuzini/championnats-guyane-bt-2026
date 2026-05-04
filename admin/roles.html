@@ -124,6 +124,7 @@
     .btn.primary{background:linear-gradient(180deg,var(--blue),var(--blue-dark));color:#fff;border-color:var(--blue);}
     .btn.clay{background:linear-gradient(135deg,var(--clay),var(--clay-light));color:#fff;border-color:var(--clay);}
     .btn.danger{background:#fff5f5;color:#8a1f1f;border-color:#f1b2b2;}
+    .btn.whatsapp{background:#ecfff3;color:#087a35;border-color:#b8efca;}
     .btn:disabled{opacity:.55;cursor:not-allowed;}
 
     .status-box{
@@ -135,7 +136,8 @@
     .muted{color:var(--muted);font-size:14px;line-height:1.45;}
     .sep{border:none;border-top:1px solid rgba(16,24,40,.08);margin:18px 0;}
 
-    .role-card{
+    .role-card,
+    .invite-card{
       border-radius:20px;
       padding:14px;
       background:#fff;
@@ -189,11 +191,28 @@
     .badge.admin{background:linear-gradient(135deg,var(--clay),var(--clay-light));color:#fff;}
     .badge.jat{background:linear-gradient(135deg,#5322a8,#a457f0);color:#fff;}
     .badge.arbitre{background:linear-gradient(135deg,var(--blue),var(--sky));color:#fff;}
+    .badge.pending{background:#fff7e6;color:#9a5b00;border:1px solid #ffd37a;}
+    .badge.used{background:#ecfff3;color:#087a35;border:1px solid #b8efca;}
+
+    details.role-details{
+      border-top:1px solid rgba(16,24,40,.08);
+      padding-top:8px;
+    }
+
+    details.role-details summary{
+      cursor:pointer;
+      font-weight:1000;
+      color:var(--blue-dark);
+      list-style:none;
+    }
+
+    details.role-details summary::-webkit-details-marker{display:none;}
 
     .role-actions{
       display:grid;
       grid-template-columns:1fr;
       gap:8px;
+      margin-top:10px;
     }
 
     @media (min-width:760px){
@@ -253,7 +272,7 @@
       <div>
         <h2 class="panel-title">🔐 Gestion des accès</h2>
         <p class="panel-text">
-          Crée les comptes organisateurs et attribue les rôles Admin, JAT ou Arbitre.
+          Crée des invitations WhatsApp et gère les rôles actifs.
         </p>
       </div>
       <div class="panel-tag">Admin</div>
@@ -265,28 +284,16 @@
 
     <hr class="sep">
 
-    <h2 class="panel-title" style="font-size:24px;">➕ Créer un utilisateur</h2>
+    <h2 class="panel-title" style="font-size:24px;">➕ Créer une invitation</h2>
     <p class="panel-text">
-      Le compte sera créé dans Firebase Authentication, puis le rôle sera automatiquement ajouté dans Firestore.
+      Tu indiques seulement un nom/label et un rôle. L’utilisateur recevra un lien WhatsApp pour créer son compte avec son email et son mot de passe.
     </p>
 
-    <form id="createUserForm" class="grid" autocomplete="off" style="margin-top:14px;">
-      <div class="grid two">
+    <form id="inviteForm" class="grid" autocomplete="off" style="margin-top:14px;">
+      <div class="grid three">
         <div class="field">
-          <label for="email">Email *</label>
-          <input id="email" name="email" type="email" required placeholder="exemple@email.com">
-        </div>
-
-        <div class="field">
-          <label for="password">Mot de passe temporaire *</label>
-          <input id="password" name="password" type="password" required minlength="6" placeholder="Minimum 6 caractères">
-        </div>
-      </div>
-
-      <div class="grid two">
-        <div class="field">
-          <label for="label">Nom / label</label>
-          <input id="label" name="label" type="text" placeholder="Ex : Fabrice, JAT, Table 1…">
+          <label for="label">Nom / label *</label>
+          <input id="label" name="label" type="text" required placeholder="Ex : Fabrice, Table 1, Arbitre 2…">
         </div>
 
         <div class="field">
@@ -297,17 +304,32 @@
             <option value="admin">Admin</option>
           </select>
         </div>
+
+        <div class="field">
+          <label for="inviteCode">Code invitation</label>
+          <input id="inviteCode" name="inviteCode" type="text" value="Beach2026" readonly>
+        </div>
       </div>
 
-      <button class="btn clay" id="createBtn" type="submit">✅ Créer l’utilisateur et le rôle</button>
-      <p class="muted" id="createStatus" role="status" aria-live="polite" style="margin:0;"></p>
+      <button class="btn clay" id="createInviteBtn" type="submit">✅ Créer l’invitation</button>
+      <p class="muted" id="inviteStatus" role="status" aria-live="polite" style="margin:0;"></p>
     </form>
+
+    <hr class="sep">
+
+    <h2 class="panel-title" style="font-size:24px;">📨 Invitations en attente</h2>
+    <p class="panel-text">
+      Clique sur WhatsApp pour envoyer le lien d’activation.
+    </p>
+
+    <p class="muted" id="invitesCount" style="margin-top:12px;">Chargement…</p>
+    <div id="invitesList" class="grid" style="margin-top:12px;"></div>
 
     <hr class="sep">
 
     <h2 class="panel-title" style="font-size:24px;">👥 Rôles existants</h2>
     <p class="panel-text">
-      Modifier un rôle change immédiatement les droits associés à cet UID.
+      Les cartes sont compactes. Déplie une carte pour modifier le rôle, le label ou supprimer l’accès.
     </p>
 
     <p class="muted" id="rolesCount" style="margin-top:12px;">Chargement…</p>
@@ -317,14 +339,10 @@
 </main>
 
 <script type="module">
-  import { auth, db } from "../assets/js/firebase.js?v=roles1";
-  import { logout, getRoleByUid } from "../assets/js/session.js?v=roles1";
+  import { auth, db } from "../assets/js/firebase.js?v=roles2";
+  import { logout, getRoleByUid } from "../assets/js/session.js?v=roles2";
 
-  import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.5/firebase-app.js";
   import {
-    getAuth,
-    createUserWithEmailAndPassword,
-    signOut,
     sendPasswordResetEmail,
     onAuthStateChanged
   } from "https://www.gstatic.com/firebasejs/10.12.5/firebase-auth.js";
@@ -341,30 +359,26 @@
     onSnapshot
   } from "https://www.gstatic.com/firebasejs/10.12.5/firebase-firestore.js";
 
-  const firebaseConfig = {
-    apiKey: "AIzaSyAdjBE2UpEFRUgkASTaKP5X7vYr0ygzUzI",
-    authDomain: "championnats-guyane-bt-2026.firebaseapp.com",
-    projectId: "championnats-guyane-bt-2026",
-    storageBucket: "championnats-guyane-bt-2026.firebasestorage.app",
-    messagingSenderId: "639869315232",
-    appId: "1:639869315232:web:c73adb022414faf1d641c5"
-  };
-
-  const secondaryApp = initializeApp(firebaseConfig, "secondary-auth-roles");
-  const secondaryAuth = getAuth(secondaryApp);
+  const FIRST_ADMIN_UID = "VDvjleXzgQOS2MCtqxennuEOJq83";
+  const FIRST_ADMIN_EMAIL = "tcsuzini.beachtennis@gmail.com";
+  const GENERIC_INVITE_CODE = "Beach2026";
 
   const accessDenied = document.getElementById("accessDenied");
   const pageContent = document.getElementById("pageContent");
   const adminStatus = document.getElementById("adminStatus");
 
-  const createUserForm = document.getElementById("createUserForm");
-  const createBtn = document.getElementById("createBtn");
-  const createStatus = document.getElementById("createStatus");
+  const inviteForm = document.getElementById("inviteForm");
+  const createInviteBtn = document.getElementById("createInviteBtn");
+  const inviteStatus = document.getElementById("inviteStatus");
+
+  const invitesCount = document.getElementById("invitesCount");
+  const invitesList = document.getElementById("invitesList");
 
   const rolesCount = document.getElementById("rolesCount");
   const rolesList = document.getElementById("rolesList");
 
   let unsubscribeRoles = null;
+  let unsubscribeInvites = null;
 
   function esc(str){
     return (str || "")
@@ -388,9 +402,47 @@
     return "Arbitre";
   }
 
-  function setCreateLoading(isLoading){
-    createBtn.disabled = isLoading;
-    createBtn.textContent = isLoading ? "Création en cours…" : "✅ Créer l’utilisateur et le rôle";
+  function makeInviteId(){
+    const chars = "ABCDEFGHJKLMNPQRSTUVWXYZ23456789";
+    let out = "";
+    for(let i=0;i<8;i++){
+      out += chars[Math.floor(Math.random() * chars.length)];
+    }
+    return out;
+  }
+
+  function joinUrl(inviteId){
+    const base = location.href.split("/admin/")[0] + "/";
+    return `${base}join.html?invite=${encodeURIComponent(inviteId)}`;
+  }
+
+  function whatsappText(invite){
+    const url = joinUrl(invite.id);
+
+    return [
+      "Coucou 👋",
+      "",
+      "Ton accès organisateur pour les Championnats Guyane Beach Tennis est prêt ✅",
+      "",
+      `Nom : ${invite.label}`,
+      `Rôle : ${roleLabel(invite.role)}`,
+      "",
+      "Pour activer ton accès :",
+      "1️⃣ Clique sur le lien ci-dessous",
+      "2️⃣ Renseigne ton email",
+      "3️⃣ Choisis ton mot de passe",
+      "4️⃣ Valide ton accès",
+      "",
+      url,
+      "",
+      `Code invitation : ${GENERIC_INVITE_CODE}`,
+      "",
+      "À très vite 🔐🏖️🎾"
+    ].join("\n");
+  }
+
+  function whatsappHref(invite){
+    return `https://wa.me/?text=${encodeURIComponent(whatsappText(invite))}`;
   }
 
   function stopRoles(){
@@ -398,6 +450,77 @@
       unsubscribeRoles();
       unsubscribeRoles = null;
     }
+  }
+
+  function stopInvites(){
+    if(unsubscribeInvites){
+      unsubscribeInvites();
+      unsubscribeInvites = null;
+    }
+  }
+
+  function startInvites(){
+    stopInvites();
+
+    invitesCount.textContent = "Chargement…";
+    invitesList.innerHTML = "";
+
+    const q = query(collection(db, "invites"), orderBy("createdAt", "desc"));
+
+    unsubscribeInvites = onSnapshot(q, (snap) => {
+      const items = snap.docs.map(d => ({ id:d.id, ...d.data() }));
+      const pending = items.filter(i => (i.status || "pending") === "pending");
+
+      invitesCount.textContent = `📌 ${pending.length} invitation${pending.length > 1 ? "s" : ""} en attente`;
+
+      if(pending.length === 0){
+        invitesList.innerHTML = `<p class="muted" style="margin:0;">Aucune invitation en attente.</p>`;
+        return;
+      }
+
+      invitesList.innerHTML = pending.map(invite => `
+        <div class="invite-card" data-id="${esc(invite.id)}">
+          <div class="role-top">
+            <div style="min-width:0;">
+              <div class="role-name">${esc(invite.label || "Invitation")}</div>
+              <div class="role-email">Code : ${esc(GENERIC_INVITE_CODE)}</div>
+              <div class="role-uid">${esc(joinUrl(invite.id))}</div>
+            </div>
+            <span class="badge pending">${esc(roleLabel(invite.role))}</span>
+          </div>
+
+          <div class="role-actions">
+            <a class="btn whatsapp" href="${esc(whatsappHref(invite))}" target="_blank" rel="noopener">💬 Envoyer WhatsApp</a>
+            <button class="btn primary btn-copy" type="button">📋 Copier le lien</button>
+            <button class="btn danger btn-delete-invite" type="button">🗑️ Supprimer</button>
+          </div>
+        </div>
+      `).join("");
+
+      invitesList.querySelectorAll(".invite-card").forEach(card => {
+        const id = card.dataset.id;
+
+        card.querySelector(".btn-copy").onclick = async () => {
+          try{
+            await navigator.clipboard.writeText(joinUrl(id));
+            alert("Lien copié ✅");
+          }catch(error){
+            alert(joinUrl(id));
+          }
+        };
+
+        card.querySelector(".btn-delete-invite").onclick = async () => {
+          const ok = confirm("Supprimer cette invitation ?");
+          if(!ok) return;
+
+          await deleteDoc(doc(db, "invites", id));
+        };
+      });
+
+    }, (error) => {
+      console.error(error);
+      invitesCount.textContent = "❌ Impossible de charger les invitations.";
+    });
   }
 
   function startRoles(){
@@ -408,8 +531,23 @@
 
     const q = query(collection(db, "roles"), orderBy("role", "asc"));
 
-    unsubscribeRoles = onSnapshot(q, (snap) => {
+    unsubscribeRoles = onSnapshot(q, async (snap) => {
       const items = snap.docs.map(d => ({ uid:d.id, ...d.data() }));
+
+      for(const item of items){
+        if(item.uid === FIRST_ADMIN_UID && !item.email){
+          try{
+            await updateDoc(doc(db, "roles", item.uid), {
+              email: FIRST_ADMIN_EMAIL,
+              label: item.label || "TC Suzini Beach Tennis",
+              updatedAt: serverTimestamp(),
+              updatedBy: auth.currentUser?.uid || null
+            });
+          }catch(error){
+            console.warn("Email admin initial non mis à jour", error);
+          }
+        }
+      }
 
       rolesCount.textContent = `📌 ${items.length} rôle${items.length > 1 ? "s" : ""}`;
 
@@ -429,32 +567,49 @@
               <div style="min-width:0;">
                 <div class="role-name">${esc(label)}</div>
                 <div class="role-email">${esc(email || "Email non renseigné")}</div>
-                <div class="role-uid">${esc(item.uid)}</div>
               </div>
               <span class="badge ${badgeClass(role)}">${esc(roleLabel(role))}</span>
             </div>
 
-            <div class="grid two">
-              <div class="field">
-                <label>Modifier le rôle</label>
-                <select class="role-select">
-                  <option value="arbitre" ${role === "arbitre" ? "selected" : ""}>Arbitre</option>
-                  <option value="jat" ${role === "jat" ? "selected" : ""}>Juge-arbitre</option>
-                  <option value="admin" ${role === "admin" ? "selected" : ""}>Admin</option>
-                </select>
+            <details class="role-details">
+              <summary>⚙️ Modifier / détails</summary>
+
+              <div class="role-uid">${esc(item.uid)}</div>
+
+              <div class="grid two" style="margin-top:10px;">
+                <div class="field">
+                  <label>Modifier le rôle</label>
+                  <select class="role-select">
+                    <option value="arbitre" ${role === "arbitre" ? "selected" : ""}>Arbitre</option>
+                    <option value="jat" ${role === "jat" ? "selected" : ""}>Juge-arbitre</option>
+                    <option value="admin" ${role === "admin" ? "selected" : ""}>Admin</option>
+                  </select>
+                </div>
+
+                <div class="field">
+                  <label>Modifier le label</label>
+                  <input class="label-input" type="text" value="${esc(item.label || "")}" placeholder="Nom / fonction">
+                </div>
               </div>
 
-              <div class="field">
-                <label>Modifier le label</label>
-                <input class="label-input" type="text" value="${esc(item.label || "")}" placeholder="Nom / fonction">
-              </div>
-            </div>
+              <div class="grid two" style="margin-top:10px;">
+                <div class="field">
+                  <label>Modifier l’email affiché</label>
+                  <input class="email-input" type="email" value="${esc(email)}" placeholder="email@exemple.com">
+                </div>
 
-            <div class="role-actions">
-              <button class="btn primary btn-save" type="button">💾 Enregistrer</button>
-              <button class="btn btn-reset" type="button" data-email="${esc(email)}">🔑 Mail reset password</button>
-              <button class="btn danger btn-delete" type="button">🗑️ Supprimer le rôle</button>
-            </div>
+                <div class="field">
+                  <label>UID</label>
+                  <input type="text" value="${esc(item.uid)}" readonly>
+                </div>
+              </div>
+
+              <div class="role-actions">
+                <button class="btn primary btn-save" type="button">💾 Enregistrer</button>
+                <button class="btn btn-reset" type="button" data-email="${esc(email)}">🔑 Mail reset password</button>
+                <button class="btn danger btn-delete" type="button">🗑️ Supprimer le rôle</button>
+              </div>
+            </details>
           </div>
         `;
       }).join("");
@@ -463,6 +618,7 @@
         const uid = card.dataset.uid;
         const select = card.querySelector(".role-select");
         const labelInput = card.querySelector(".label-input");
+        const emailInput = card.querySelector(".email-input");
         const btnSave = card.querySelector(".btn-save");
         const btnDelete = card.querySelector(".btn-delete");
         const btnReset = card.querySelector(".btn-reset");
@@ -475,6 +631,7 @@
             await updateDoc(doc(db, "roles", uid), {
               role: select.value,
               label: labelInput.value.trim(),
+              email: emailInput.value.trim(),
               updatedAt: serverTimestamp(),
               updatedBy: auth.currentUser?.uid || null
             });
@@ -503,7 +660,7 @@
         };
 
         btnReset.onclick = async () => {
-          const email = btnReset.dataset.email || "";
+          const email = emailInput.value.trim() || btnReset.dataset.email || "";
           if(!email){
             alert("Aucun email enregistré pour cet utilisateur.");
             return;
@@ -525,46 +682,43 @@
     });
   }
 
-  createUserForm.addEventListener("submit", async (event) => {
+  inviteForm.addEventListener("submit", async (event) => {
     event.preventDefault();
 
-    setCreateLoading(true);
-    createStatus.textContent = "Création de l’utilisateur…";
+    createInviteBtn.disabled = true;
+    createInviteBtn.textContent = "Création…";
+    inviteStatus.textContent = "Création de l’invitation…";
 
     try{
-      const email = createUserForm.email.value.trim();
-      const password = createUserForm.password.value;
-      const role = createUserForm.role.value;
-      const label = createUserForm.label.value.trim();
+      const label = inviteForm.label.value.trim();
+      const role = inviteForm.role.value;
 
-      if(!email || !password || !role){
-        throw new Error("Email, mot de passe et rôle obligatoires.");
+      if(!label || !role){
+        throw new Error("Nom/label et rôle obligatoires.");
       }
 
-      const cred = await createUserWithEmailAndPassword(secondaryAuth, email, password);
-      const user = cred.user;
+      const inviteId = makeInviteId();
 
-      await setDoc(doc(db, "roles", user.uid), {
-        uid: user.uid,
-        email,
+      await setDoc(doc(db, "invites", inviteId), {
         label,
         role,
+        code: GENERIC_INVITE_CODE,
+        status: "pending",
         createdAt: serverTimestamp(),
         updatedAt: serverTimestamp(),
-        createdBy: auth.currentUser?.uid || null,
-        updatedBy: auth.currentUser?.uid || null
+        createdBy: auth.currentUser?.uid || null
       });
 
-      await signOut(secondaryAuth);
-
-      createUserForm.reset();
-      createStatus.textContent = `✅ Utilisateur créé : ${email} — rôle ${roleLabel(role)}. UID : ${user.uid}`;
+      inviteForm.reset();
+      inviteForm.inviteCode.value = GENERIC_INVITE_CODE;
+      inviteStatus.textContent = `✅ Invitation créée pour ${label}.`;
 
     }catch(error){
       console.error(error);
-      createStatus.textContent = "❌ Erreur : " + (error?.message || "Impossible de créer l’utilisateur.");
+      inviteStatus.textContent = "❌ Erreur : " + (error?.message || "Impossible de créer l’invitation.");
     }finally{
-      setCreateLoading(false);
+      createInviteBtn.disabled = false;
+      createInviteBtn.textContent = "✅ Créer l’invitation";
     }
   });
 
@@ -578,6 +732,7 @@
     accessDenied.style.display = "none";
     pageContent.style.display = "none";
     stopRoles();
+    stopInvites();
 
     if(!user){
       accessDenied.style.display = "block";
@@ -594,6 +749,7 @@
 
       adminStatus.textContent = `✅ Connecté admin : ${user.email}`;
       pageContent.style.display = "block";
+      startInvites();
       startRoles();
 
     }catch(error){
