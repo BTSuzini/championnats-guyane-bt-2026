@@ -245,12 +245,27 @@ function centerActiveNav(){
 
   if(!nav || !active) return;
 
-  const target =
-    active.offsetLeft -
-    (nav.clientWidth / 2) +
-    (active.clientWidth / 2);
+  const navRect = nav.getBoundingClientRect();
+  const activeRect = active.getBoundingClientRect();
 
-  nav.scrollLeft = Math.max(0, target);
+  const activeCenter =
+    active.offsetLeft + (activeRect.width / 2);
+
+  const target =
+    activeCenter - (navRect.width / 2);
+
+  nav.scrollTo({
+    left: Math.max(0, target),
+    behavior: "auto"
+  });
+}
+
+function centerActiveNavAfterLoad(){
+  centerActiveNav();
+  requestAnimationFrame(centerActiveNav);
+  setTimeout(centerActiveNav, 80);
+  setTimeout(centerActiveNav, 250);
+  setTimeout(centerActiveNav, 600);
 }
 
 function renderHeader(){
@@ -289,14 +304,11 @@ function renderHeader(){
     </header>
   `;
 
-  requestAnimationFrame(() => {
-    centerActiveNav();
+  centerActiveNavAfterLoad();
+
+  window.addEventListener("resize", () => {
+    centerActiveNavAfterLoad();
   });
-
-  setTimeout(centerActiveNav, 80);
-  setTimeout(centerActiveNav, 250);
-
-  window.addEventListener("resize", centerActiveNav);
 }
 
 injectStyles();
