@@ -49,6 +49,32 @@ function emitZoneChange(categorie, epreuve){
   }));
 }
 
+function centerActiveNav(){
+  const nav = document.querySelector(".admin-nav");
+  const active = document.querySelector(".admin-nav-link.primary");
+
+  if(!nav || !active) return;
+
+  const navRect = nav.getBoundingClientRect();
+  const activeRect = active.getBoundingClientRect();
+
+  const activeCenter = active.offsetLeft + (activeRect.width / 2);
+  const target = activeCenter - (navRect.width / 2);
+
+  nav.scrollTo({
+    left: Math.max(0, target),
+    behavior: "auto"
+  });
+}
+
+function centerActiveNavAfterLoad(){
+  centerActiveNav();
+  requestAnimationFrame(centerActiveNav);
+  setTimeout(centerActiveNav, 80);
+  setTimeout(centerActiveNav, 250);
+  setTimeout(centerActiveNav, 600);
+}
+
 function injectStyles(){
   if(document.getElementById("adminHeaderStyles")) return;
 
@@ -196,6 +222,7 @@ function injectStyles(){
       padding:2px 4px;
       scrollbar-width:none;
       -webkit-overflow-scrolling:touch;
+      scroll-behavior:smooth;
     }
 
     .admin-nav::-webkit-scrollbar{display:none;}
@@ -225,48 +252,46 @@ function injectStyles(){
       left:0;
       right:0;
       z-index:998;
-      background:linear-gradient(135deg,#dff7ff,#effcff);
-      border-top:1px solid rgba(255,255,255,.65);
+      background:
+        radial-gradient(circle at 18% 10%, rgba(255,255,255,.42), transparent 24%),
+        radial-gradient(circle at 80% 24%, rgba(255,255,255,.26), transparent 24%),
+        linear-gradient(135deg,#23b7ea 0%,#7fdfff 48%,#f5fdff 100%);
+      box-shadow:0 8px 18px rgba(16,24,40,.08);
       border-bottom:1px solid rgba(7,91,154,.10);
-      box-shadow:0 8px 18px rgba(16,24,40,.06);
-      padding:12px 0 14px;
+      padding:14px 0 16px;
     }
 
     .admin-zone-inner{
       display:grid;
       gap:8px;
-      justify-items:center;
     }
 
     .admin-zone-line{
-      width:100%;
       display:flex;
-      align-items:center;
       justify-content:center;
+      align-items:center;
       gap:10px;
       overflow-x:auto;
       scrollbar-width:none;
       -webkit-overflow-scrolling:touch;
-      padding:2px 8px;
-      scroll-padding-left:14px;
-      scroll-padding-right:14px;
+      padding:3px 2px;
     }
 
     .admin-zone-line::-webkit-scrollbar{display:none;}
 
     .admin-zone-btn{
       flex:0 0 auto;
-      min-width:88px;
-      min-height:36px;
-      padding:8px 18px;
+      min-height:34px;
+      padding:7px 18px;
       border-radius:999px;
-      border:1px solid rgba(7,91,154,.14);
-      background:#fff;
+      border:1px solid rgba(255,255,255,.36);
+      background:rgba(255,255,255,.82);
       color:#1c2430;
       font-size:13px;
       font-weight:1000;
       cursor:pointer;
-      box-shadow:0 5px 12px rgba(16,24,40,.05);
+      box-shadow:0 5px 12px rgba(16,24,40,.08);
+      touch-action:manipulation;
       text-align:center;
       white-space:nowrap;
     }
@@ -275,20 +300,21 @@ function injectStyles(){
       background:linear-gradient(180deg,var(--blue),var(--blue-dark));
       color:#fff;
       border-color:var(--blue);
-      box-shadow:0 8px 18px rgba(7,91,154,.22);
+      box-shadow:0 8px 18px rgba(7,91,154,.24);
     }
 
     .admin-zone-btn.all-active{
-      background:linear-gradient(180deg,#e4f7ff,#c9f0ff);
-      color:var(--blue-dark);
-      border-color:rgba(39,188,237,.28);
+      background:linear-gradient(180deg,var(--blue),var(--blue-dark));
+      color:#fff;
+      border-color:var(--blue);
+      box-shadow:0 8px 18px rgba(7,91,154,.24);
     }
 
     .admin-zone-btn.all-active[aria-selected="true"]{
-      background:linear-gradient(180deg,#e4f7ff,#c9f0ff);
-      color:var(--blue-dark);
-      border-color:rgba(39,188,237,.28);
-      box-shadow:0 5px 12px rgba(16,24,40,.05);
+      background:linear-gradient(180deg,var(--blue),var(--blue-dark));
+      color:#fff;
+      border-color:var(--blue);
+      box-shadow:0 8px 18px rgba(7,91,154,.24);
     }
 
     @media (min-width:760px){
@@ -299,10 +325,6 @@ function injectStyles(){
       .admin-header-logo{
         width:96px;
         height:80px;
-      }
-
-      .admin-nav{
-        justify-content:center;
       }
     }
 
@@ -406,6 +428,12 @@ function renderHeader(){
   }else{
     emitZoneChange("ALL", "ALL");
   }
+
+  centerActiveNavAfterLoad();
+
+  window.addEventListener("resize", () => {
+    centerActiveNavAfterLoad();
+  });
 }
 
 function bindZoneButtons(initialCategorie, initialEpreuve){
