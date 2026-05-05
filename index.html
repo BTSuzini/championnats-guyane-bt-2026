@@ -7,21 +7,13 @@
 
   <style>
     :root{
-      --clay:#c65a1e;
-      --clay-dark:#8e3a13;
-      --clay-light:#ee8a3a;
-      --sky:#27bced;
-      --sky-light:#e9faff;
-      --aqua:#00a9c8;
-      --blue:#075b9a;
-      --blue-dark:#063b72;
-      --white:#ffffff;
-      --text:#17212b;
-      --muted:#667085;
-      --card:rgba(255,255,255,.94);
+      --clay:#c65a1e; --clay-dark:#8e3a13; --clay-light:#ee8a3a;
+      --sky:#27bced; --aqua:#00a9c8; --blue:#075b9a; --blue-dark:#063b72;
+      --text:#17212b; --muted:#667085; --card:rgba(255,255,255,.94);
       --shadow:0 16px 40px rgba(16,24,40,.12);
       --container:1180px;
-      --header-h:150px;
+      --public-header-h:158px;
+      --public-total-top:158px;
     }
 
     *{box-sizing:border-box;}
@@ -39,53 +31,43 @@
     a{color:inherit;text-decoration:none;}
     img{display:block;max-width:100%;}
 
-    .container{
+    .container,
+    .public-container{
       width:min(var(--container), calc(100% - 28px));
       margin:0 auto;
     }
 
-    .site-header{
+    .public-site-header{
       position:fixed;
-      top:0;
-      left:0;
-      right:0;
+      top:0;left:0;right:0;
       z-index:1000;
       background:linear-gradient(135deg,var(--clay-dark),var(--clay),var(--clay-light));
-      border-bottom:1px solid rgba(0,0,0,.08);
       box-shadow:0 10px 26px rgba(142,58,19,.28);
     }
 
-    .header-inner{
-      min-height:var(--header-h);
+    .public-header-inner{
+      min-height:var(--public-header-h);
       display:grid;
       grid-template-columns:80px 1fr 80px;
       grid-template-rows:auto auto;
       align-items:center;
       gap:10px 18px;
-      padding:12px 0;
+      padding:12px 0 14px;
     }
 
-    .header-logo{
-      width:80px;
-      height:80px;
-      display:flex;
-      align-items:center;
-      justify-content:center;
+    .public-header-logo{
+      width:80px;height:80px;
+      display:flex;align-items:center;justify-content:center;
     }
 
-    .header-logo img{
-      max-width:100%;
-      max-height:100%;
-      object-fit:contain;
+    .public-header-logo img{
+      max-width:100%;max-height:100%;object-fit:contain;
       filter:drop-shadow(0 6px 10px rgba(0,0,0,.18));
     }
 
-    .header-title{
-      text-align:center;
-      color:#fff;
-    }
+    .public-header-title{text-align:center;color:#fff;}
 
-    .header-title strong{
+    .public-header-title strong{
       display:block;
       font-size:clamp(22px,4vw,42px);
       line-height:.95;
@@ -94,45 +76,41 @@
       font-weight:1000;
     }
 
-    .header-nav-wrap{
+    .public-nav-wrap{
       grid-column:1 / 4;
       position:relative;
       overflow:hidden;
       padding:0 34px;
     }
 
-    .header-nav-wrap::before,
-    .header-nav-wrap::after{
+    .public-nav-wrap::before,
+    .public-nav-wrap::after{
       content:"";
       position:absolute;
-      top:0;
-      bottom:0;
+      top:0;bottom:0;
       width:40px;
       z-index:2;
       pointer-events:none;
     }
 
-    .header-nav-wrap::before{
+    .public-nav-wrap::before{
       left:0;
       background:linear-gradient(90deg, rgba(142,58,19,.98), rgba(142,58,19,0));
     }
 
-    .header-nav-wrap::after{
+    .public-nav-wrap::after{
       right:0;
       background:linear-gradient(270deg, rgba(198,90,30,.98), rgba(198,90,30,0));
     }
 
-    .nav-arrow{
+    .public-nav-arrow{
       position:absolute;
       top:50%;
       transform:translateY(-50%);
       z-index:3;
-      width:28px;
-      height:28px;
+      width:28px;height:28px;
       border-radius:999px;
-      display:flex;
-      align-items:center;
-      justify-content:center;
+      display:flex;align-items:center;justify-content:center;
       background:rgba(255,255,255,.88);
       color:var(--clay-dark);
       font-size:20px;
@@ -141,21 +119,22 @@
       pointer-events:none;
     }
 
-    .nav-arrow.left{left:2px;}
-    .nav-arrow.right{right:2px;}
+    .public-nav-arrow.left{left:2px;}
+    .public-nav-arrow.right{right:2px;}
 
-    .header-nav{
+    .public-nav{
       display:flex;
       gap:10px;
       overflow-x:auto;
       padding:2px 4px;
       scrollbar-width:none;
       -webkit-overflow-scrolling:touch;
+      scroll-behavior:smooth;
     }
 
-    .header-nav::-webkit-scrollbar{display:none;}
+    .public-nav::-webkit-scrollbar{display:none;}
 
-    .nav-link{
+    .public-nav-link{
       flex:0 0 auto;
       min-height:42px;
       padding:10px 17px;
@@ -166,25 +145,26 @@
       font-weight:900;
       white-space:nowrap;
       box-shadow:0 8px 16px rgba(0,0,0,.14);
+      text-decoration:none;
     }
 
-    .nav-link.primary{
+    .public-nav-link.primary{
       background:linear-gradient(180deg,var(--blue),var(--blue-dark));
       color:#fff;
     }
 
     main{
-      padding-top:calc(var(--header-h) + 24px);
+      padding-top:calc(var(--public-total-top, 158px) + 20px);
       padding-bottom:42px;
     }
 
-    .section{margin-top:22px;}
+    .section{margin-top:16px;}
 
     .hero{
       position:relative;
       overflow:hidden;
-      border-radius:32px;
-      padding:28px 22px 24px;
+      border-radius:26px;
+      padding:22px 18px;
       color:#fff;
       background:
         radial-gradient(circle at 18% 10%, rgba(255,255,255,.42), transparent 24%),
@@ -207,7 +187,7 @@
       position:relative;
       z-index:1;
       display:grid;
-      gap:20px;
+      gap:14px;
       text-align:center;
     }
 
@@ -215,15 +195,15 @@
       display:flex;
       flex-wrap:wrap;
       justify-content:center;
-      gap:10px;
+      gap:8px;
     }
 
     .pill{
-      padding:9px 14px;
+      padding:8px 12px;
       border-radius:999px;
       background:rgba(255,255,255,.22);
       color:#fff;
-      font-size:13px;
+      font-size:12px;
       font-weight:900;
       box-shadow:inset 0 0 0 1px rgba(255,255,255,.28);
       backdrop-filter:blur(8px);
@@ -231,7 +211,7 @@
 
     .hero-title{
       margin:0;
-      font-size:clamp(34px,7vw,76px);
+      font-size:clamp(30px,7vw,68px);
       line-height:.92;
       letter-spacing:-.06em;
       font-weight:1000;
@@ -240,8 +220,8 @@
     }
 
     .hero-date{
-      margin-top:14px;
-      font-size:clamp(30px,5vw,56px);
+      margin-top:8px;
+      font-size:clamp(24px,5vw,48px);
       font-weight:1000;
       color:var(--blue-dark);
       text-transform:uppercase;
@@ -249,9 +229,9 @@
 
     .hero-sub{
       max-width:760px;
-      margin:14px auto 0;
-      font-size:16px;
-      line-height:1.55;
+      margin:8px auto 0;
+      font-size:15px;
+      line-height:1.4;
       color:#073b68;
       font-weight:700;
     }
@@ -259,14 +239,13 @@
     .hero-infos{
       display:grid;
       grid-template-columns:1fr;
-      gap:12px;
-      margin-top:8px;
+      gap:10px;
     }
 
     .hero-info{
       text-align:left;
-      padding:16px 18px;
-      border-radius:20px;
+      padding:13px 14px;
+      border-radius:18px;
       background:rgba(255,255,255,.78);
       color:#12324c;
       box-shadow:inset 0 0 0 1px rgba(255,255,255,.5);
@@ -275,34 +254,33 @@
     .hero-info strong{
       display:block;
       color:var(--clay-dark);
-      font-size:13px;
+      font-size:12px;
       text-transform:uppercase;
       letter-spacing:.08em;
-      margin-bottom:6px;
+      margin-bottom:4px;
     }
 
     .hero-info span{
       display:block;
-      font-size:16px;
+      font-size:15px;
       font-weight:900;
-      line-height:1.35;
+      line-height:1.25;
     }
 
     .hero-actions{
       display:grid;
       grid-template-columns:1fr;
-      gap:12px;
-      margin-top:4px;
+      gap:10px;
     }
 
     .hero-btn{
-      min-height:58px;
+      min-height:54px;
       border-radius:18px;
       display:flex;
       align-items:center;
       justify-content:center;
-      padding:14px 18px;
-      font-size:16px;
+      padding:13px 16px;
+      font-size:15px;
       font-weight:1000;
       box-shadow:0 12px 24px rgba(6,59,114,.18);
     }
@@ -320,9 +298,9 @@
     .panel{
       background:var(--card);
       border:1px solid rgba(255,255,255,.6);
-      border-radius:28px;
+      border-radius:24px;
       box-shadow:var(--shadow);
-      padding:20px;
+      padding:18px;
     }
 
     .panel-head{
@@ -330,21 +308,21 @@
       justify-content:space-between;
       align-items:flex-start;
       gap:12px;
-      margin-bottom:16px;
+      margin-bottom:14px;
     }
 
     .panel-title{
       margin:0;
-      font-size:28px;
+      font-size:24px;
       line-height:1.05;
       letter-spacing:-.03em;
     }
 
     .panel-text{
-      margin:8px 0 0;
+      margin:6px 0 0;
       color:var(--muted);
-      font-size:15px;
-      line-height:1.55;
+      font-size:14px;
+      line-height:1.35;
     }
 
     .panel-tag{
@@ -362,47 +340,41 @@
     .grid-main{
       display:grid;
       grid-template-columns:1fr;
-      gap:14px;
+      gap:10px;
     }
 
     .entry-card{
       position:relative;
       overflow:hidden;
-      border-radius:24px;
-      min-height:116px;
-      padding:18px;
+      border-radius:20px;
+      min-height:96px;
+      padding:15px;
       color:#fff;
-      box-shadow:0 16px 28px rgba(16,24,40,.14);
-      transition:transform .18s ease, box-shadow .18s ease;
-    }
-
-    .entry-card:hover{
-      transform:translateY(-2px);
-      box-shadow:0 20px 34px rgba(16,24,40,.18);
+      box-shadow:0 10px 22px rgba(16,24,40,.12);
     }
 
     .entry-kicker{
-      font-size:13px;
+      font-size:12px;
       font-weight:900;
       text-transform:uppercase;
       letter-spacing:.08em;
       opacity:.9;
-      margin-bottom:8px;
+      margin-bottom:6px;
     }
 
     .entry-title{
-      font-size:28px;
+      font-size:24px;
       line-height:1.02;
       letter-spacing:-.03em;
       font-weight:1000;
-      margin:0 0 8px;
+      margin:0 0 6px;
     }
 
     .entry-sub{
-      font-size:15px;
-      line-height:1.45;
+      font-size:14px;
+      line-height:1.35;
       opacity:.96;
-      max-width:92%;
+      max-width:96%;
     }
 
     .card-clay{background:linear-gradient(135deg,var(--clay-dark),var(--clay),var(--clay-light));}
@@ -411,19 +383,18 @@
     .card-white{
       color:#12324c;
       background:linear-gradient(135deg,#ffffff,#e6faff);
-      box-shadow:inset 0 0 0 1px rgba(7,91,154,.12), 0 16px 28px rgba(16,24,40,.10);
+      box-shadow:inset 0 0 0 1px rgba(7,91,154,.12), 0 10px 22px rgba(16,24,40,.10);
     }
 
     .category-box{
-      margin-top:14px;
       display:grid;
       grid-template-columns:repeat(2,1fr);
       gap:10px;
     }
 
     .category-item{
-      border-radius:18px;
-      padding:14px;
+      border-radius:16px;
+      padding:12px;
       background:#f4fbff;
       border:1px solid rgba(7,91,154,.10);
       text-align:center;
@@ -431,32 +402,27 @@
       color:var(--blue-dark);
     }
 
-    .note{
-      margin-top:14px;
-      padding:15px 16px;
+    .category-item small{
+      color:var(--muted);
+      font-weight:900;
+    }
+
+    .note,
+    .status-box{
+      margin-top:12px;
+      padding:13px 14px;
       border-radius:18px;
-      background:linear-gradient(135deg,rgba(39,188,237,.14),rgba(198,90,30,.08));
+      background:linear-gradient(135deg,rgba(39,188,237,.12),rgba(198,90,30,.08));
       border:1px solid rgba(39,188,237,.22);
       color:#475467;
       font-size:14px;
-      line-height:1.55;
-    }
-
-    .status-box{
-      margin-top:14px;
-      padding:14px 16px;
-      border-radius:18px;
-      background:#f8fafc;
-      border:1px solid rgba(16,24,40,.06);
-      color:#475467;
-      font-size:14px;
-      line-height:1.5;
+      line-height:1.45;
     }
 
     .status-box strong{color:#1d2733;}
 
     .mini-link{
-      min-height:54px;
+      min-height:50px;
       display:inline-flex;
       align-items:center;
       justify-content:center;
@@ -485,34 +451,21 @@
       vertical-align:middle;
     }
 
-    .role-badge.admin{
-      background:linear-gradient(135deg,var(--clay),var(--clay-light));
-      color:#fff;
-    }
-
-    .role-badge.jat{
-      background:linear-gradient(135deg,#5322a8,#a457f0);
-      color:#fff;
-    }
-
-    .role-badge.arbitre{
-      background:linear-gradient(135deg,var(--blue),var(--sky));
-      color:#fff;
-    }
-
-    .role-badge.none{
-      background:#eef2f6;
-      color:#475467;
-    }
+    .role-badge.admin{background:linear-gradient(135deg,var(--clay),var(--clay-light));color:#fff;}
+    .role-badge.jat{background:linear-gradient(135deg,#5322a8,#a457f0);color:#fff;}
+    .role-badge.arbitre{background:linear-gradient(135deg,var(--blue),var(--sky));color:#fff;}
+    .role-badge.none{background:#eef2f6;color:#475467;}
 
     @media (min-width:760px){
-      :root{--header-h:158px;}
+      :root{
+        --public-header-h:158px;
+        --public-total-top:158px;
+      }
 
-      .header-inner{grid-template-columns:100px 1fr 100px;}
-      .header-logo{width:96px;height:80px;}
-      .header-nav{justify-content:center;}
+      .public-header-inner{grid-template-columns:100px 1fr 100px;}
+      .public-header-logo{width:96px;height:80px;}
 
-      .hero{padding:34px 30px 32px;}
+      .hero{padding:32px 30px;}
       .hero-infos{grid-template-columns:1fr 1fr 1fr;}
 
       .hero-actions{
@@ -524,45 +477,26 @@
 
       .grid-main{grid-template-columns:1fr 1fr;}
       .category-box{grid-template-columns:repeat(4,1fr);}
-      .panel{padding:24px;}
+      .panel{padding:22px;}
+      .panel-title{font-size:28px;}
+    }
+
+    @media (max-width:759px){
+      :root{
+        --public-header-h:150px;
+        --public-total-top:150px;
+      }
+
+      main{
+        padding-top:calc(var(--public-total-top, 150px) + 16px);
+      }
     }
   </style>
 </head>
 
 <body>
 
-<header class="site-header">
-  <div class="container header-inner">
-
-    <div class="header-logo">
-      <img src="assets/img/logo-lg.png" alt="Ligue Guyane">
-    </div>
-
-    <div class="header-title">
-      <strong>Championnats Guyane<br>Beach Tennis</strong>
-    </div>
-
-    <div class="header-logo">
-      <img src="assets/img/logo-lg.png" alt="Ligue Guyane">
-    </div>
-
-    <div class="header-nav-wrap">
-      <span class="nav-arrow left">‹</span>
-      <nav class="header-nav" aria-label="Navigation principale">
-        <a class="nav-link primary" href="index.html">🏠 Accueil</a>
-        <a class="nav-link" href="public/inscriptions.html">📝 Inscriptions</a>
-        <a class="nav-link" href="public/equipes.html">👥 Équipes</a>
-        <a class="nav-link" href="public/programmation.html">📅 Programmation</a>
-        <a class="nav-link" href="public/resultats.html">🏆 Résultats</a>
-        <a class="nav-link" href="public/reglement.html">📘 Règlement</a>
-        <a class="nav-link" href="public/restauration.html">🍽️ Restauration</a>
-        <a class="nav-link" href="public/contact.html">📩 Contact</a>
-      </nav>
-      <span class="nav-arrow right">›</span>
-    </div>
-
-  </div>
-</header>
+<div id="publicHeader"></div>
 
 <main class="container">
 
@@ -579,10 +513,9 @@
 
         <div>
           <h1 class="hero-title">Championnats Guyane Beach Tennis</h1>
-          <div class="hero-date">Du 09 au 10 mai 2026</div>
+          <div class="hero-date">09 & 10 mai 2026</div>
           <p class="hero-sub">
-            Mini-site officiel du tournoi : inscriptions, équipes engagées,
-            programmation, résultats et informations pratiques.
+            Mini-site officiel du tournoi : inscriptions, équipes, programmation, résultats et infos pratiques.
           </p>
         </div>
 
@@ -604,8 +537,8 @@
         </div>
 
         <div class="hero-actions">
-          <a class="hero-btn hero-btn-primary" href="public/inscriptions.html">S’inscrire au tournoi</a>
-          <a class="hero-btn hero-btn-secondary" href="public/equipes.html">Voir les équipes</a>
+          <a class="hero-btn hero-btn-primary" href="public/inscriptions.html">📝 S’inscrire</a>
+          <a class="hero-btn hero-btn-secondary" href="public/equipes.html">👥 Voir les équipes</a>
         </div>
 
       </div>
@@ -617,9 +550,7 @@
       <div class="panel-head">
         <div>
           <h2 class="panel-title">Catégories & épreuves</h2>
-          <p class="panel-text">
-            Chaque catégorie propose deux épreuves : Double Messieurs et Double Dames.
-          </p>
+          <p class="panel-text">Chaque catégorie propose Double Messieurs et Double Dames.</p>
         </div>
         <div class="panel-tag">Officiel</div>
       </div>
@@ -632,8 +563,7 @@
       </div>
 
       <div class="note">
-        Les inscriptions se font uniquement par équipe. Le formulaire permet de choisir
-        la catégorie puis l’épreuve, avant de renseigner les deux joueurs.
+        Les inscriptions se font uniquement par équipe. Le formulaire permet de choisir la catégorie, l’épreuve, puis de renseigner les deux joueurs.
       </div>
     </div>
   </section>
@@ -643,9 +573,7 @@
       <div class="panel-head">
         <div>
           <h2 class="panel-title">Accès rapide</h2>
-          <p class="panel-text">
-            Les pages indispensables pour suivre le tournoi.
-          </p>
+          <p class="panel-text">Les pages indispensables pour suivre le tournoi.</p>
         </div>
         <div class="panel-tag">Tournoi</div>
       </div>
@@ -654,25 +582,25 @@
         <a class="entry-card card-clay" href="public/inscriptions.html">
           <div class="entry-kicker">Joueurs</div>
           <h3 class="entry-title">Inscriptions</h3>
-          <div class="entry-sub">Inscrire une équipe dans la bonne catégorie et la bonne épreuve.</div>
+          <div class="entry-sub">Inscrire une équipe dans la bonne catégorie.</div>
         </a>
 
         <a class="entry-card card-blue" href="public/equipes.html">
           <div class="entry-kicker">Participants</div>
           <h3 class="entry-title">Équipes</h3>
-          <div class="entry-sub">Visualiser les équipes engagées par catégorie et par épreuve.</div>
+          <div class="entry-sub">Voir les équipes engagées par épreuve.</div>
         </a>
 
         <a class="entry-card card-aqua" href="public/programmation.html">
           <div class="entry-kicker">Matchs</div>
           <h3 class="entry-title">Programmation</h3>
-          <div class="entry-sub">Planning des rencontres, horaires et terrains.</div>
+          <div class="entry-sub">Planning, horaires et terrains.</div>
         </a>
 
         <a class="entry-card card-white" href="public/resultats.html">
           <div class="entry-kicker">Suivi</div>
           <h3 class="entry-title">Résultats</h3>
-          <div class="entry-sub">Résultats, classements et podiums du championnat.</div>
+          <div class="entry-sub">Scores, classements et podiums.</div>
         </a>
       </div>
     </div>
@@ -682,10 +610,8 @@
     <div class="panel">
       <div class="panel-head">
         <div>
-          <h2 class="panel-title">Informations pratiques</h2>
-          <p class="panel-text">
-            Pages complémentaires à compléter au fur et à mesure.
-          </p>
+          <h2 class="panel-title">Infos pratiques</h2>
+          <p class="panel-text">Pages complémentaires du tournoi.</p>
         </div>
         <div class="panel-tag">Infos</div>
       </div>
@@ -694,25 +620,25 @@
         <a class="entry-card card-clay" href="public/restauration.html">
           <div class="entry-kicker">Sur place</div>
           <h3 class="entry-title">Restauration</h3>
-          <div class="entry-sub">Repas, buvette et informations restauration du week-end.</div>
+          <div class="entry-sub">Repas, buvette et infos restauration.</div>
         </a>
 
         <a class="entry-card card-blue" href="public/reglement.html">
           <div class="entry-kicker">Compétition</div>
           <h3 class="entry-title">Règlement</h3>
-          <div class="entry-sub">Règlement sportif, catégories, formats et conditions de participation.</div>
+          <div class="entry-sub">Formats, règles et participation.</div>
         </a>
 
         <a class="entry-card card-aqua" href="public/contact.html">
           <div class="entry-kicker">Besoin d’aide</div>
           <h3 class="entry-title">Contact</h3>
-          <div class="entry-sub">Contacter l’organisation du tournoi.</div>
+          <div class="entry-sub">Contacter l’organisation.</div>
         </a>
 
         <a class="entry-card card-white" href="public/programmation.html">
           <div class="entry-kicker">Repères</div>
           <h3 class="entry-title">Horaires</h3>
-          <div class="entry-sub">Retrouver les horaires, rendez-vous et informations de présence.</div>
+          <div class="entry-sub">Retrouver les rendez-vous et créneaux.</div>
         </a>
       </div>
     </div>
@@ -723,9 +649,7 @@
       <div class="panel-head">
         <div>
           <h2 class="panel-title">Espace organisateurs</h2>
-          <p class="panel-text">
-            Accès sécurisé pour l’administration, le juge-arbitre et les arbitres.
-          </p>
+          <p class="panel-text">Accès sécurisé pour l’administration, le juge-arbitre et les arbitres.</p>
         </div>
         <div class="panel-tag">Sécurisé</div>
       </div>
@@ -734,25 +658,25 @@
         <a class="entry-card card-clay" href="#" id="btnAdmin">
           <div class="entry-kicker">Gestion</div>
           <h3 class="entry-title">Admin</h3>
-          <div class="entry-sub">Administration générale du tournoi et pilotage des contenus.</div>
+          <div class="entry-sub">Administration générale du tournoi.</div>
         </a>
 
         <a class="entry-card card-blue" href="#" id="btnJAT">
           <div class="entry-kicker">Officiel</div>
           <h3 class="entry-title">Juge-arbitre</h3>
-          <div class="entry-sub">Accès JAT pour la gestion sportive et le suivi officiel.</div>
+          <div class="entry-sub">Gestion sportive et suivi officiel.</div>
         </a>
 
         <a class="entry-card card-aqua" href="#" id="btnArbitre">
           <div class="entry-kicker">Terrain</div>
           <h3 class="entry-title">Arbitre</h3>
-          <div class="entry-sub">Accès arbitre pour le suivi terrain et les saisies autorisées.</div>
+          <div class="entry-sub">Suivi terrain et saisies autorisées.</div>
         </a>
 
         <a class="entry-card card-white" href="public/equipes.html">
           <div class="entry-kicker">Lecture</div>
           <h3 class="entry-title">Vue publique</h3>
-          <div class="entry-sub">Retour rapide vers les informations visibles par tous.</div>
+          <div class="entry-sub">Retour aux informations visibles par tous.</div>
         </a>
       </div>
 
@@ -769,6 +693,70 @@
   </section>
 
 </main>
+
+<script>
+  const headerMount = document.getElementById("publicHeader");
+
+  function centerActiveNav(){
+    const nav = document.querySelector(".public-nav");
+    const active = document.querySelector(".public-nav-link.primary");
+    if(!nav || !active) return;
+
+    const navRect = nav.getBoundingClientRect();
+    const activeRect = active.getBoundingClientRect();
+    const activeCenter = active.offsetLeft + (activeRect.width / 2);
+    const target = activeCenter - (navRect.width / 2);
+
+    nav.scrollTo({
+      left:Math.max(0, target),
+      behavior:"auto"
+    });
+  }
+
+  function centerActiveNavAfterLoad(){
+    centerActiveNav();
+    requestAnimationFrame(centerActiveNav);
+    setTimeout(centerActiveNav, 80);
+    setTimeout(centerActiveNav, 250);
+    setTimeout(centerActiveNav, 600);
+  }
+
+  headerMount.innerHTML = `
+    <header class="public-site-header">
+      <div class="public-container public-header-inner">
+        <div class="public-header-logo">
+          <img src="assets/img/logo-lg.png" alt="Ligue Guyane">
+        </div>
+
+        <div class="public-header-title">
+          <strong>Championnats Guyane<br>Beach Tennis</strong>
+        </div>
+
+        <div class="public-header-logo">
+          <img src="assets/img/logo-lg.png" alt="Ligue Guyane">
+        </div>
+
+        <div class="public-nav-wrap">
+          <span class="public-nav-arrow left">‹</span>
+          <nav class="public-nav" aria-label="Navigation principale">
+            <a class="public-nav-link primary" href="index.html">🏠 Accueil</a>
+            <a class="public-nav-link" href="public/inscriptions.html">📝 Inscriptions</a>
+            <a class="public-nav-link" href="public/equipes.html">👥 Équipes</a>
+            <a class="public-nav-link" href="public/programmation.html">📅 Programmation</a>
+            <a class="public-nav-link" href="public/resultats.html">🏆 Résultats</a>
+            <a class="public-nav-link" href="public/reglement.html">📘 Règlement</a>
+            <a class="public-nav-link" href="public/restauration.html">🍽️ Restauration</a>
+            <a class="public-nav-link" href="public/contact.html">📩 Contact</a>
+          </nav>
+          <span class="public-nav-arrow right">›</span>
+        </div>
+      </div>
+    </header>
+  `;
+
+  centerActiveNavAfterLoad();
+  window.addEventListener("resize", centerActiveNavAfterLoad);
+</script>
 
 <script type="module">
   import { auth } from "./assets/js/firebase.js?v=5";
@@ -821,7 +809,7 @@
   }
 
   async function askLogin(){
-    const email = prompt("Email organisateur 1 ?");
+    const email = prompt("Email organisateur ?");
     if(!email) return null;
 
     const password = prompt("Mot de passe ?");
