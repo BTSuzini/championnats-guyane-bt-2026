@@ -135,6 +135,7 @@ function injectStyles(){
       padding:2px 4px;
       scrollbar-width:none;
       -webkit-overflow-scrolling:touch;
+      scroll-behavior:smooth;
     }
 
     .public-nav::-webkit-scrollbar{display:none;}
@@ -222,10 +223,6 @@ function injectStyles(){
         width:96px;
         height:80px;
       }
-
-      .public-nav{
-        justify-content:center;
-      }
     }
 
     @media (max-width:759px){
@@ -240,6 +237,22 @@ function injectStyles(){
     }
   `;
   document.head.appendChild(style);
+}
+
+function centerActiveNav(){
+  const nav = document.querySelector(".public-nav");
+  const active = document.querySelector(".public-nav-link.primary");
+
+  if(!nav || !active) return;
+
+  requestAnimationFrame(() => {
+    const target =
+      active.offsetLeft -
+      (nav.clientWidth / 2) +
+      (active.clientWidth / 2);
+
+    nav.scrollLeft = Math.max(0, target);
+  });
 }
 
 function renderHeader(){
@@ -277,6 +290,12 @@ function renderHeader(){
       </div>
     </header>
   `;
+
+  centerActiveNav();
+
+  window.addEventListener("resize", () => {
+    centerActiveNav();
+  });
 }
 
 injectStyles();
