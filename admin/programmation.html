@@ -1,0 +1,1001 @@
+<!doctype html>
+<html lang="fr">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Admin — Programmation — Championnats Guyane Beach Tennis</title>
+
+  <style>
+    :root{
+      --clay:#c65a1e; --clay-dark:#8e3a13; --clay-light:#ee8a3a;
+      --sky:#27bced; --aqua:#00a9c8; --blue:#075b9a; --blue-dark:#063b72;
+      --text:#17212b; --muted:#667085; --card:rgba(255,255,255,.94);
+      --shadow:0 16px 40px rgba(16,24,40,.12);
+      --container:1180px;
+    }
+
+    *{box-sizing:border-box;}
+
+    body{
+      margin:0;
+      font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;
+      color:var(--text);
+      background:
+        radial-gradient(circle at 20% 0%, rgba(39,188,237,.22), transparent 28%),
+        radial-gradient(circle at 85% 10%, rgba(0,169,200,.16), transparent 26%),
+        linear-gradient(180deg,#f4fcff 0%,#e9f8ff 48%,#ffffff 100%);
+    }
+
+    a{color:inherit;text-decoration:none;}
+
+    .container{
+      width:min(var(--container), calc(100% - 28px));
+      margin:0 auto;
+    }
+
+    main{
+      padding-top:calc(var(--admin-total-top, 158px) + 24px);
+      padding-bottom:42px;
+    }
+
+    .section{margin-top:18px;}
+
+    .panel{
+      background:var(--card);
+      border:1px solid rgba(255,255,255,.6);
+      border-radius:24px;
+      box-shadow:var(--shadow);
+      padding:18px;
+    }
+
+    .panel-head{
+      display:flex;
+      justify-content:space-between;
+      align-items:flex-start;
+      gap:12px;
+      margin-bottom:14px;
+    }
+
+    .panel-title{
+      margin:0;
+      font-size:26px;
+      line-height:1.05;
+      letter-spacing:-.03em;
+    }
+
+    .panel-text{
+      margin:6px 0 0;
+      color:var(--muted);
+      font-size:15px;
+      line-height:1.45;
+    }
+
+    .panel-tag{
+      flex-shrink:0;
+      padding:8px 13px;
+      border-radius:999px;
+      background:#e4f7ff;
+      color:var(--blue-dark);
+      font-size:12px;
+      font-weight:1000;
+      text-transform:uppercase;
+      letter-spacing:.06em;
+    }
+
+    .grid{
+      display:grid;
+      grid-template-columns:1fr;
+      gap:10px;
+    }
+
+    .zone-line{
+      display:flex;
+      gap:10px;
+      overflow-x:auto;
+      scrollbar-width:none;
+      -webkit-overflow-scrolling:touch;
+      padding:3px 2px;
+    }
+
+    .zone-line::-webkit-scrollbar{display:none;}
+
+    .zone-btn,
+    .btn{
+      appearance:none;
+      border:1px solid rgba(7,91,154,.14);
+      background:#fff;
+      border-radius:999px;
+      min-height:42px;
+      padding:10px 16px;
+      font-size:14px;
+      font-weight:1000;
+      cursor:pointer;
+      color:#1c2430;
+      text-align:center;
+      box-shadow:0 6px 14px rgba(16,24,40,.05);
+      white-space:nowrap;
+    }
+
+    .zone-btn[aria-selected="true"],
+    .btn.primary,
+    .btn.is-active{
+      background:linear-gradient(180deg,var(--blue),var(--blue-dark));
+      color:#fff;
+      border-color:var(--blue);
+      box-shadow:0 10px 22px rgba(7,91,154,.22);
+    }
+
+    .btn.clay{
+      background:linear-gradient(135deg,var(--clay),var(--clay-light));
+      color:#fff;
+      border-color:var(--clay);
+    }
+
+    .btn.danger{
+      background:#fff5f5;
+      color:#8a1f1f;
+      border-color:#f1b2b2;
+    }
+
+    .btn:disabled{
+      opacity:.55;
+      cursor:not-allowed;
+    }
+
+    .status-box{
+      margin-top:12px;
+      padding:14px 16px;
+      border-radius:18px;
+      background:linear-gradient(135deg,rgba(39,188,237,.12),rgba(198,90,30,.08));
+      border:1px solid rgba(39,188,237,.22);
+      color:#475467;
+      font-size:14px;
+      line-height:1.5;
+    }
+
+    .muted{
+      color:var(--muted);
+      font-size:14px;
+      line-height:1.45;
+    }
+
+    .match-list{
+      display:grid;
+      gap:12px;
+      margin-top:12px;
+    }
+
+    .match-card{
+      border-radius:18px;
+      border:1px solid rgba(16,24,40,.08);
+      padding:13px;
+      background:#fff;
+      box-shadow:0 8px 18px rgba(16,24,40,.06);
+    }
+
+    .match-card.courtA{
+      background:#fff8dd;
+      border-color:rgba(255,196,0,.35);
+    }
+
+    .match-card.courtB{
+      background:#ffeef2;
+      border-color:rgba(255,0,60,.20);
+    }
+
+    .match-head{
+      display:flex;
+      align-items:center;
+      gap:8px;
+      min-width:0;
+    }
+
+    .m-slot{
+      font-size:12px;
+      font-weight:1000;
+      color:#667085;
+      white-space:nowrap;
+    }
+
+    .m-time{
+      font-size:14px;
+      font-weight:1000;
+      white-space:nowrap;
+    }
+
+    .m-court{
+      min-width:0;
+      flex:1;
+      font-size:13px;
+      font-weight:900;
+      font-style:italic;
+      color:#475467;
+      overflow:hidden;
+      text-overflow:ellipsis;
+      white-space:nowrap;
+    }
+
+    .actions{
+      display:flex;
+      gap:6px;
+      flex-wrap:wrap;
+      justify-content:flex-end;
+    }
+
+    .btnx{
+      padding:8px 10px;
+      border-radius:999px;
+      border:1px solid #ddd;
+      background:#fff;
+      cursor:pointer;
+      font-weight:1000;
+      color:#111;
+    }
+
+    .btnx:disabled{
+      opacity:.45;
+      cursor:not-allowed;
+    }
+
+    .team-row{
+      margin-top:10px;
+      display:grid;
+      grid-template-columns:1fr;
+      gap:4px;
+    }
+
+    .team-name{
+      font-size:16px;
+      font-weight:1000;
+      line-height:1.15;
+    }
+
+    .team-sub{
+      font-size:13px;
+      color:#475467;
+      font-weight:800;
+    }
+
+    .vs-line{
+      margin:9px 0 5px;
+      text-align:center;
+      font-weight:1000;
+      letter-spacing:2px;
+      opacity:.55;
+      font-size:12px;
+    }
+
+    @media (min-width:760px){
+      .panel{padding:22px;}
+      .grid.two{grid-template-columns:1fr 1fr;}
+      .grid.three{grid-template-columns:repeat(3,1fr);}
+      .grid.four{grid-template-columns:repeat(4,1fr);}
+      .zone-line{justify-content:center;}
+    }
+
+    @media (max-width:759px){
+      main{padding-top:calc(var(--admin-total-top, 150px) + 20px);}
+      .panel-title{font-size:24px;}
+      .zone-line{justify-content:flex-start;}
+    }
+  </style>
+</head>
+
+<body>
+
+<div id="adminHeader"></div>
+
+<main class="container">
+
+  <section class="section panel" id="accessDenied" style="display:none;">
+    <h2 class="panel-title">⛔ Accès refusé</h2>
+    <p class="panel-text">Cette page est réservée aux administrateurs.</p>
+  </section>
+
+  <section class="section panel" id="pageContent" style="display:none;">
+    <div class="panel-head">
+      <div>
+        <h1 class="panel-title">📅 Programmation</h1>
+        <p class="panel-text">
+          Génère et ajuste la programmation par catégorie et par épreuve.
+        </p>
+      </div>
+      <div class="panel-tag">Admin</div>
+    </div>
+
+    <div class="zone-line" aria-label="Sélection catégorie">
+      <button class="zone-btn category-btn" data-categorie="U14" type="button" aria-selected="true">U14</button>
+      <button class="zone-btn category-btn" data-categorie="U18" type="button" aria-selected="false">U18</button>
+      <button class="zone-btn category-btn" data-categorie="Seniors" type="button" aria-selected="false">Seniors</button>
+      <button class="zone-btn category-btn" data-categorie="45+" type="button" aria-selected="false">45+</button>
+    </div>
+
+    <div class="zone-line" aria-label="Sélection épreuve" style="margin-top:8px;">
+      <button class="zone-btn epreuve-btn" data-epreuve="DM" type="button" aria-selected="true">👨 Double Messieurs</button>
+      <button class="zone-btn epreuve-btn" data-epreuve="DD" type="button" aria-selected="false">👩 Double Dames</button>
+    </div>
+
+    <div class="status-box">
+      Zone sélectionnée : <strong id="zoneLabel">U14 — Double Messieurs</strong>
+    </div>
+  </section>
+
+  <section class="section panel" id="panelVisibility" style="display:none;">
+    <div class="panel-head">
+      <div>
+        <h2 class="panel-title">👀 Visibilité publique</h2>
+        <p class="panel-text" id="visibilityText">Chargement…</p>
+      </div>
+      <div class="panel-tag">Public</div>
+    </div>
+
+    <div class="grid two">
+      <button class="btn" id="btnPublicHide">🔒 Mettre en maintenance</button>
+      <button class="btn" id="btnPublicShow">✅ Rendre visible</button>
+    </div>
+
+    <div class="status-box">
+      Si la programmation est masquée, l’admin peut toujours ouvrir la page publique en aperçu, mais le public verra une page de maintenance.
+    </div>
+  </section>
+
+  <section class="section panel" id="panelBuild" style="display:none;">
+    <div class="panel-head">
+      <div>
+        <h2 class="panel-title">⚙️ Génération</h2>
+        <p class="panel-text" id="buildStatus">Chargement…</p>
+      </div>
+      <div class="panel-tag">Planning</div>
+    </div>
+
+    <div class="grid three">
+      <button class="btn primary" id="btnGenerate">🧩 Générer depuis les équipes</button>
+      <button class="btn danger" id="btnResetProg">🧨 RAZ programmation</button>
+      <a class="btn" id="btnOpenPublic" href="../public/programmation.html?adminPreview=1">👀 Aperçu public</a>
+    </div>
+
+    <div class="status-box">
+      La génération actuelle crée des matchs simples à partir de la liste principale de la catégorie/épreuve sélectionnée.
+      Elle pourra ensuite être remplacée par une génération depuis le tirage validé.
+    </div>
+  </section>
+
+  <section class="section panel" id="panelSchedule" style="display:none;">
+    <div class="panel-head">
+      <div>
+        <h2 class="panel-title">🗓️ Ordre chronologique</h2>
+        <p class="panel-text" id="schedStatus">—</p>
+      </div>
+      <div class="panel-tag">Direct</div>
+    </div>
+
+    <div id="adminList"></div>
+
+    <p class="muted" style="margin-top:12px;">
+      ↑ ↓ échangent les créneaux. Le bouton terrain alterne entre Manon et Lisa.
+    </p>
+  </section>
+
+</main>
+
+<script type="module" src="../assets/js/admin-header.js"></script>
+
+<script type="module">
+  import { auth, db } from "../assets/js/firebase.js";
+  import { getRoleByUid } from "../assets/js/session.js";
+  import { onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.12.5/firebase-auth.js";
+  import {
+    collection,
+    doc,
+    getDocs,
+    getDoc,
+    setDoc,
+    updateDoc,
+    deleteDoc,
+    onSnapshot,
+    query,
+    orderBy,
+    serverTimestamp
+  } from "https://www.gstatic.com/firebasejs/10.12.5/firebase-firestore.js";
+
+  const EVENT_ID = "championnats-2026";
+
+  const EPREUVE_LABELS = {
+    DM: "Double Messieurs",
+    DD: "Double Dames"
+  };
+
+  const accessDenied = document.getElementById("accessDenied");
+  const pageContent = document.getElementById("pageContent");
+  const panelVisibility = document.getElementById("panelVisibility");
+  const panelBuild = document.getElementById("panelBuild");
+  const panelSchedule = document.getElementById("panelSchedule");
+
+  const zoneLabel = document.getElementById("zoneLabel");
+  const visibilityText = document.getElementById("visibilityText");
+  const buildStatus = document.getElementById("buildStatus");
+  const schedStatus = document.getElementById("schedStatus");
+  const adminList = document.getElementById("adminList");
+
+  const btnPublicHide = document.getElementById("btnPublicHide");
+  const btnPublicShow = document.getElementById("btnPublicShow");
+  const btnGenerate = document.getElementById("btnGenerate");
+  const btnResetProg = document.getElementById("btnResetProg");
+  const btnOpenPublic = document.getElementById("btnOpenPublic");
+
+  const categoryButtons = [...document.querySelectorAll(".category-btn")];
+  const epreuveButtons = [...document.querySelectorAll(".epreuve-btn")];
+
+  let currentCategorie = "U14";
+  let currentEpreuve = "DM";
+  let currentProg = null;
+  let unsubProg = null;
+  let unsubVisibility = null;
+
+  function esc(s){
+    return (s ?? "").toString()
+      .replaceAll("&","&amp;")
+      .replaceAll("<","&lt;")
+      .replaceAll(">","&gt;");
+  }
+
+  function zoneKey(){
+    return `${currentCategorie}_${currentEpreuve}`.replace("+", "plus");
+  }
+
+  function zoneText(){
+    return `${currentCategorie} — ${EPREUVE_LABELS[currentEpreuve]}`;
+  }
+
+  function progRef(){
+    return doc(db, "events", EVENT_ID, "programmations", zoneKey());
+  }
+
+  function visibilityRef(){
+    return doc(db, "events", EVENT_ID, "config", "programmation");
+  }
+
+  function equipesCol(){
+    return collection(db, "events", EVENT_ID, "equipes");
+  }
+
+  function defaultCourts(){
+    return {
+      A: "court Manon",
+      B: "court Lisa"
+    };
+  }
+
+  function defaultSlots(count){
+    const base = [
+      ["08:30","A"], ["08:30","B"],
+      ["09:15","A"], ["09:15","B"],
+      ["10:00","A"], ["10:00","B"],
+      ["10:45","A"], ["10:45","B"],
+      ["11:30","A"], ["11:30","B"],
+      ["12:15","A"], ["12:15","B"],
+      ["13:00","A"], ["13:00","B"],
+      ["13:45","A"], ["13:45","B"],
+      ["14:30","A"], ["14:30","B"],
+      ["15:15","A"], ["15:15","B"],
+      ["16:00","A"], ["16:00","B"]
+    ];
+
+    return base.slice(0, Math.max(1, count)).map((x, i) => ({
+      slot:i + 1,
+      time:x[0],
+      court:x[1]
+    }));
+  }
+
+  function teamParts(t){
+    if(!t) return { title:"—", sub:"" };
+
+    return {
+      title:t.teamName || "Équipe",
+      sub:`${t.joueur1FirstName || "?"} / ${t.joueur2FirstName || "?"}`
+    };
+  }
+
+  function courtLabel(courtKey){
+    if(courtKey === "A") return "🐝 court Manon";
+    if(courtKey === "B") return "🌶️ court Lisa";
+    return "🎾 terrain";
+  }
+
+  function updateZoneButtons(){
+    categoryButtons.forEach(btn => {
+      btn.setAttribute("aria-selected", btn.dataset.categorie === currentCategorie ? "true" : "false");
+    });
+
+    epreuveButtons.forEach(btn => {
+      btn.setAttribute("aria-selected", btn.dataset.epreuve === currentEpreuve ? "true" : "false");
+    });
+
+    zoneLabel.textContent = zoneText();
+
+    btnOpenPublic.href =
+      `../public/programmation.html?categorie=${encodeURIComponent(currentCategorie)}&epreuve=${encodeURIComponent(currentEpreuve)}&adminPreview=1`;
+
+    try{
+      localStorage.setItem("champ_admin_categorie", currentCategorie);
+      localStorage.setItem("champ_admin_epreuve", currentEpreuve);
+    }catch(error){}
+  }
+
+  function showDenied(){
+    accessDenied.style.display = "block";
+    pageContent.style.display = "none";
+    panelVisibility.style.display = "none";
+    panelBuild.style.display = "none";
+    panelSchedule.style.display = "none";
+    stopListeners();
+  }
+
+  function showAdmin(){
+    accessDenied.style.display = "none";
+    pageContent.style.display = "block";
+    panelVisibility.style.display = "block";
+    panelBuild.style.display = "block";
+    panelSchedule.style.display = "block";
+    updateZoneButtons();
+    startListeners();
+  }
+
+  function stopListeners(){
+    if(unsubProg){
+      unsubProg();
+      unsubProg = null;
+    }
+
+    if(unsubVisibility){
+      unsubVisibility();
+      unsubVisibility = null;
+    }
+  }
+
+  function startListeners(){
+    if(unsubProg){
+      unsubProg();
+      unsubProg = null;
+    }
+
+    buildStatus.textContent = "Chargement…";
+    schedStatus.textContent = "Chargement…";
+    adminList.innerHTML = "";
+
+    unsubProg = onSnapshot(progRef(), (snap) => {
+      currentProg = snap.exists() ? (snap.data() || {}) : null;
+
+      if(!currentProg){
+        buildStatus.textContent = "ℹ️ Aucune programmation enregistrée pour cette zone.";
+        schedStatus.textContent = "—";
+        adminList.innerHTML = `<p class="muted" style="margin:0;">Aucune programmation à afficher.</p>`;
+        return;
+      }
+
+      buildStatus.textContent = "✅ Programmation présente.";
+      renderAdminList();
+    }, (error) => {
+      console.error(error);
+      buildStatus.textContent = "❌ Impossible de charger la programmation.";
+      schedStatus.textContent = "❌ Erreur Firestore.";
+    });
+
+    if(!unsubVisibility){
+      unsubVisibility = onSnapshot(visibilityRef(), (snap) => {
+        const data = snap.exists() ? (snap.data() || {}) : {};
+        const visible = data.publicVisible === true;
+
+        visibilityText.innerHTML = visible
+          ? "Statut actuel : <strong>visible publiquement ✅</strong>"
+          : "Statut actuel : <strong>maintenance / masquée 🔒</strong>";
+
+        btnPublicShow.classList.toggle("is-active", visible);
+        btnPublicHide.classList.toggle("is-active", !visible);
+      }, (error) => {
+        console.error(error);
+        visibilityText.textContent = "❌ Impossible de lire la visibilité publique.";
+      });
+    }
+  }
+
+  async function setPublicVisible(value){
+    await setDoc(visibilityRef(), {
+      publicVisible:value === true,
+      updatedAt:serverTimestamp(),
+      updatedBy:auth.currentUser?.uid || null
+    }, { merge:true });
+  }
+
+  async function fetchTeams(){
+    const snap = await getDocs(query(equipesCol(), orderBy("createdAt", "asc")));
+
+    const rows = [];
+    snap.forEach(d => {
+      const x = d.data() || {};
+
+      if(String(x.categorie || "").trim() !== currentCategorie) return;
+      if(String(x.epreuve || "").trim() !== currentEpreuve) return;
+      if(x.stby === true) return;
+      if(x.list === "wait") return;
+
+      rows.push({
+        id:d.id,
+        teamName:x.teamName || "",
+        joueur1FirstName:x.joueur1FirstName || "",
+        joueur2FirstName:x.joueur2FirstName || "",
+        createdAtMs:x.createdAt?.toMillis ? x.createdAt.toMillis() : 0
+      });
+    });
+
+    rows.sort((a,b) => (a.createdAtMs || 0) - (b.createdAtMs || 0));
+    return rows;
+  }
+
+  async function generateProgrammation(){
+    const teams = await fetchTeams();
+
+    if(teams.length < 2){
+      throw new Error("Il faut au moins 2 équipes en liste principale pour générer une programmation.");
+    }
+
+    const matches = {};
+    const schedule = {};
+    const matchCount = Math.floor(teams.length / 2);
+    const slots = defaultSlots(matchCount);
+
+    for(let i = 0; i < matchCount; i++){
+      const mid = `M${i + 1}`;
+      const slotObj = slots[i];
+
+      matches[mid] = {
+        id:mid,
+        n:i + 1,
+        round:"Match",
+        A:{ type:"team", team:teams[i * 2] },
+        B:{ type:"team", team:teams[i * 2 + 1] }
+      };
+
+      schedule[mid] = {
+        slot:slotObj.slot,
+        court:slotObj.court
+      };
+    }
+
+    await setDoc(progRef(), {
+      eventId:EVENT_ID,
+      categorie:currentCategorie,
+      epreuve:currentEpreuve,
+      key:zoneKey(),
+      createdAt:serverTimestamp(),
+      updatedAt:serverTimestamp(),
+      updatedBy:auth.currentUser?.uid || null,
+      courts:defaultCourts(),
+      slots,
+      matches,
+      schedule,
+      source:{
+        type:"equipes",
+        note:"Génération simple depuis les équipes en liste principale."
+      }
+    }, { merge:true });
+  }
+
+  async function resetProgrammation(){
+    await deleteDoc(progRef());
+  }
+
+  function normalizeEntry(entry, slotObj){
+    if(typeof entry === "number"){
+      return {
+        slot:Number(entry),
+        court:slotObj?.court || "A"
+      };
+    }
+
+    return {
+      slot:Number(entry?.slot || slotObj?.slot || 1),
+      court:entry?.court || slotObj?.court || "A"
+    };
+  }
+
+  function renderAdminCard({ slot, time, courtKey, mid, teamA, teamB }){
+    return `
+      <div class="match-card ${esc(courtKey === "A" ? "courtA" : "courtB")}">
+        <div class="match-head">
+          <div class="m-slot">#${esc(slot)} · ${esc(mid)}</div>
+          <div class="m-time">${esc(time)}</div>
+          <div class="m-court">${esc(courtLabel(courtKey))}</div>
+
+          <div class="actions">
+            <button class="btnx" data-act="court" data-mid="${esc(mid)}" title="Changer de terrain">
+              ${courtKey === "A" ? "🐝" : "🌶️"}
+            </button>
+            <button class="btnx" data-act="up" data-slot="${esc(slot)}" ${slot <= 1 ? "disabled" : ""}>↑</button>
+            <button class="btnx" data-act="down" data-slot="${esc(slot)}" ${slot >= (currentProg?.slots?.length || 0) ? "disabled" : ""}>↓</button>
+          </div>
+        </div>
+
+        <div class="team-row">
+          <div class="team-name">${esc(teamA.title)}</div>
+          ${teamA.sub ? `<div class="team-sub">${esc(teamA.sub)}</div>` : ""}
+        </div>
+
+        <div class="vs-line">VS</div>
+
+        <div class="team-row">
+          <div class="team-name">${esc(teamB.title)}</div>
+          ${teamB.sub ? `<div class="team-sub">${esc(teamB.sub)}</div>` : ""}
+        </div>
+      </div>
+    `;
+  }
+
+  function renderAdminList(){
+    if(!currentProg){
+      adminList.innerHTML = "";
+      return;
+    }
+
+    const matches = currentProg.matches || {};
+    const slots = Array.isArray(currentProg.slots) ? currentProg.slots : [];
+    const schedule = currentProg.schedule || {};
+
+    const slotToMatch = new Map();
+
+    for(const [mid, entry] of Object.entries(schedule)){
+      const slotNum = typeof entry === "number" ? Number(entry) : Number(entry?.slot);
+      if(!slotToMatch.has(slotNum)){
+        slotToMatch.set(slotNum, mid);
+      }
+    }
+
+    const cards = [];
+
+    for(const slotObj of slots){
+      const mid = slotToMatch.get(Number(slotObj.slot));
+      const match = mid ? matches[mid] : null;
+      if(!match) continue;
+
+      const entry = normalizeEntry(schedule[mid], slotObj);
+      const teamA = teamParts(match.A?.team || null);
+      const teamB = teamParts(match.B?.team || null);
+
+      cards.push(renderAdminCard({
+        slot:slotObj.slot,
+        time:slotObj.time,
+        courtKey:entry.court,
+        mid,
+        teamA,
+        teamB
+      }));
+    }
+
+    adminList.innerHTML = cards.length
+      ? `<div class="match-list">${cards.join("")}</div>`
+      : `<p class="muted" style="margin:0;">Aucun match dans cette programmation.</p>`;
+
+    schedStatus.textContent = `✅ ${cards.length} match(s) affiché(s) — ${zoneText()}`;
+  }
+
+  async function swapSlots(slotA, slotB){
+    const snap = await getDoc(progRef());
+    if(!snap.exists()) throw new Error("Programmation introuvable.");
+
+    const prog = snap.data() || {};
+    const slots = Array.isArray(prog.slots) ? prog.slots : [];
+    const schedule = prog.schedule || {};
+
+    let mA = null;
+    let mB = null;
+
+    for(const [mid, entry] of Object.entries(schedule)){
+      const slotNum = typeof entry === "number" ? Number(entry) : Number(entry?.slot);
+      if(slotNum === Number(slotA) && !mA) mA = mid;
+      if(slotNum === Number(slotB) && !mB) mB = mid;
+    }
+
+    const newSchedule = { ...schedule };
+
+    function move(mid, nextSlot){
+      if(!mid) return;
+
+      const oldEntry = schedule[mid];
+      const oldSlot = typeof oldEntry === "number" ? Number(oldEntry) : Number(oldEntry?.slot);
+      const oldSlotObj = slots.find(x => Number(x.slot) === oldSlot) || null;
+      const norm = normalizeEntry(oldEntry, oldSlotObj);
+
+      newSchedule[mid] = {
+        slot:Number(nextSlot),
+        court:norm.court
+      };
+    }
+
+    move(mA, slotB);
+    move(mB, slotA);
+
+    await updateDoc(progRef(), {
+      schedule:newSchedule,
+      updatedAt:serverTimestamp(),
+      updatedBy:auth.currentUser?.uid || null
+    });
+  }
+
+  async function toggleCourt(mid){
+    const snap = await getDoc(progRef());
+    if(!snap.exists()) throw new Error("Programmation introuvable.");
+
+    const prog = snap.data() || {};
+    const slots = Array.isArray(prog.slots) ? prog.slots : [];
+    const schedule = prog.schedule || {};
+    const oldEntry = schedule[mid];
+
+    const oldSlot = typeof oldEntry === "number" ? Number(oldEntry) : Number(oldEntry?.slot);
+    const slotObj = slots.find(x => Number(x.slot) === oldSlot) || null;
+    const norm = normalizeEntry(oldEntry, slotObj);
+
+    const nextCourt = norm.court === "A" ? "B" : "A";
+
+    await updateDoc(progRef(), {
+      [`schedule.${mid}`]:{
+        slot:norm.slot,
+        court:nextCourt
+      },
+      updatedAt:serverTimestamp(),
+      updatedBy:auth.currentUser?.uid || null
+    });
+  }
+
+  async function changeZone(categorie, epreuve){
+    currentCategorie = categorie || currentCategorie;
+    currentEpreuve = epreuve || currentEpreuve;
+    updateZoneButtons();
+    startListeners();
+  }
+
+  categoryButtons.forEach(btn => {
+    btn.onclick = () => changeZone(btn.dataset.categorie, currentEpreuve);
+  });
+
+  epreuveButtons.forEach(btn => {
+    btn.onclick = () => changeZone(currentCategorie, btn.dataset.epreuve);
+  });
+
+  btnPublicHide.onclick = async () => {
+    try{
+      await setPublicVisible(false);
+    }catch(error){
+      console.error(error);
+      alert("Erreur : impossible de masquer la programmation.");
+    }
+  };
+
+  btnPublicShow.onclick = async () => {
+    try{
+      await setPublicVisible(true);
+    }catch(error){
+      console.error(error);
+      alert("Erreur : impossible de rendre la programmation visible.");
+    }
+  };
+
+  btnGenerate.onclick = async () => {
+    const ok = confirm(`Générer la programmation pour ${zoneText()} ?\n\nCela remplacera la programmation existante de cette zone.`);
+    if(!ok) return;
+
+    btnGenerate.disabled = true;
+    buildStatus.textContent = "Génération…";
+
+    try{
+      await generateProgrammation();
+      buildStatus.textContent = "✅ Programmation générée.";
+    }catch(error){
+      console.error(error);
+      buildStatus.textContent = "❌ " + (error?.message || "Impossible de générer.");
+      alert("Erreur ❌\n\n" + (error?.message || "Impossible de générer."));
+    }finally{
+      btnGenerate.disabled = false;
+    }
+  };
+
+  btnResetProg.onclick = async () => {
+    const ok = confirm(`Réinitialiser la programmation pour ${zoneText()} ?\n\n⚠️ Action irréversible.`);
+    if(!ok) return;
+
+    btnResetProg.disabled = true;
+    buildStatus.textContent = "Réinitialisation…";
+
+    try{
+      await resetProgrammation();
+      buildStatus.textContent = "✅ Programmation supprimée.";
+    }catch(error){
+      console.error(error);
+      buildStatus.textContent = "❌ " + (error?.message || "Impossible de supprimer.");
+      alert("Erreur ❌");
+    }finally{
+      btnResetProg.disabled = false;
+    }
+  };
+
+  adminList.addEventListener("click", async (event) => {
+    const btn = event.target.closest("button[data-act]");
+    if(!btn) return;
+
+    if(!currentProg){
+      alert("Aucune programmation.");
+      return;
+    }
+
+    const act = btn.dataset.act;
+
+    try{
+      schedStatus.textContent = "Traitement…";
+
+      if(act === "up" || act === "down"){
+        const slot = Number(btn.dataset.slot);
+        const maxSlot = Number(currentProg?.slots?.length || 0);
+
+        if(act === "up" && slot > 1){
+          await swapSlots(slot, slot - 1);
+        }
+
+        if(act === "down" && slot < maxSlot){
+          await swapSlots(slot, slot + 1);
+        }
+      }
+
+      if(act === "court"){
+        const mid = btn.dataset.mid;
+        if(mid) await toggleCourt(mid);
+      }
+
+      schedStatus.textContent = "✅ OK";
+    }catch(error){
+      console.error(error);
+      schedStatus.textContent = "❌ Erreur.";
+      alert("Erreur ❌");
+    }
+  });
+
+  onAuthStateChanged(auth, async (user) => {
+    stopListeners();
+
+    accessDenied.style.display = "none";
+    pageContent.style.display = "none";
+    panelVisibility.style.display = "none";
+    panelBuild.style.display = "none";
+    panelSchedule.style.display = "none";
+
+    if(!user){
+      showDenied();
+      return;
+    }
+
+    try{
+      const role = await getRoleByUid(user.uid);
+
+      if(role !== "admin"){
+        showDenied();
+        return;
+      }
+
+      try{
+        const savedCat = localStorage.getItem("champ_admin_categorie");
+        const savedEpreuve = localStorage.getItem("champ_admin_epreuve");
+
+        if(["U14","U18","Seniors","45+"].includes(savedCat)) currentCategorie = savedCat;
+        if(["DM","DD"].includes(savedEpreuve)) currentEpreuve = savedEpreuve;
+      }catch(error){}
+
+      showAdmin();
+
+    }catch(error){
+      console.error(error);
+      showDenied();
+    }
+  });
+</script>
+
+</body>
+</html>
