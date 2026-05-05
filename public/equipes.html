@@ -147,6 +147,7 @@
       display:flex;
       gap:12px;
       justify-content:space-between;
+      align-items:center;
       width:100%;
       min-width:0;
     }
@@ -180,22 +181,32 @@
       max-width:100%;
     }
 
-    .team-meta{
-      display:inline-flex;
-      padding:4px 10px;
-      border-radius:999px;
-      font-size:12px;
-      border:1px solid #d9e6ff;
-      background:#f3f7ff;
-      color:var(--blue-dark);
-      font-weight:1000;
-      white-space:nowrap;
+    .team-line2,
+    .team-line3{
+      color:#222;
+      font-weight:700;
+      line-height:1.25;
     }
 
-    .team-line2{
-      color:#222;
-      font-weight:500;
-      line-height:1.25;
+    .ranked-card{
+      align-items:center;
+    }
+
+    .ranked-rank{
+      flex:0 0 auto;
+      min-width:58px;
+      min-height:58px;
+      border-radius:18px;
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      text-align:center;
+      background:linear-gradient(180deg,#e4f7ff,#c9f0ff);
+      color:var(--blue-dark);
+      border:1px solid rgba(39,188,237,.28);
+      font-size:20px;
+      font-weight:1000;
+      box-shadow:0 6px 14px rgba(7,91,154,.08);
     }
 
     .pill{
@@ -374,7 +385,7 @@
   function statusPill(r){
     return r.stby
       ? `<span class="pill stby">STBY</span>`
-      : `<span class="pill">OK</span>`;
+      : "";
   }
 
   function cardInscritHtml(idx, r){
@@ -384,9 +395,7 @@
           <div class="team-line1">
             <span class="team-num">#${idx}</span>
             <span class="team-name">${esc(r.teamName)}</span>
-            <span class="team-meta">${esc(r.categorie)} • ${esc(r.epreuve)}</span>
           </div>
-          <div class="team-line2">${esc(r.joueur1FirstName)} / ${esc(r.joueur2FirstName)}</div>
         </div>
         <div>${statusPill(r)}</div>
       </div>
@@ -399,17 +408,26 @@
     const teamRank = (p1 !== null && p2 !== null) ? (p1 + p2) : null;
 
     return `
-      <div class="team-card">
+      <div class="team-card ranked-card">
         <div class="team-left">
           <div class="team-line1">
             <span class="team-num">#${idx}</span>
             <span class="team-name">${esc(r.teamName)}</span>
-            <span class="team-meta">🏷️ ${esc(fmtRank(teamRank))}</span>
           </div>
+
           <div class="team-line2">
-            ${esc(r.joueur1FirstName)} (${esc(fmtRank(p1))}) / ${esc(r.joueur2FirstName)} (${esc(fmtRank(p2))})
+            ${esc(r.joueur1FirstName)} (${esc(fmtRank(p1))})
+          </div>
+
+          <div class="team-line3">
+            ${esc(r.joueur2FirstName)} (${esc(fmtRank(p2))})
           </div>
         </div>
+
+        <div class="ranked-rank">
+          ${esc(fmtRank(teamRank))}
+        </div>
+
         <div>${statusPill(r)}</div>
       </div>
     `;
