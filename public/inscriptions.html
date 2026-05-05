@@ -1,147 +1,582 @@
 <!doctype html>
 <html lang="fr">
 <head>
-<meta charset="utf-8" />
-<meta name="viewport" content="width=device-width, initial-scale=1" />
-<title>Inscriptions — Championnats Guyane Beach Tennis</title>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Inscriptions — Championnats Guyane Beach Tennis</title>
 
-<style>
-/* --- TON CSS IDENTIQUE (inchangé) --- */
-:root{
-  --clay:#c65a1e; --clay-dark:#8e3a13; --clay-light:#ee8a3a;
-  --sky:#27bced; --aqua:#00a9c8; --blue:#075b9a; --blue-dark:#063b72;
-  --text:#17212b; --muted:#667085; --card:rgba(255,255,255,.94);
-  --shadow:0 16px 40px rgba(16,24,40,.12);
-  --container:1180px; --zone-h:104px;
-}
+  <style>
+    :root{
+      --clay:#c65a1e; --clay-dark:#8e3a13; --clay-light:#ee8a3a;
+      --sky:#27bced; --aqua:#00a9c8; --blue:#075b9a; --blue-dark:#063b72;
+      --text:#17212b; --muted:#667085; --card:rgba(255,255,255,.94);
+      --shadow:0 16px 40px rgba(16,24,40,.12);
+      --container:1180px;
+      --zone-h:104px;
+    }
 
-*{box-sizing:border-box;}
+    *{box-sizing:border-box;}
 
-body{
-  margin:0;
-  font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;
-  color:var(--text);
-  background:
-    radial-gradient(circle at 20% 0%, rgba(39,188,237,.22), transparent 28%),
-    radial-gradient(circle at 85% 10%, rgba(0,169,200,.16), transparent 26%),
-    linear-gradient(180deg,#f4fcff 0%,#e9f8ff 48%,#ffffff 100%);
-}
+    body{
+      margin:0;
+      font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;
+      color:var(--text);
+      background:
+        radial-gradient(circle at 20% 0%, rgba(39,188,237,.22), transparent 28%),
+        radial-gradient(circle at 85% 10%, rgba(0,169,200,.16), transparent 26%),
+        linear-gradient(180deg,#f4fcff 0%,#e9f8ff 48%,#ffffff 100%);
+    }
 
-a{color:inherit;text-decoration:none;}
-.container{width:min(var(--container), calc(100% - 28px));margin:0 auto;}
+    a{color:inherit;text-decoration:none;}
+    .container{width:min(var(--container), calc(100% - 28px));margin:0 auto;}
 
-main{
-  padding-top:calc(var(--public-total-top, 158px) + var(--zone-h) + 30px);
-  padding-bottom:42px;
-}
+    main{
+      padding-top:calc(var(--public-total-top, 158px) + var(--zone-h) + 30px);
+      padding-bottom:42px;
+    }
 
-/* --- zone buttons --- */
-.public-zone-btn{
-  flex:0 0 auto;
-  padding:7px 18px;
-  border-radius:999px;
-  border:1px solid rgba(255,255,255,.36);
-  background:rgba(255,255,255,.82);
-  font-weight:1000;
-  cursor:pointer;
-}
+    .section{margin-top:16px;}
 
-.public-zone-btn[aria-selected="true"]{
-  background:linear-gradient(180deg,var(--blue),var(--blue-dark));
-  color:#fff;
-}
+    .panel{
+      background:var(--card);
+      border:1px solid rgba(255,255,255,.6);
+      border-radius:24px;
+      box-shadow:var(--shadow);
+      padding:18px;
+    }
 
-/* --- reste inchangé --- */
-</style>
+    .panel-head{
+      display:flex;
+      justify-content:space-between;
+      align-items:flex-start;
+      gap:12px;
+      margin-bottom:14px;
+    }
+
+    .panel-title{
+      margin:0;
+      font-size:26px;
+      line-height:1.05;
+      letter-spacing:-.03em;
+    }
+
+    .panel-text{
+      margin:6px 0 0;
+      color:var(--muted);
+      font-size:15px;
+      line-height:1.35;
+    }
+
+    .panel-tag{
+      flex-shrink:0;
+      padding:8px 13px;
+      border-radius:999px;
+      background:#e4f7ff;
+      color:var(--blue-dark);
+      font-size:12px;
+      font-weight:1000;
+      text-transform:uppercase;
+      letter-spacing:.06em;
+    }
+
+    .status-box{
+      margin-bottom:16px;
+      padding:14px 16px;
+      border-radius:18px;
+      background:linear-gradient(135deg,rgba(39,188,237,.12),rgba(198,90,30,.08));
+      border:1px solid rgba(39,188,237,.22);
+      color:#475467;
+      font-size:14px;
+      line-height:1.5;
+    }
+
+    .form{display:grid;gap:14px;}
+    .field{display:grid;gap:8px;}
+
+    .field label,
+    .choice-label{
+      font-weight:900;
+      color:#1c2430;
+    }
+
+    .field input{
+      width:100%;
+      min-height:50px;
+      border-radius:16px;
+      border:1px solid rgba(16,24,40,.10);
+      background:#fff;
+      padding:0 14px;
+      font-size:16px;
+      color:#17212b;
+      outline:none;
+    }
+
+    .field input:focus{
+      border-color:rgba(39,188,237,.65);
+      box-shadow:0 0 0 4px rgba(39,188,237,.14);
+    }
+
+    .choice-block{display:grid;gap:10px;}
+    .choice-grid{display:grid;grid-template-columns:1fr;gap:10px;}
+    .choice-grid.categories{grid-template-columns:repeat(2,1fr);}
+
+    .choice-card{position:relative;}
+    .choice-card input{position:absolute;opacity:0;pointer-events:none;}
+
+    .choice-card label{
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      min-height:56px;
+      padding:12px 14px;
+      border-radius:18px;
+      border:1px solid rgba(16,24,40,.10);
+      background:#fff;
+      font-weight:1000;
+      cursor:pointer;
+      text-align:center;
+      transition:all .18s ease;
+      box-shadow:0 8px 16px rgba(16,24,40,.04);
+    }
+
+    .choice-card input:checked + label{
+      border-color:var(--blue);
+      background:linear-gradient(180deg,var(--blue),var(--blue-dark));
+      color:#fff;
+      box-shadow:0 12px 22px rgba(7,91,154,.22);
+    }
+
+    .choice-card.epreuve input:checked + label{
+      border-color:var(--clay);
+      background:linear-gradient(135deg,var(--clay),var(--clay-light));
+      color:#fff;
+      box-shadow:0 12px 22px rgba(198,90,30,.22);
+    }
+
+    .sep{
+      border:none;
+      border-top:1px solid rgba(16,24,40,.08);
+      margin:4px 0;
+    }
+
+    .player-title{
+      margin:0;
+      font-size:22px;
+      font-weight:1000;
+      color:#1c2430;
+    }
+
+    .btn{
+      appearance:none;
+      border:none;
+      min-height:56px;
+      border-radius:18px;
+      padding:14px 18px;
+      font-size:16px;
+      font-weight:1000;
+      cursor:pointer;
+    }
+
+    .btn-primary{
+      background:linear-gradient(135deg,var(--clay),var(--clay-light));
+      color:#fff;
+      box-shadow:0 12px 22px rgba(198,90,30,.20);
+    }
+
+    .btn:disabled{
+      opacity:.55;
+      cursor:not-allowed;
+    }
+
+    .muted{
+      color:var(--muted);
+      font-size:14px;
+      line-height:1.45;
+    }
+
+    @media (min-width:760px){
+      :root{--zone-h:104px;}
+      .choice-grid{grid-template-columns:1fr 1fr;}
+      .choice-grid.categories{grid-template-columns:repeat(4,1fr);}
+      .panel{padding:22px;}
+    }
+
+    @media (max-width:759px){
+      :root{--zone-h:104px;}
+
+      main{
+        padding-top:calc(var(--public-total-top, 150px) + var(--zone-h) + 28px);
+      }
+
+      .panel-title{font-size:24px;}
+    }
+  </style>
 </head>
 
 <body>
 
 <div id="publicHeader"></div>
 
-<!-- 🔥 SOUS BANDEAU CORRIGÉ -->
 <section class="public-zonebar">
   <div class="public-container public-zonebar-inner">
-
-    <div class="public-zone-line">
-      <button class="public-zone-btn" data-categorie="U14">U14</button>
-      <button class="public-zone-btn" data-categorie="U18">U18</button>
-      <button class="public-zone-btn" data-categorie="Seniors">Seniors</button>
-      <button class="public-zone-btn" data-categorie="45+">45+</button>
+    <div class="public-zone-line" aria-label="Catégories">
+      <button class="public-zone-btn zone-cat-btn" data-categorie="U14" type="button" aria-selected="false">U14</button>
+      <button class="public-zone-btn zone-cat-btn" data-categorie="U18" type="button" aria-selected="false">U18</button>
+      <button class="public-zone-btn zone-cat-btn" data-categorie="Seniors" type="button" aria-selected="false">Seniors</button>
+      <button class="public-zone-btn zone-cat-btn" data-categorie="45+" type="button" aria-selected="false">45+</button>
     </div>
 
-    <div class="public-zone-line">
-      <button class="public-zone-btn" data-epreuve="DM">👨 Double Messieurs</button>
-      <button class="public-zone-btn" data-epreuve="DD">👩 Double Dames</button>
+    <div class="public-zone-line" aria-label="Épreuves">
+      <button class="public-zone-btn zone-epreuve-btn" data-epreuve="DM" type="button" aria-selected="false">👨 Double Messieurs</button>
+      <button class="public-zone-btn zone-epreuve-btn" data-epreuve="DD" type="button" aria-selected="false">👩 Double Dames</button>
     </div>
-
   </div>
 </section>
 
 <main class="container">
 
-<form id="signupForm">
+  <section class="section">
+    <div class="panel">
 
-<!-- catégories -->
-<input type="radio" name="categorie" value="U14" id="catU14">
-<input type="radio" name="categorie" value="U18" id="catU18">
-<input type="radio" name="categorie" value="Seniors" id="catSeniors">
-<input type="radio" name="categorie" value="45+" id="cat45">
+      <div class="panel-head">
+        <div>
+          <h1 class="panel-title">📝 Inscrire une équipe</h1>
+          <p class="panel-text">
+            Choisissez la catégorie, l’épreuve, puis renseignez les deux joueurs.
+          </p>
+        </div>
+        <div class="panel-tag">Officiel</div>
+      </div>
 
-<!-- épreuves -->
-<input type="radio" name="epreuve" value="DM" id="epreuveDM">
-<input type="radio" name="epreuve" value="DD" id="epreuveDD">
+      <div class="status-box" id="gateMsg">
+        ✅ Inscriptions ouvertes — paiement à venir.
+      </div>
 
-</form>
+      <form id="signupForm" class="form" autocomplete="on">
+
+        <div class="choice-block">
+          <div class="choice-label">Catégorie *</div>
+          <div class="choice-grid categories">
+            <div class="choice-card">
+              <input id="catU14" name="categorie" type="radio" value="U14" required>
+              <label for="catU14">U14</label>
+            </div>
+
+            <div class="choice-card">
+              <input id="catU18" name="categorie" type="radio" value="U18" required>
+              <label for="catU18">U18</label>
+            </div>
+
+            <div class="choice-card">
+              <input id="catSeniors" name="categorie" type="radio" value="Seniors" required>
+              <label for="catSeniors">Seniors</label>
+            </div>
+
+            <div class="choice-card">
+              <input id="cat45" name="categorie" type="radio" value="45+" required>
+              <label for="cat45">45+</label>
+            </div>
+          </div>
+        </div>
+
+        <div class="choice-block">
+          <div class="choice-label">Épreuve *</div>
+          <div class="choice-grid">
+            <div class="choice-card epreuve">
+              <input id="epreuveDM" name="epreuve" type="radio" value="DM" required>
+              <label for="epreuveDM">👨 Double Messieurs</label>
+            </div>
+
+            <div class="choice-card epreuve">
+              <input id="epreuveDD" name="epreuve" type="radio" value="DD" required>
+              <label for="epreuveDD">👩 Double Dames</label>
+            </div>
+          </div>
+        </div>
+
+        <hr class="sep" />
+
+        <h3 class="player-title">Joueur / Joueuse 1</h3>
+
+        <div class="field">
+          <label for="p1LastName">Nom *</label>
+          <input id="p1LastName" name="p1LastName" type="text" required placeholder="Nom">
+        </div>
+
+        <div class="field">
+          <label for="p1FirstName">Prénom *</label>
+          <input id="p1FirstName" name="p1FirstName" type="text" required placeholder="Prénom">
+        </div>
+
+        <div class="field">
+          <label for="p1Licence">N° Licence *</label>
+          <input id="p1Licence" name="p1Licence" type="text" required placeholder="Ex : 0123456A">
+        </div>
+
+        <div class="field">
+          <label for="p1Phone">Téléphone *</label>
+          <input id="p1Phone" name="p1Phone" type="tel" required placeholder="Ex : +594... / 06...">
+        </div>
+
+        <hr class="sep" />
+
+        <h3 class="player-title">Joueur / Joueuse 2</h3>
+
+        <div class="field">
+          <label for="p2LastName">Nom *</label>
+          <input id="p2LastName" name="p2LastName" type="text" required placeholder="Nom">
+        </div>
+
+        <div class="field">
+          <label for="p2FirstName">Prénom *</label>
+          <input id="p2FirstName" name="p2FirstName" type="text" required placeholder="Prénom">
+        </div>
+
+        <div class="field">
+          <label for="p2Licence">N° Licence *</label>
+          <input id="p2Licence" name="p2Licence" type="text" required placeholder="Ex : 0123456A">
+        </div>
+
+        <div class="field">
+          <label for="p2Phone">Téléphone *</label>
+          <input id="p2Phone" name="p2Phone" type="tel" required placeholder="Ex : +594... / 06...">
+        </div>
+
+        <button id="submitBtn" class="btn btn-primary" type="submit">
+          ✅ Valider l’inscription
+        </button>
+
+        <p id="status" class="muted" role="status" aria-live="polite" style="margin:0;"></p>
+
+      </form>
+    </div>
+  </section>
 
 </main>
 
 <script type="module" src="../assets/js/public-header.js"></script>
 
-<script>
-/* =========================
-   🔥 SYNCHRO BANDEAU ↔ FORM
-   ========================= */
+<script type="module">
+  import { db } from "../assets/js/firebase.js";
+  import {
+    collection,
+    addDoc,
+    doc,
+    setDoc,
+    serverTimestamp
+  } from "https://www.gstatic.com/firebasejs/10.12.5/firebase-firestore.js";
 
-const catBtns = document.querySelectorAll("[data-categorie]");
-const epBtns  = document.querySelectorAll("[data-epreuve]");
+  const EVENT_ID = "championnats-2026";
 
-function updateUI(){
-  const cat = document.querySelector('input[name="categorie"]:checked')?.value;
-  const ep  = document.querySelector('input[name="epreuve"]:checked')?.value;
+  const form = document.getElementById("signupForm");
+  const statusEl = document.getElementById("status");
+  const submitBtn = document.getElementById("submitBtn");
 
-  catBtns.forEach(btn=>{
-    btn.setAttribute("aria-selected", btn.dataset.categorie === cat);
+  const zoneCatBtns = Array.from(document.querySelectorAll(".zone-cat-btn"));
+  const zoneEpreuveBtns = Array.from(document.querySelectorAll(".zone-epreuve-btn"));
+
+  function clean(value){
+    return (value || "").trim();
+  }
+
+  function capitalize(value){
+    const v = clean(value).toLowerCase();
+    if(!v) return "";
+    return v.charAt(0).toUpperCase() + v.slice(1);
+  }
+
+  function buildTeamName(p1First, p1Last, p2First, p2Last){
+    const i1 = clean(p1Last).charAt(0).toUpperCase();
+    const i2 = clean(p2Last).charAt(0).toUpperCase();
+
+    return `${capitalize(p1First)} ${i1} - ${capitalize(p2First)} ${i2}`;
+  }
+
+  function slugify(value){
+    return clean(value)
+      .toLowerCase()
+      .normalize("NFD")
+      .replace(/[\u0300-\u036f]/g, "")
+      .replace(/[^a-z0-9]+/g, "-")
+      .replace(/(^-|-$)/g, "");
+  }
+
+  function setStatus(message){
+    statusEl.textContent = message;
+  }
+
+  function getRadioByNameValue(name, value){
+    return Array.from(document.querySelectorAll(`input[name="${name}"]`))
+      .find(input => input.value === value) || null;
+  }
+
+  function syncZoneButtons(){
+    const selectedCategorie = form.querySelector('input[name="categorie"]:checked')?.value || "";
+    const selectedEpreuve = form.querySelector('input[name="epreuve"]:checked')?.value || "";
+
+    zoneCatBtns.forEach(btn => {
+      btn.setAttribute("aria-selected", btn.dataset.categorie === selectedCategorie ? "true" : "false");
+    });
+
+    zoneEpreuveBtns.forEach(btn => {
+      btn.setAttribute("aria-selected", btn.dataset.epreuve === selectedEpreuve ? "true" : "false");
+    });
+  }
+
+  function selectCategorie(value){
+    const input = getRadioByNameValue("categorie", value);
+    if(!input) return;
+
+    input.checked = true;
+    input.dispatchEvent(new Event("change", { bubbles:true }));
+    syncZoneButtons();
+  }
+
+  function selectEpreuve(value){
+    const input = getRadioByNameValue("epreuve", value);
+    if(!input) return;
+
+    input.checked = true;
+    input.dispatchEvent(new Event("change", { bubbles:true }));
+    syncZoneButtons();
+  }
+
+  zoneCatBtns.forEach(btn => {
+    btn.addEventListener("click", () => {
+      selectCategorie(btn.dataset.categorie);
+    });
   });
 
-  epBtns.forEach(btn=>{
-    btn.setAttribute("aria-selected", btn.dataset.epreuve === ep);
-  });
-}
-
-/* --- clic catégorie --- */
-catBtns.forEach(btn=>{
-  btn.onclick = () => {
-    document.querySelector(`input[name="categorie"][value="${btn.dataset.categorie}"]`).checked = true;
-    updateUI();
-  };
-});
-
-/* --- clic épreuve --- */
-epBtns.forEach(btn=>{
-  btn.onclick = () => {
-    document.querySelector(`input[name="epreuve"][value="${btn.dataset.epreuve}"]`).checked = true;
-    updateUI();
-  };
-});
-
-/* --- synchro quand on clique dans le formulaire --- */
-document.querySelectorAll('input[name="categorie"], input[name="epreuve"]')
-  .forEach(input=>{
-    input.addEventListener("change", updateUI);
+  zoneEpreuveBtns.forEach(btn => {
+    btn.addEventListener("click", () => {
+      selectEpreuve(btn.dataset.epreuve);
+    });
   });
 
-updateUI();
+  form.querySelectorAll('input[name="categorie"], input[name="epreuve"]').forEach(input => {
+    input.addEventListener("change", syncZoneButtons);
+  });
+
+  function readFormData(){
+    return {
+      categorie: form.querySelector('input[name="categorie"]:checked')?.value || "",
+      epreuve: form.querySelector('input[name="epreuve"]:checked')?.value || "",
+
+      p1FirstName: clean(form.p1FirstName.value),
+      p1LastName: clean(form.p1LastName.value),
+      p1Licence: clean(form.p1Licence.value),
+      p1Phone: clean(form.p1Phone.value),
+
+      p2FirstName: clean(form.p2FirstName.value),
+      p2LastName: clean(form.p2LastName.value),
+      p2Licence: clean(form.p2Licence.value),
+      p2Phone: clean(form.p2Phone.value)
+    };
+  }
+
+  form.addEventListener("submit", async (event) => {
+    event.preventDefault();
+
+    submitBtn.disabled = true;
+    setStatus("Envoi en cours…");
+
+    try{
+      const data = readFormData();
+
+      if(
+        !data.categorie ||
+        !data.epreuve ||
+        !data.p1FirstName || !data.p1LastName || !data.p1Licence || !data.p1Phone ||
+        !data.p2FirstName || !data.p2LastName || !data.p2Licence || !data.p2Phone
+      ){
+        throw new Error("Merci de compléter tous les champs obligatoires.");
+      }
+
+      const teamName = buildTeamName(
+        data.p1FirstName,
+        data.p1LastName,
+        data.p2FirstName,
+        data.p2LastName
+      );
+
+      const privatePayload = {
+        eventId: EVENT_ID,
+        createdAt: serverTimestamp(),
+
+        categorie: data.categorie,
+        epreuve: data.epreuve,
+        categorieKey: slugify(data.categorie),
+        epreuveKey: slugify(data.epreuve),
+
+        teamName: teamName,
+        teamKey: slugify(teamName),
+
+        paiement: "placeholder",
+        statut: "inscrite",
+
+        joueur1: {
+          firstName: data.p1FirstName,
+          lastName: data.p1LastName,
+          licence: data.p1Licence,
+          phone: data.p1Phone
+        },
+
+        joueur2: {
+          firstName: data.p2FirstName,
+          lastName: data.p2LastName,
+          licence: data.p2Licence,
+          phone: data.p2Phone
+        }
+      };
+
+      const privateRef = await addDoc(
+        collection(db, "events", EVENT_ID, "inscriptions"),
+        privatePayload
+      );
+
+      const publicPayload = {
+        eventId: EVENT_ID,
+        createdAt: serverTimestamp(),
+
+        inscriptionId: privateRef.id,
+
+        categorie: data.categorie,
+        epreuve: data.epreuve,
+        categorieKey: slugify(data.categorie),
+        epreuveKey: slugify(data.epreuve),
+
+        teamName: teamName,
+        teamKey: slugify(teamName),
+
+        joueur1FirstName: data.p1FirstName,
+        joueur2FirstName: data.p2FirstName,
+
+        statut: "inscrite",
+        paiement: "placeholder",
+        list: "main",
+        stby: false
+      };
+
+      await setDoc(
+        doc(db, "events", EVENT_ID, "equipes", privateRef.id),
+        publicPayload
+      );
+
+      form.reset();
+      syncZoneButtons();
+
+      setStatus("✅ Inscription enregistrée : " + teamName);
+      alert("✅ Inscription confirmée !\n\nÉquipe enregistrée : " + teamName);
+
+    }catch(error){
+      console.error(error);
+      setStatus("❌ Erreur : " + (error?.message || "Impossible d’enregistrer l’inscription."));
+    }finally{
+      submitBtn.disabled = false;
+    }
+  });
+
+  syncZoneButtons();
 </script>
 
 </body>
