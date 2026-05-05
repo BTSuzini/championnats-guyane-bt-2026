@@ -18,6 +18,7 @@ function injectStyles(){
       --clay-light:#ee8a3a;
       --blue:#075b9a;
       --blue-dark:#063b72;
+      --sky:#27bced;
       --container:1180px;
       --public-header-h:158px;
       --public-total-top:158px;
@@ -157,6 +158,61 @@ function injectStyles(){
       color:#fff;
     }
 
+    .public-zonebar{
+      position:fixed;
+      top:var(--public-header-h);
+      left:0;
+      right:0;
+      z-index:999;
+      background:
+        radial-gradient(circle at 18% 10%, rgba(255,255,255,.42), transparent 24%),
+        radial-gradient(circle at 80% 24%, rgba(255,255,255,.26), transparent 24%),
+        linear-gradient(135deg,#23b7ea 0%,#7fdfff 48%,#f5fdff 100%);
+      box-shadow:0 8px 18px rgba(16,24,40,.08);
+      border-bottom:1px solid rgba(7,91,154,.10);
+      padding:14px 0 16px;
+    }
+
+    .public-zonebar-inner{
+      display:grid;
+      gap:8px;
+    }
+
+    .public-zone-line{
+      display:flex;
+      justify-content:center;
+      align-items:center;
+      gap:10px;
+      overflow-x:auto;
+      scrollbar-width:none;
+      -webkit-overflow-scrolling:touch;
+      padding:3px 2px;
+    }
+
+    .public-zone-line::-webkit-scrollbar{display:none;}
+
+    .public-zone-btn{
+      flex:0 0 auto;
+      min-height:34px;
+      padding:7px 18px;
+      border-radius:999px;
+      border:1px solid rgba(255,255,255,.36);
+      background:rgba(255,255,255,.82);
+      color:#1c2430;
+      font-size:13px;
+      font-weight:1000;
+      cursor:pointer;
+      box-shadow:0 5px 12px rgba(16,24,40,.08);
+      touch-action:manipulation;
+    }
+
+    .public-zone-btn[aria-selected="true"]{
+      background:linear-gradient(180deg,var(--blue),var(--blue-dark));
+      color:#fff;
+      border-color:var(--blue);
+      box-shadow:0 8px 18px rgba(7,91,154,.24);
+    }
+
     @media (min-width:760px){
       .public-header-inner{
         grid-template-columns:100px 1fr 100px;
@@ -176,6 +232,10 @@ function injectStyles(){
       :root{
         --public-header-h:150px;
         --public-total-top:150px;
+      }
+
+      .public-zone-line{
+        justify-content:flex-start;
       }
     }
   `;
