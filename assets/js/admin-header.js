@@ -296,20 +296,8 @@ function injectStyles(){
       white-space:nowrap;
     }
 
-    .admin-zone-btn[aria-selected="true"]{
-      background:linear-gradient(180deg,var(--blue),var(--blue-dark));
-      color:#fff;
-      border-color:var(--blue);
-      box-shadow:0 8px 18px rgba(7,91,154,.24);
-    }
-
-    .admin-zone-btn.all-active{
-      background:linear-gradient(180deg,var(--blue),var(--blue-dark));
-      color:#fff;
-      border-color:var(--blue);
-      box-shadow:0 8px 18px rgba(7,91,154,.24);
-    }
-
+    .admin-zone-btn[aria-selected="true"],
+    .admin-zone-btn.all-active,
     .admin-zone-btn.all-active[aria-selected="true"]{
       background:linear-gradient(180deg,var(--blue),var(--blue-dark));
       color:#fff;
@@ -372,6 +360,7 @@ function renderHeader(){
             <a class="${navClass("index.html")}" href="index.html">🛠️ Admin</a>
             <a class="${navClass("inscriptions.html")}" href="inscriptions.html">📝 Inscriptions</a>
             <a class="${navClass("equipes.html")}" href="equipes.html">👥 Équipes</a>
+            <a class="${navClass("tirage.html")}" href="tirage.html">🎲 Tirage</a>
             <a class="${navClass("programmation.html")}" href="programmation.html">📅 Programmation</a>
             <a class="${navClass("resultats.html")}" href="resultats.html">🏆 Résultats</a>
             <a class="${navClass("roles.html")}" href="roles.html">🔐 Rôles</a>
