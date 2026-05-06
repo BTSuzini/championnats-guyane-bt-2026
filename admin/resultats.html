@@ -1,0 +1,344 @@
+<!doctype html>
+<html lang="fr">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Admin — Résultats — Championnats Guyane Beach Tennis</title>
+
+  <style>
+    :root{
+      --clay:#c65a1e; --clay-dark:#8e3a13; --clay-light:#ee8a3a;
+      --sky:#27bced; --aqua:#00a9c8; --blue:#075b9a; --blue-dark:#063b72;
+      --text:#17212b; --muted:#667085; --card:rgba(255,255,255,.94);
+      --shadow:0 16px 40px rgba(16,24,40,.12);
+      --container:1180px;
+    }
+
+    *{box-sizing:border-box;}
+
+    body{
+      margin:0;
+      font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;
+      color:var(--text);
+      background:
+        radial-gradient(circle at 20% 0%, rgba(39,188,237,.22), transparent 28%),
+        radial-gradient(circle at 85% 10%, rgba(0,169,200,.16), transparent 26%),
+        linear-gradient(180deg,#f4fcff 0%,#e9f8ff 48%,#ffffff 100%);
+    }
+
+    a{color:inherit;text-decoration:none;}
+    .container{width:min(var(--container), calc(100% - 28px));margin:0 auto;}
+
+    main{
+      padding-top:calc(var(--admin-total-top, 158px) + 24px);
+      padding-bottom:42px;
+    }
+
+    .section{margin-top:18px;}
+
+    .panel{
+      background:var(--card);
+      border:1px solid rgba(255,255,255,.6);
+      border-radius:24px;
+      box-shadow:var(--shadow);
+      padding:18px;
+    }
+
+    .panel-head{
+      display:flex;
+      justify-content:space-between;
+      align-items:flex-start;
+      gap:12px;
+      margin-bottom:14px;
+    }
+
+    .panel-title{
+      margin:0;
+      font-size:26px;
+      line-height:1.05;
+      letter-spacing:-.03em;
+    }
+
+    .panel-text{
+      margin:6px 0 0;
+      color:var(--muted);
+      font-size:15px;
+      line-height:1.45;
+    }
+
+    .panel-tag{
+      flex-shrink:0;
+      padding:8px 13px;
+      border-radius:999px;
+      background:#e4f7ff;
+      color:var(--blue-dark);
+      font-size:12px;
+      font-weight:1000;
+      text-transform:uppercase;
+      letter-spacing:.06em;
+    }
+
+    .grid{display:grid;grid-template-columns:1fr;gap:10px;}
+
+    .btn{
+      appearance:none;
+      border:1px solid rgba(7,91,154,.14);
+      background:#fff;
+      border-radius:999px;
+      min-height:42px;
+      padding:10px 16px;
+      font-size:14px;
+      font-weight:1000;
+      cursor:pointer;
+      color:#1c2430;
+      text-align:center;
+      box-shadow:0 6px 14px rgba(16,24,40,.05);
+      white-space:nowrap;
+    }
+
+    .btn.primary,
+    .btn.is-active{
+      background:linear-gradient(180deg,var(--blue),var(--blue-dark));
+      color:#fff;
+      border-color:var(--blue);
+      box-shadow:0 10px 22px rgba(7,91,154,.22);
+    }
+
+    .btn.danger{
+      background:#fff5f5;
+      color:#8a1f1f;
+      border-color:#f1b2b2;
+    }
+
+    .status-box{
+      margin-top:12px;
+      padding:14px 16px;
+      border-radius:18px;
+      background:linear-gradient(135deg,rgba(39,188,237,.12),rgba(198,90,30,.08));
+      border:1px solid rgba(39,188,237,.22);
+      color:#475467;
+      font-size:14px;
+      line-height:1.5;
+    }
+
+    .placeholder{
+      padding:15px 16px;
+      border-radius:18px;
+      background:linear-gradient(135deg,rgba(39,188,237,.12),rgba(198,90,30,.08));
+      border:1px solid rgba(39,188,237,.22);
+      color:#475467;
+      font-size:14px;
+      line-height:1.5;
+    }
+
+    .muted{color:var(--muted);font-size:14px;line-height:1.45;}
+
+    @media (min-width:760px){
+      .panel{padding:22px;}
+      .grid.two{grid-template-columns:1fr 1fr;}
+      .grid.three{grid-template-columns:repeat(3,1fr);}
+    }
+
+    @media (max-width:759px){
+      main{padding-top:calc(var(--admin-total-top, 150px) + 20px);}
+      .panel-title{font-size:24px;}
+    }
+  </style>
+</head>
+
+<body data-zone-selector="none">
+
+<div id="adminHeader"></div>
+
+<main class="container">
+
+  <section class="section panel" id="accessDenied" style="display:none;">
+    <h2 class="panel-title">⛔ Accès refusé</h2>
+    <p class="panel-text">Cette page est réservée aux administrateurs.</p>
+  </section>
+
+  <section class="section panel" id="pageContent" style="display:none;">
+    <div class="panel-head">
+      <div>
+        <h1 class="panel-title">🏆 Résultats</h1>
+        <p class="panel-text">
+          Gestion de la visibilité publique des résultats.
+        </p>
+      </div>
+      <div class="panel-tag">Admin</div>
+    </div>
+
+    <div class="placeholder">
+      <strong>Fichier de travail résultats.</strong><br>
+      La saisie complète des résultats pourra être ajoutée ensuite. Pour l’instant, cette page pilote la visibilité publique.
+    </div>
+  </section>
+
+  <section class="section panel" id="panelVisibility" style="display:none;">
+    <div class="panel-head">
+      <div>
+        <h2 class="panel-title">👀 Visibilité publique</h2>
+        <p class="panel-text" id="visibilityText">Chargement…</p>
+      </div>
+      <div class="panel-tag">Public</div>
+    </div>
+
+    <div class="grid two">
+      <button class="btn danger" id="btnPublicHide" type="button">🔒 Mettre en maintenance</button>
+      <button class="btn primary" id="btnPublicShow" type="button">✅ Rendre visible</button>
+    </div>
+
+    <div class="status-box">
+      Si les résultats sont masqués, le public verra une page de maintenance.
+      Les administrateurs et JAT pourront quand même voir la page publique en version travail.
+    </div>
+  </section>
+
+  <section class="section panel" id="panelPreview" style="display:none;">
+    <div class="panel-head">
+      <div>
+        <h2 class="panel-title">👁️ Aperçu public</h2>
+        <p class="panel-text">
+          Ouvre la page publique telle que visible par les organisateurs.
+        </p>
+      </div>
+      <div class="panel-tag">Test</div>
+    </div>
+
+    <div class="grid">
+      <a class="btn" href="../public/resultats.html?adminPreview=1">👀 Ouvrir la page publique</a>
+    </div>
+  </section>
+
+</main>
+
+<script type="module" src="../assets/js/admin-header.js"></script>
+
+<script type="module">
+  import { auth, db } from "../assets/js/firebase.js";
+  import { getRoleByUid } from "../assets/js/session.js";
+  import { onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.12.5/firebase-auth.js";
+  import {
+    doc,
+    setDoc,
+    onSnapshot,
+    serverTimestamp
+  } from "https://www.gstatic.com/firebasejs/10.12.5/firebase-firestore.js";
+
+  const EVENT_ID = "championnats-2026";
+
+  const accessDenied = document.getElementById("accessDenied");
+  const pageContent = document.getElementById("pageContent");
+  const panelVisibility = document.getElementById("panelVisibility");
+  const panelPreview = document.getElementById("panelPreview");
+
+  const visibilityText = document.getElementById("visibilityText");
+  const btnPublicHide = document.getElementById("btnPublicHide");
+  const btnPublicShow = document.getElementById("btnPublicShow");
+
+  let unsubVisibility = null;
+
+  function visibilityRef(){
+    return doc(db, "events", EVENT_ID, "config", "resultats");
+  }
+
+  function stopListeners(){
+    if(unsubVisibility){
+      unsubVisibility();
+      unsubVisibility = null;
+    }
+  }
+
+  function startListeners(){
+    stopListeners();
+
+    unsubVisibility = onSnapshot(visibilityRef(), (snap) => {
+      const data = snap.exists() ? (snap.data() || {}) : {};
+      const visible = data.publicVisible === true;
+
+      visibilityText.innerHTML = visible
+        ? "Statut actuel : <strong>visible publiquement ✅</strong>"
+        : "Statut actuel : <strong>maintenance / masqué 🔒</strong>";
+
+      btnPublicShow.classList.toggle("is-active", visible);
+      btnPublicHide.classList.toggle("is-active", !visible);
+    }, (error) => {
+      console.error(error);
+      visibilityText.textContent = "❌ Impossible de lire la visibilité publique.";
+    });
+  }
+
+  async function setPublicVisible(value){
+    await setDoc(visibilityRef(), {
+      publicVisible:value === true,
+      updatedAt:serverTimestamp(),
+      updatedBy:auth.currentUser?.uid || null
+    }, { merge:true });
+  }
+
+  function showDenied(){
+    accessDenied.style.display = "block";
+    pageContent.style.display = "none";
+    panelVisibility.style.display = "none";
+    panelPreview.style.display = "none";
+    stopListeners();
+  }
+
+  function showAdmin(){
+    accessDenied.style.display = "none";
+    pageContent.style.display = "block";
+    panelVisibility.style.display = "block";
+    panelPreview.style.display = "block";
+    startListeners();
+  }
+
+  btnPublicHide.onclick = async () => {
+    try{
+      await setPublicVisible(false);
+    }catch(error){
+      console.error(error);
+      alert("Erreur : impossible de masquer les résultats.");
+    }
+  };
+
+  btnPublicShow.onclick = async () => {
+    try{
+      await setPublicVisible(true);
+    }catch(error){
+      console.error(error);
+      alert("Erreur : impossible de rendre les résultats visibles.");
+    }
+  };
+
+  onAuthStateChanged(auth, async (user) => {
+    stopListeners();
+
+    accessDenied.style.display = "none";
+    pageContent.style.display = "none";
+    panelVisibility.style.display = "none";
+    panelPreview.style.display = "none";
+
+    if(!user){
+      showDenied();
+      return;
+    }
+
+    try{
+      const role = await getRoleByUid(user.uid);
+
+      if(role !== "admin"){
+        showDenied();
+        return;
+      }
+
+      showAdmin();
+
+    }catch(error){
+      console.error(error);
+      showDenied();
+    }
+  });
+</script>
+
+</body>
+</html>
