@@ -1,0 +1,708 @@
+<!doctype html>
+<html lang="fr">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Tirage — Championnats Guyane Beach Tennis</title>
+
+  <style>
+    :root{
+      --clay:#c65a1e; --clay-dark:#8e3a13; --clay-light:#ee8a3a;
+      --sky:#27bced; --aqua:#00a9c8; --blue:#075b9a; --blue-dark:#063b72;
+      --text:#17212b; --muted:#667085; --card:rgba(255,255,255,.94);
+      --shadow:0 16px 40px rgba(16,24,40,.12);
+      --container:1180px;
+      --zone-h:104px;
+    }
+
+    *{box-sizing:border-box;}
+
+    body{
+      margin:0;
+      font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;
+      color:var(--text);
+      background:
+        radial-gradient(circle at 20% 0%, rgba(39,188,237,.22), transparent 28%),
+        radial-gradient(circle at 85% 10%, rgba(0,169,200,.16), transparent 26%),
+        linear-gradient(180deg,#f4fcff 0%,#e9f8ff 48%,#fff 100%);
+    }
+
+    a{color:inherit;text-decoration:none;}
+    .container{width:min(var(--container), calc(100% - 28px));margin:0 auto;}
+
+    main{
+      padding-top:calc(var(--public-total-top, 158px) + var(--zone-h) + 30px);
+      padding-bottom:42px;
+    }
+
+    .section{margin-top:16px;}
+
+    .panel{
+      background:var(--card);
+      border:1px solid rgba(255,255,255,.6);
+      border-radius:24px;
+      box-shadow:var(--shadow);
+      padding:18px;
+    }
+
+    .panel-head{
+      display:flex;
+      justify-content:space-between;
+      align-items:flex-start;
+      gap:12px;
+      margin-bottom:14px;
+    }
+
+    .panel-title{
+      margin:0;
+      font-size:26px;
+      line-height:1.05;
+      letter-spacing:-.03em;
+    }
+
+    .panel-text{
+      margin:6px 0 0;
+      color:var(--muted);
+      font-size:15px;
+      line-height:1.35;
+    }
+
+    .panel-tag{
+      flex-shrink:0;
+      padding:8px 13px;
+      border-radius:999px;
+      background:#e4f7ff;
+      color:var(--blue-dark);
+      font-size:12px;
+      font-weight:1000;
+      text-transform:uppercase;
+      letter-spacing:.06em;
+    }
+
+    .placeholder,
+    .status-box{
+      padding:15px 16px;
+      border-radius:18px;
+      background:linear-gradient(135deg,rgba(39,188,237,.12),rgba(198,90,30,.08));
+      border:1px solid rgba(39,188,237,.22);
+      color:#475467;
+      font-size:14px;
+      line-height:1.5;
+    }
+
+    .placeholder p{margin:0;}
+    .placeholder p + p{margin-top:8px;}
+
+    .status-box{
+      margin-top:12px;
+    }
+
+    .muted{
+      color:var(--muted);
+      font-size:14px;
+      line-height:1.45;
+    }
+
+    .pool-grid{
+      display:grid;
+      gap:12px;
+      grid-template-columns:1fr;
+      margin-top:12px;
+    }
+
+    .pool-card{
+      border:1px solid rgba(16,24,40,.08);
+      border-radius:18px;
+      background:#fff;
+      padding:13px;
+      box-shadow:0 8px 18px rgba(16,24,40,.06);
+    }
+
+    .pool-title{
+      font-size:13px;
+      font-weight:1000;
+      color:var(--blue-dark);
+      text-transform:uppercase;
+      letter-spacing:.06em;
+      margin-bottom:10px;
+    }
+
+    .pool-list{
+      display:grid;
+      gap:8px;
+    }
+
+    .pool-slot{
+      border:1px solid #eee;
+      border-radius:14px;
+      background:#fafafa;
+      padding:10px 12px;
+      font-weight:1000;
+      font-size:14px;
+      line-height:1.2;
+      min-width:0;
+      white-space:nowrap;
+      overflow:hidden;
+      text-overflow:ellipsis;
+    }
+
+    .pool-slot.empty{
+      background:#f7fbff;
+      border-color:#d9ebfb;
+      color:#667085;
+      font-style:italic;
+    }
+
+    .pool-slot.seed{
+      background:#fff9e8;
+      border-color:#f1dca1;
+    }
+
+    .item-list{
+      display:grid;
+      gap:8px;
+      margin-top:10px;
+    }
+
+    .item-card{
+      border:1px solid rgba(16,24,40,.08);
+      border-radius:16px;
+      background:#fff;
+      padding:11px 12px;
+      box-shadow:0 6px 14px rgba(16,24,40,.05);
+      display:flex;
+      justify-content:space-between;
+      gap:10px;
+      align-items:center;
+    }
+
+    .pill{
+      display:inline-flex;
+      align-items:center;
+      padding:4px 10px;
+      border-radius:999px;
+      font-size:12px;
+      border:1px solid #d9e6ff;
+      background:#f3f7ff;
+      color:var(--blue-dark);
+      white-space:nowrap;
+      font-weight:1000;
+    }
+
+    @media (min-width:760px){
+      :root{--zone-h:104px;}
+      .panel{padding:22px;}
+      .pool-grid{grid-template-columns:1fr 1fr;}
+    }
+
+    @media (max-width:759px){
+      :root{--zone-h:104px;}
+
+      main{
+        padding-top:calc(var(--public-total-top, 150px) + var(--zone-h) + 28px);
+      }
+
+      .panel-title{font-size:24px;}
+    }
+  </style>
+</head>
+
+<body>
+
+<div id="publicHeader"></div>
+
+<section class="public-zonebar">
+  <div class="public-container public-zonebar-inner">
+    <div class="public-zone-line" aria-label="Sélection catégorie">
+      <button class="public-zone-btn zone-cat-btn" data-categorie="U14" type="button" aria-selected="true">U14</button>
+      <button class="public-zone-btn zone-cat-btn" data-categorie="U18" type="button" aria-selected="false">U18</button>
+      <button class="public-zone-btn zone-cat-btn" data-categorie="Seniors" type="button" aria-selected="false">Seniors</button>
+      <button class="public-zone-btn zone-cat-btn" data-categorie="45+" type="button" aria-selected="false">45+</button>
+    </div>
+
+    <div class="public-zone-line" aria-label="Sélection épreuve">
+      <button class="public-zone-btn zone-epreuve-btn" data-epreuve="DM" type="button" aria-selected="true">👨 Double Messieurs</button>
+      <button class="public-zone-btn zone-epreuve-btn" data-epreuve="DD" type="button" aria-selected="false">👩 Double Dames</button>
+    </div>
+  </div>
+</section>
+
+<main class="container">
+
+  <section class="section panel" id="maintenancePanel" style="display:none;">
+    <div class="panel-head">
+      <div>
+        <h1 class="panel-title">🎲 Tirage</h1>
+        <p class="panel-text">La page est en cours de préparation.</p>
+      </div>
+      <div class="panel-tag">Maintenance</div>
+    </div>
+
+    <div class="placeholder">
+      <p><strong>🔒 Tirage en maintenance.</strong></p>
+      <p>Le tirage sera visible ici dès publication officielle par l’organisation.</p>
+    </div>
+  </section>
+
+  <section class="section panel" id="workPanel" style="display:none;">
+    <div class="panel-head">
+      <div>
+        <h1 class="panel-title">🎲 Tirage</h1>
+        <p class="panel-text">
+          <span id="workIntro">Fichier de travail pour le tirage.</span>
+        </p>
+      </div>
+      <div class="panel-tag" id="pageTag">Direct</div>
+    </div>
+
+    <div class="status-box">
+      Zone affichée : <strong id="zoneLabel">U14 — Double Messieurs</strong><br>
+      Statut : <strong id="drawStatus">Chargement…</strong>
+    </div>
+  </section>
+
+  <section class="section panel" id="drawPanel" style="display:none;">
+    <div class="panel-head">
+      <div>
+        <h2 class="panel-title">🏖️ Poules</h2>
+        <p class="panel-text" id="drawInfo">—</p>
+      </div>
+      <div class="panel-tag">Tirage</div>
+    </div>
+
+    <div class="pool-grid">
+      <div class="pool-card">
+        <div class="pool-title">Poule A</div>
+        <div id="poolAList" class="pool-list"></div>
+      </div>
+
+      <div class="pool-card">
+        <div class="pool-title">Poule B</div>
+        <div id="poolBList" class="pool-list"></div>
+      </div>
+    </div>
+  </section>
+
+  <section class="section panel" id="detailsPanel" style="display:none;">
+    <div class="panel-head">
+      <div>
+        <h2 class="panel-title">📌 Suivi du tirage</h2>
+        <p class="panel-text">Équipes révélées et tirages restants.</p>
+      </div>
+      <div class="panel-tag">Détails</div>
+    </div>
+
+    <div>
+      <div style="font-weight:1000;margin-bottom:8px;">📌 Déjà révélés</div>
+      <div id="revealedList" class="item-list"></div>
+    </div>
+
+    <div style="margin-top:16px;">
+      <div style="font-weight:1000;margin-bottom:8px;">📥 Restant à tirer</div>
+      <div id="remainingList" class="item-list"></div>
+    </div>
+  </section>
+
+</main>
+
+<script type="module" src="../assets/js/public-header.js"></script>
+
+<script type="module">
+  import { auth, db } from "../assets/js/firebase.js";
+  import { getRoleByUid } from "../assets/js/session.js";
+  import { onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.12.5/firebase-auth.js";
+  import {
+    collection,
+    getDocs,
+    query,
+    orderBy,
+    doc,
+    onSnapshot
+  } from "https://www.gstatic.com/firebasejs/10.12.5/firebase-firestore.js";
+
+  const EVENT_ID = "championnats-2026";
+
+  const EPREUVE_LABELS = {
+    DM: "Double Messieurs",
+    DD: "Double Dames"
+  };
+
+  const params = new URLSearchParams(location.search);
+
+  let currentCategorie = params.get("categorie") || "U14";
+  let currentEpreuve = params.get("epreuve") || "DM";
+  let isPrivileged = false;
+  let publicVisible = false;
+  let cachedTeams = [];
+  let currentDraw = null;
+  let unsubDraw = null;
+  let unsubVisibility = null;
+
+  const maintenancePanel = document.getElementById("maintenancePanel");
+  const workPanel = document.getElementById("workPanel");
+  const drawPanel = document.getElementById("drawPanel");
+  const detailsPanel = document.getElementById("detailsPanel");
+
+  const workIntro = document.getElementById("workIntro");
+  const pageTag = document.getElementById("pageTag");
+  const zoneLabel = document.getElementById("zoneLabel");
+  const drawStatus = document.getElementById("drawStatus");
+  const drawInfo = document.getElementById("drawInfo");
+
+  const poolAList = document.getElementById("poolAList");
+  const poolBList = document.getElementById("poolBList");
+  const revealedList = document.getElementById("revealedList");
+  const remainingList = document.getElementById("remainingList");
+
+  const zoneCatBtns = Array.from(document.querySelectorAll(".zone-cat-btn"));
+  const zoneEpreuveBtns = Array.from(document.querySelectorAll(".zone-epreuve-btn"));
+
+  function esc(s){
+    return (s ?? "").toString()
+      .replaceAll("&","&amp;")
+      .replaceAll("<","&lt;")
+      .replaceAll(">","&gt;");
+  }
+
+  function toNum(v){
+    if(v === null || v === undefined || v === "") return null;
+    const n = typeof v === "number" ? v : Number(String(v).replace(",", ".").trim());
+    return Number.isFinite(n) ? n : null;
+  }
+
+  function teamRank(t){
+    const a = toNum(t.p1Rank);
+    const b = toNum(t.p2Rank);
+    if(a === null || b === null) return Number.POSITIVE_INFINITY;
+    return a + b;
+  }
+
+  function teamNameOnly(t){
+    return t?.teamName || "—";
+  }
+
+  function teamLabel(t){
+    if(!t) return "—";
+    return `${t.teamName || "Équipe"} (${t.joueur1FirstName || "?"} / ${t.joueur2FirstName || "?"})`;
+  }
+
+  function zoneKey(){
+    return `${currentCategorie}_${currentEpreuve}`.replace("+", "plus");
+  }
+
+  function zoneText(){
+    return `${currentCategorie} — ${EPREUVE_LABELS[currentEpreuve]}`;
+  }
+
+  function drawRef(){
+    return doc(db, "events", EVENT_ID, "tirages", zoneKey());
+  }
+
+  function visibilityRef(){
+    return doc(db, "events", EVENT_ID, "config", "tirage");
+  }
+
+  function equipesCol(){
+    return collection(db, "events", EVENT_ID, "equipes");
+  }
+
+  function syncZoneButtons(){
+    zoneCatBtns.forEach(btn => {
+      btn.setAttribute("aria-selected", btn.dataset.categorie === currentCategorie ? "true" : "false");
+    });
+
+    zoneEpreuveBtns.forEach(btn => {
+      btn.setAttribute("aria-selected", btn.dataset.epreuve === currentEpreuve ? "true" : "false");
+    });
+
+    zoneLabel.textContent = zoneText();
+  }
+
+  async function fetchTeams(){
+    const snap = await getDocs(query(equipesCol(), orderBy("createdAt", "asc")));
+    const rows = [];
+
+    snap.forEach(d => {
+      const x = d.data() || {};
+
+      if(String(x.categorie || "").trim() !== currentCategorie) return;
+      if(String(x.epreuve || "").trim() !== currentEpreuve) return;
+      if(x.stby === true) return;
+      if(x.list === "wait") return;
+
+      rows.push({
+        id:d.id,
+        createdAtMs:x.createdAt?.toMillis ? x.createdAt.toMillis() : 0,
+        teamName:x.teamName || "",
+        joueur1FirstName:x.joueur1FirstName || "",
+        joueur2FirstName:x.joueur2FirstName || "",
+        p1Rank:x.p1Rank ?? null,
+        p2Rank:x.p2Rank ?? null
+      });
+    });
+
+    rows.sort((a,b) => {
+      const ar = teamRank(a);
+      const br = teamRank(b);
+      if(ar !== br) return ar - br;
+      return (a.createdAtMs || 0) - (b.createdAtMs || 0);
+    });
+
+    return rows;
+  }
+
+  function parseToken(token){
+    const s = String(token || "");
+    if(s.startsWith("A:")) return { pool:"A", id:s.slice(2) };
+    if(s.startsWith("B:")) return { pool:"B", id:s.slice(2) };
+    return { pool:null, id:s };
+  }
+
+  function findTeam(id){
+    return cachedTeams.find(t => t.id === id) || null;
+  }
+
+  function remainingTokens(){
+    const order = Array.isArray(currentDraw?.order) ? currentDraw.order : [];
+    const revealed = Number(currentDraw?.revealed || 0);
+    return order.slice(revealed);
+  }
+
+  function revealedTokens(){
+    const order = Array.isArray(currentDraw?.order) ? currentDraw.order : [];
+    const revealed = Number(currentDraw?.revealed || 0);
+    return order.slice(0, revealed);
+  }
+
+  function tokenLabel(token){
+    const p = parseToken(token);
+    const team = findTeam(p.id);
+    const dest = p.pool === "A" ? "Poule A" : p.pool === "B" ? "Poule B" : "Placement";
+    return `${dest} → ${teamLabel(team)}`;
+  }
+
+  function buildState(){
+    const seed1 = currentDraw?.seed1 || cachedTeams[0] || null;
+    const seed2 = currentDraw?.seed2 || cachedTeams[1] || null;
+
+    const state = {
+      seed1,
+      seed2,
+      poolA: seed1 ? [seed1] : [],
+      poolB: seed2 ? [seed2] : []
+    };
+
+    for(const token of revealedTokens()){
+      const p = parseToken(token);
+      const team = findTeam(p.id);
+      if(!team) continue;
+
+      if(p.pool === "A" && !state.poolA.some(t => t.id === team.id)){
+        state.poolA.push(team);
+      }
+
+      if(p.pool === "B" && !state.poolB.some(t => t.id === team.id)){
+        state.poolB.push(team);
+      }
+    }
+
+    return state;
+  }
+
+  function poolSlotHtml(team, index, opts = {}){
+    if(!team){
+      return `<div class="pool-slot empty">Place ${index + 1} en attente</div>`;
+    }
+
+    const cls = opts.seed ? "pool-slot seed" : "pool-slot";
+    const suffix = opts.seedLabel ? ` — ${esc(opts.seedLabel)}` : "";
+
+    return `<div class="${cls}">${esc(teamNameOnly(team))}${suffix}</div>`;
+  }
+
+  function itemCardHtml(text, badge){
+    return `
+      <div class="item-card">
+        <div style="min-width:0;"><b>${esc(text)}</b></div>
+        <span class="pill">${esc(badge)}</span>
+      </div>
+    `;
+  }
+
+  function canSeeWork(){
+    return publicVisible || isPrivileged;
+  }
+
+  function updateVisibilityDisplay(){
+    const showWork = canSeeWork();
+
+    maintenancePanel.style.display = showWork ? "none" : "block";
+    workPanel.style.display = showWork ? "block" : "none";
+    drawPanel.style.display = showWork ? "block" : "none";
+    detailsPanel.style.display = showWork ? "block" : "none";
+
+    if(!showWork) return;
+
+    if(publicVisible){
+      workIntro.textContent = "Tirage publié officiellement.";
+      pageTag.textContent = "Public";
+    }else{
+      workIntro.textContent = "Fichier de travail pour tirage — visible uniquement admin / JAT.";
+      pageTag.textContent = "Travail";
+    }
+
+    renderCurrent();
+  }
+
+  function renderCurrent(){
+    syncZoneButtons();
+
+    if(!canSeeWork()) return;
+
+    if(!currentDraw){
+      drawStatus.textContent = "Aucun tirage préparé.";
+      drawInfo.textContent = "—";
+      poolAList.innerHTML = `<div class="pool-slot empty">En attente</div>`;
+      poolBList.innerHTML = `<div class="pool-slot empty">En attente</div>`;
+      revealedList.innerHTML = `<p class="muted" style="margin:0;">Aucun tirage révélé.</p>`;
+      remainingList.innerHTML = `<p class="muted" style="margin:0;">—</p>`;
+      return;
+    }
+
+    if(currentDraw.status === "running"){
+      drawStatus.textContent = "Tirage en cours.";
+    }else if(currentDraw.status === "pending_validation"){
+      drawStatus.textContent = "Tirage terminé — en attente de validation.";
+    }else if(currentDraw.status === "validated"){
+      drawStatus.textContent = "Tirage validé.";
+    }else{
+      drawStatus.textContent = "Tirage préparé.";
+    }
+
+    const state = buildState();
+
+    poolAList.innerHTML = [
+      poolSlotHtml(state.poolA[0], 0, { seed:true, seedLabel:"TS1" }),
+      poolSlotHtml(state.poolA[1], 1),
+      poolSlotHtml(state.poolA[2], 2),
+      poolSlotHtml(state.poolA[3], 3),
+      poolSlotHtml(state.poolA[4], 4),
+      poolSlotHtml(state.poolA[5], 5)
+    ].join("");
+
+    poolBList.innerHTML = [
+      poolSlotHtml(state.poolB[0], 0, { seed:true, seedLabel:"TS2" }),
+      poolSlotHtml(state.poolB[1], 1),
+      poolSlotHtml(state.poolB[2], 2),
+      poolSlotHtml(state.poolB[3], 3),
+      poolSlotHtml(state.poolB[4], 4),
+      poolSlotHtml(state.poolB[5], 5)
+    ].join("");
+
+    const remaining = remainingTokens();
+    const revealed = revealedTokens();
+
+    remainingList.innerHTML = remaining.length
+      ? remaining.map(tok => itemCardHtml(tokenLabel(tok), "urne")).join("")
+      : `<p class="muted" style="margin:0;">Aucune équipe restante.</p>`;
+
+    revealedList.innerHTML = revealed.length
+      ? revealed.map((tok, i) => itemCardHtml(`#${i + 1} — ${tokenLabel(tok)}`, "tiré")).join("")
+      : `<p class="muted" style="margin:0;">Aucun tirage révélé.</p>`;
+
+    const placed = state.poolA.length + state.poolB.length;
+    const total = cachedTeams.length;
+
+    drawInfo.textContent = `${placed}/${total} équipe(s) placée(s).`;
+  }
+
+  function stopDrawListener(){
+    if(unsubDraw){
+      unsubDraw();
+      unsubDraw = null;
+    }
+  }
+
+  function startDrawListener(){
+    stopDrawListener();
+
+    currentDraw = null;
+    cachedTeams = [];
+
+    unsubDraw = onSnapshot(drawRef(), async (snap) => {
+      currentDraw = snap.exists() ? (snap.data() || {}) : null;
+      cachedTeams = await fetchTeams();
+      renderCurrent();
+    }, (error) => {
+      console.error(error);
+      drawStatus.textContent = "Erreur de chargement du tirage.";
+    });
+  }
+
+  function startVisibilityListener(){
+    if(unsubVisibility){
+      unsubVisibility();
+      unsubVisibility = null;
+    }
+
+    unsubVisibility = onSnapshot(visibilityRef(), (snap) => {
+      const data = snap.exists() ? (snap.data() || {}) : {};
+      publicVisible = data.publicVisible === true;
+      updateVisibilityDisplay();
+    }, (error) => {
+      console.error(error);
+      publicVisible = false;
+      updateVisibilityDisplay();
+    });
+  }
+
+  function changeZone(categorie, epreuve){
+    currentCategorie = categorie || currentCategorie;
+    currentEpreuve = epreuve || currentEpreuve;
+
+    try{
+      const url = new URL(location.href);
+      url.searchParams.set("categorie", currentCategorie);
+      url.searchParams.set("epreuve", currentEpreuve);
+      history.replaceState(null, "", url.toString());
+    }catch(error){}
+
+    syncZoneButtons();
+    startDrawListener();
+  }
+
+  zoneCatBtns.forEach(btn => {
+    btn.addEventListener("click", () => {
+      changeZone(btn.dataset.categorie, currentEpreuve);
+    });
+  });
+
+  zoneEpreuveBtns.forEach(btn => {
+    btn.addEventListener("click", () => {
+      changeZone(currentCategorie, btn.dataset.epreuve);
+    });
+  });
+
+  syncZoneButtons();
+  startVisibilityListener();
+  startDrawListener();
+
+  onAuthStateChanged(auth, async (user) => {
+    isPrivileged = false;
+
+    if(user){
+      try{
+        const role = await getRoleByUid(user.uid);
+        isPrivileged = role === "admin" || role === "jat";
+      }catch(error){
+        console.error(error);
+        isPrivileged = false;
+      }
+    }
+
+    updateVisibilityDisplay();
+  });
+</script>
+
+</body>
+</html>
