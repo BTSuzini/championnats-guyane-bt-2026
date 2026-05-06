@@ -89,43 +89,116 @@
       line-height:1.5;
     }
 
-    .placeholder p{
-      margin:0;
+    .placeholder p{margin:0;}
+    .placeholder p + p{margin-top:8px;}
+
+    .work-badge{
+      display:inline-flex;
+      margin-bottom:10px;
+      padding:7px 12px;
+      border-radius:999px;
+      background:#fff7e6;
+      color:#9a5b00;
+      border:1px solid #ffd37a;
+      font-weight:1000;
+      font-size:12px;
+      text-transform:uppercase;
+      letter-spacing:.05em;
     }
 
-    .placeholder p + p{
-      margin-top:8px;
-    }
-
-    .quick-list{
+    .match-list{
       display:grid;
-      gap:10px;
+      gap:12px;
       margin-top:12px;
     }
 
-    .quick-item{
-      border-radius:16px;
-      background:#fff;
+    .match-card{
+      border-radius:18px;
       border:1px solid rgba(16,24,40,.08);
-      padding:12px 14px;
-      font-weight:900;
-      color:#1c2430;
-      box-shadow:0 6px 14px rgba(16,24,40,.04);
+      padding:13px;
+      background:#fff;
+      box-shadow:0 8px 18px rgba(16,24,40,.06);
     }
 
-    .quick-item span{
-      display:block;
-      margin-top:4px;
+    .match-card.courtA{
+      background:#fff8dd;
+      border-color:rgba(255,196,0,.35);
+    }
+
+    .match-card.courtB{
+      background:#ffeef2;
+      border-color:rgba(255,0,60,.20);
+    }
+
+    .match-head{
+      display:flex;
+      align-items:center;
+      gap:8px;
+      min-width:0;
+      margin-bottom:10px;
+    }
+
+    .m-slot{
+      font-size:12px;
+      font-weight:1000;
+      color:#667085;
+      white-space:nowrap;
+    }
+
+    .m-time{
+      font-size:14px;
+      font-weight:1000;
+      white-space:nowrap;
+    }
+
+    .m-court{
+      min-width:0;
+      flex:1;
       font-size:13px;
-      font-weight:700;
+      font-weight:900;
+      font-style:italic;
+      color:#475467;
+      overflow:hidden;
+      text-overflow:ellipsis;
+      white-space:nowrap;
+    }
+
+    .team-row{
+      display:grid;
+      grid-template-columns:1fr;
+      gap:4px;
+    }
+
+    .team-name{
+      font-size:16px;
+      font-weight:1000;
+      line-height:1.15;
+    }
+
+    .team-sub{
+      font-size:13px;
+      color:#475467;
+      font-weight:800;
+    }
+
+    .vs-line{
+      margin:9px 0 5px;
+      text-align:center;
+      font-weight:1000;
+      letter-spacing:2px;
+      opacity:.55;
+      font-size:12px;
+    }
+
+    .muted{
       color:var(--muted);
-      line-height:1.35;
+      font-size:14px;
+      line-height:1.45;
     }
 
     @media (min-width:760px){
       :root{--zone-h:104px;}
       .panel{padding:22px;}
-      .quick-list{grid-template-columns:repeat(3,1fr);}
     }
 
     @media (max-width:759px){
@@ -162,37 +235,30 @@
 
 <main class="container">
 
-  <section class="section">
-    <div class="panel">
-      <div class="panel-head">
-        <div>
-          <h1 class="panel-title">📅 Programmation</h1>
-          <p class="panel-text">Planning des matchs, horaires et terrains.</p>
-        </div>
-        <div class="panel-tag">À venir</div>
+  <section class="section panel">
+    <div class="panel-head">
+      <div>
+        <h1 class="panel-title">📅 Programmation</h1>
+        <p class="panel-text" id="pageIntro">Planning des matchs, horaires et terrains.</p>
       </div>
+      <div class="panel-tag" id="pageTag">Direct</div>
+    </div>
+
+    <div id="maintenanceBox" class="placeholder" style="display:none;">
+      <p><strong>🚧 Programmation en maintenance.</strong></p>
+      <p>La programmation est en cours de préparation ou de validation par l’organisation.</p>
+      <p>Elle sera publiée ici dès qu’elle sera disponible.</p>
+    </div>
+
+    <div id="workBox" style="display:none;">
+      <div class="work-badge">Fichier de travail</div>
 
       <div class="placeholder">
-        <p><strong>🚧 Programmation à venir.</strong></p>
-        <p>Elle sera publiée après validation du format et/ou du tirage.</p>
+        <p><strong id="zoneLabel">U14 — Double Messieurs</strong></p>
+        <p id="statusText">Chargement de la programmation…</p>
       </div>
 
-      <div class="quick-list">
-        <div class="quick-item">
-          🕒 Horaires
-          <span>Les créneaux de matchs seront affichés ici.</span>
-        </div>
-
-        <div class="quick-item">
-          🏖️ Terrains
-          <span>Les terrains affectés seront précisés pour chaque rencontre.</span>
-        </div>
-
-        <div class="quick-item">
-          🏆 Phases finales
-          <span>Les tableaux finaux seront ajoutés après les phases qualificatives.</span>
-        </div>
-      </div>
+      <div id="publicList" class="match-list"></div>
     </div>
   </section>
 
@@ -200,12 +266,99 @@
 
 <script type="module" src="../assets/js/public-header.js"></script>
 
-<script>
-  const zoneCatBtns = Array.from(document.querySelectorAll(".zone-cat-btn"));
-  const zoneEpreuveBtns = Array.from(document.querySelectorAll(".zone-epreuve-btn"));
+<script type="module">
+  import { auth, db } from "../assets/js/firebase.js";
+  import { getRoleByUid } from "../assets/js/session.js";
+  import { onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.12.5/firebase-auth.js";
+  import {
+    doc,
+    onSnapshot
+  } from "https://www.gstatic.com/firebasejs/10.12.5/firebase-firestore.js";
 
-  let currentCategorie = "U14";
-  let currentEpreuve = "DM";
+  const EVENT_ID = "championnats-2026";
+
+  const EPREUVE_LABELS = {
+    DM: "Double Messieurs",
+    DD: "Double Dames"
+  };
+
+  const params = new URLSearchParams(location.search);
+
+  let currentCategorie = params.get("categorie") || "U14";
+  let currentEpreuve = params.get("epreuve") || "DM";
+  let currentRole = null;
+  let publicVisible = false;
+  let currentProg = null;
+
+  let unsubVisibility = null;
+  let unsubProg = null;
+
+  const pageIntro = document.getElementById("pageIntro");
+  const pageTag = document.getElementById("pageTag");
+  const maintenanceBox = document.getElementById("maintenanceBox");
+  const workBox = document.getElementById("workBox");
+  const zoneLabel = document.getElementById("zoneLabel");
+  const statusText = document.getElementById("statusText");
+  const publicList = document.getElementById("publicList");
+
+  const zoneCatBtns = [...document.querySelectorAll(".zone-cat-btn")];
+  const zoneEpreuveBtns = [...document.querySelectorAll(".zone-epreuve-btn")];
+
+  function esc(s){
+    return (s ?? "").toString()
+      .replaceAll("&","&amp;")
+      .replaceAll("<","&lt;")
+      .replaceAll(">","&gt;");
+  }
+
+  function zoneKey(){
+    return `${currentCategorie}_${currentEpreuve}`.replace("+", "plus");
+  }
+
+  function zoneText(){
+    return `${currentCategorie} — ${EPREUVE_LABELS[currentEpreuve]}`;
+  }
+
+  function progRef(){
+    return doc(db, "events", EVENT_ID, "programmations", zoneKey());
+  }
+
+  function visibilityRef(){
+    return doc(db, "events", EVENT_ID, "config", "programmation");
+  }
+
+  function canSeeWork(){
+    return publicVisible === true || currentRole === "admin" || currentRole === "jat";
+  }
+
+  function courtLabel(courtKey){
+    if(courtKey === "A") return "🐝 court Manon";
+    if(courtKey === "B") return "🌶️ court Lisa";
+    return "🎾 terrain";
+  }
+
+  function teamParts(t){
+    if(!t) return { title:"—", sub:"" };
+
+    return {
+      title:t.teamName || "Équipe",
+      sub:`${t.joueur1FirstName || "?"} / ${t.joueur2FirstName || "?"}`
+    };
+  }
+
+  function normalizeEntry(entry, slotObj){
+    if(typeof entry === "number"){
+      return {
+        slot:Number(entry),
+        court:slotObj?.court || "A"
+      };
+    }
+
+    return {
+      slot:Number(entry?.slot || slotObj?.slot || 1),
+      court:entry?.court || slotObj?.court || "A"
+    };
+  }
 
   function syncZoneButtons(){
     zoneCatBtns.forEach(btn => {
@@ -215,23 +368,190 @@
     zoneEpreuveBtns.forEach(btn => {
       btn.setAttribute("aria-selected", btn.dataset.epreuve === currentEpreuve ? "true" : "false");
     });
+
+    zoneLabel.textContent = zoneText();
+  }
+
+  function setUrlZone(){
+    try{
+      const url = new URL(location.href);
+      url.searchParams.set("categorie", currentCategorie);
+      url.searchParams.set("epreuve", currentEpreuve);
+      history.replaceState(null, "", url.toString());
+    }catch(error){}
+  }
+
+  function stopProgListener(){
+    if(unsubProg){
+      unsubProg();
+      unsubProg = null;
+    }
+  }
+
+  function startProgListener(){
+    stopProgListener();
+
+    currentProg = null;
+    publicList.innerHTML = "";
+    statusText.textContent = "Chargement de la programmation…";
+
+    unsubProg = onSnapshot(progRef(), (snap) => {
+      currentProg = snap.exists() ? (snap.data() || {}) : null;
+      render();
+    }, (error) => {
+      console.error(error);
+      statusText.textContent = "❌ Impossible de charger la programmation.";
+      publicList.innerHTML = "";
+    });
+  }
+
+  function renderMatchCard({ slot, time, courtKey, mid, teamA, teamB }){
+    return `
+      <div class="match-card ${esc(courtKey === "A" ? "courtA" : "courtB")}">
+        <div class="match-head">
+          <div class="m-slot">#${esc(slot)} · ${esc(mid)}</div>
+          <div class="m-time">${esc(time)}</div>
+          <div class="m-court">${esc(courtLabel(courtKey))}</div>
+        </div>
+
+        <div class="team-row">
+          <div class="team-name">${esc(teamA.title)}</div>
+          ${teamA.sub ? `<div class="team-sub">${esc(teamA.sub)}</div>` : ""}
+        </div>
+
+        <div class="vs-line">VS</div>
+
+        <div class="team-row">
+          <div class="team-name">${esc(teamB.title)}</div>
+          ${teamB.sub ? `<div class="team-sub">${esc(teamB.sub)}</div>` : ""}
+        </div>
+      </div>
+    `;
+  }
+
+  function renderProg(){
+    if(!currentProg){
+      statusText.textContent = "Aucune programmation enregistrée pour cette catégorie / épreuve.";
+      publicList.innerHTML = `<p class="muted" style="margin:0;">Programmation à venir.</p>`;
+      return;
+    }
+
+    const matches = currentProg.matches || {};
+    const slots = Array.isArray(currentProg.slots) ? currentProg.slots : [];
+    const schedule = currentProg.schedule || {};
+
+    const slotToMatch = new Map();
+
+    for(const [mid, entry] of Object.entries(schedule)){
+      const slotNum = typeof entry === "number" ? Number(entry) : Number(entry?.slot);
+      if(!slotToMatch.has(slotNum)){
+        slotToMatch.set(slotNum, mid);
+      }
+    }
+
+    const cards = [];
+
+    for(const slotObj of slots){
+      const mid = slotToMatch.get(Number(slotObj.slot));
+      const match = mid ? matches[mid] : null;
+      if(!match) continue;
+
+      const entry = normalizeEntry(schedule[mid], slotObj);
+      const teamA = teamParts(match.A?.team || null);
+      const teamB = teamParts(match.B?.team || null);
+
+      cards.push(renderMatchCard({
+        slot:slotObj.slot,
+        time:slotObj.time,
+        courtKey:entry.court,
+        mid,
+        teamA,
+        teamB
+      }));
+    }
+
+    statusText.textContent = cards.length
+      ? `✅ ${cards.length} match(s) programmé(s).`
+      : "Aucun match dans cette programmation.";
+
+    publicList.innerHTML = cards.length
+      ? cards.join("")
+      : `<p class="muted" style="margin:0;">Programmation à venir.</p>`;
+  }
+
+  function render(){
+    syncZoneButtons();
+
+    if(!canSeeWork()){
+      pageIntro.textContent = "La programmation est en cours de préparation.";
+      pageTag.textContent = "Maintenance";
+      maintenanceBox.style.display = "block";
+      workBox.style.display = "none";
+      return;
+    }
+
+    pageIntro.textContent = publicVisible
+      ? "Planning des matchs, horaires et terrains."
+      : "Aperçu réservé aux admins et JAT pendant la maintenance.";
+
+    pageTag.textContent = publicVisible ? "Direct" : "Travail";
+
+    maintenanceBox.style.display = "none";
+    workBox.style.display = "block";
+
+    renderProg();
+  }
+
+  function changeZone(categorie, epreuve){
+    currentCategorie = categorie || currentCategorie;
+    currentEpreuve = epreuve || currentEpreuve;
+    syncZoneButtons();
+    setUrlZone();
+    startProgListener();
   }
 
   zoneCatBtns.forEach(btn => {
-    btn.addEventListener("click", () => {
-      currentCategorie = btn.dataset.categorie;
-      syncZoneButtons();
-    });
+    btn.onclick = () => changeZone(btn.dataset.categorie, currentEpreuve);
   });
 
   zoneEpreuveBtns.forEach(btn => {
-    btn.addEventListener("click", () => {
-      currentEpreuve = btn.dataset.epreuve;
-      syncZoneButtons();
+    btn.onclick = () => changeZone(currentCategorie, btn.dataset.epreuve);
+  });
+
+  function startVisibilityListener(){
+    if(unsubVisibility){
+      unsubVisibility();
+      unsubVisibility = null;
+    }
+
+    unsubVisibility = onSnapshot(visibilityRef(), (snap) => {
+      const data = snap.exists() ? (snap.data() || {}) : {};
+      publicVisible = data.publicVisible === true;
+      render();
+    }, (error) => {
+      console.error(error);
+      publicVisible = false;
+      render();
     });
+  }
+
+  onAuthStateChanged(auth, async (user) => {
+    currentRole = null;
+
+    if(user){
+      try{
+        currentRole = await getRoleByUid(user.uid);
+      }catch(error){
+        currentRole = null;
+      }
+    }
+
+    render();
   });
 
   syncZoneButtons();
+  startVisibilityListener();
+  startProgListener();
 </script>
 
 </body>
