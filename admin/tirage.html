@@ -265,7 +265,6 @@
       .panel{padding:22px;}
       .grid.two{grid-template-columns:1fr 1fr;}
       .grid.three{grid-template-columns:repeat(3,1fr);}
-      .grid.four{grid-template-columns:repeat(4,1fr);}
       .zone-line{justify-content:center;}
       .pool-grid{grid-template-columns:1fr 1fr;}
     }
@@ -314,6 +313,25 @@
 
     <div class="status-box">
       Zone sélectionnée : <strong id="zoneLabel">U14 — Double Messieurs</strong>
+    </div>
+  </section>
+
+  <section class="section panel" id="panelVisibility" style="display:none;">
+    <div class="panel-head">
+      <div>
+        <h2 class="panel-title">👀 Visibilité publique</h2>
+        <p class="panel-text" id="visibilityText">Chargement…</p>
+      </div>
+      <div class="panel-tag">Public</div>
+    </div>
+
+    <div class="grid two">
+      <button class="btn" id="btnPublicHide">🔒 Mettre en maintenance</button>
+      <button class="btn" id="btnPublicShow">✅ Rendre visible</button>
+    </div>
+
+    <div class="status-box">
+      Si le tirage est masqué, les admins et JAT pourront voir la version de travail, mais le public verra une page de maintenance.
     </div>
   </section>
 
@@ -411,13 +429,18 @@
 
   const accessDenied = document.getElementById("accessDenied");
   const pageContent = document.getElementById("pageContent");
+  const panelVisibility = document.getElementById("panelVisibility");
   const adminUI = document.getElementById("adminUI");
   const panel = document.getElementById("panel");
 
   const zoneLabel = document.getElementById("zoneLabel");
+  const visibilityText = document.getElementById("visibilityText");
   const statusEl = document.getElementById("status");
   const drawInfo = document.getElementById("drawInfo");
   const ruleText = document.getElementById("ruleText");
+
+  const btnPublicHide = document.getElementById("btnPublicHide");
+  const btnPublicShow = document.getElementById("btnPublicShow");
 
   const btnLoad = document.getElementById("btnLoad");
   const btnStart = document.getElementById("btnStart");
@@ -442,6 +465,7 @@
   let cachedTeams = [];
   let currentDraw = null;
   let unsubDraw = null;
+  let unsubVisibility = null;
 
   function esc(s){
     return (s ?? "").toString()
@@ -482,6 +506,10 @@
 
   function drawRef(){
     return doc(db, "events", EVENT_ID, "tirages", zoneKey());
+  }
+
+  function visibilityRef(){
+    return doc(db, "events", EVENT_ID, "config", "tirage");
   }
 
   function equipesCol(){
@@ -527,7 +555,6 @@
 
   async function fetchTeams(){
     const snap = await getDocs(query(equipesCol(), orderBy("createdAt", "asc")));
-
     const rows = [];
 
     snap.forEach(d => {
@@ -920,15 +947,53 @@
     renderCurrent();
   }
 
-  function stopListener(){
+  async function setPublicVisible(value){
+    await setDoc(visibilityRef(), {
+      publicVisible:value === true,
+      updatedAt:serverTimestamp(),
+      updatedBy:auth.currentUser?.uid || null
+    }, { merge:true });
+  }
+
+  function startVisibilityListener(){
+    if(unsubVisibility){
+      unsubVisibility();
+      unsubVisibility = null;
+    }
+
+    unsubVisibility = onSnapshot(visibilityRef(), (snap) => {
+      const data = snap.exists() ? (snap.data() || {}) : {};
+      const visible = data.publicVisible === true;
+
+      visibilityText.innerHTML = visible
+        ? "Statut actuel : <strong>visible publiquement ✅</strong>"
+        : "Statut actuel : <strong>maintenance / masqué 🔒</strong>";
+
+      btnPublicShow.classList.toggle("is-active", visible);
+      btnPublicHide.classList.toggle("is-active", !visible);
+    }, (error) => {
+      console.error(error);
+      visibilityText.textContent = "❌ Impossible de lire la visibilité publique.";
+    });
+  }
+
+  function stopListeners(){
     if(unsubDraw){
       unsubDraw();
       unsubDraw = null;
     }
+
+    if(unsubVisibility){
+      unsubVisibility();
+      unsubVisibility = null;
+    }
   }
 
-  function startListener(){
-    stopListener();
+  function startDrawListener(){
+    if(unsubDraw){
+      unsubDraw();
+      unsubDraw = null;
+    }
 
     cachedTeams = [];
     currentDraw = null;
@@ -950,7 +1015,7 @@
     updateZoneButtons();
     wheel.textContent = "—";
     wheelSub.textContent = "—";
-    startListener();
+    startDrawListener();
   }
 
   categoryButtons.forEach(btn => {
@@ -960,6 +1025,24 @@
   epreuveButtons.forEach(btn => {
     btn.onclick = () => changeZone(currentCategorie, btn.dataset.epreuve);
   });
+
+  btnPublicHide.onclick = async () => {
+    try{
+      await setPublicVisible(false);
+    }catch(error){
+      console.error(error);
+      alert("Erreur : impossible de masquer le tirage.");
+    }
+  };
+
+  btnPublicShow.onclick = async () => {
+    try{
+      await setPublicVisible(true);
+    }catch(error){
+      console.error(error);
+      alert("Erreur : impossible de rendre le tirage visible.");
+    }
+  };
 
   btnLoad.onclick = async () => {
     btnLoad.disabled = true;
@@ -1014,26 +1097,30 @@
   function showDenied(){
     accessDenied.style.display = "block";
     pageContent.style.display = "none";
+    panelVisibility.style.display = "none";
     adminUI.style.display = "none";
     panel.style.display = "none";
-    stopListener();
+    stopListeners();
   }
 
   function showAdmin(){
     accessDenied.style.display = "none";
     pageContent.style.display = "block";
+    panelVisibility.style.display = "block";
     adminUI.style.display = "block";
     panel.style.display = "block";
     updateZoneButtons();
-    startListener();
+    startVisibilityListener();
+    startDrawListener();
   }
 
   onAuthStateChanged(auth, async (user) => {
     accessDenied.style.display = "none";
     pageContent.style.display = "none";
+    panelVisibility.style.display = "none";
     adminUI.style.display = "none";
     panel.style.display = "none";
-    stopListener();
+    stopListeners();
 
     if(!user){
       showDenied();
