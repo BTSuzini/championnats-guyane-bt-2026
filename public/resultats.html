@@ -90,9 +90,7 @@
       line-height:1.5;
     }
 
-    .placeholder strong{
-      color:var(--blue-dark);
-    }
+    .placeholder strong{color:var(--blue-dark);}
 
     .quick-grid{
       display:grid;
@@ -120,6 +118,13 @@
       color:var(--muted);
       font-size:13px;
       line-height:1.35;
+    }
+
+    .status-mini{
+      margin-top:12px;
+      color:var(--muted);
+      font-size:13px;
+      line-height:1.4;
     }
 
     @media (min-width:760px){
@@ -162,21 +167,59 @@
 
 <main class="container">
 
-  <section class="section">
+  <section class="section" id="loadingPanel">
+    <div class="panel">
+      <div class="panel-head">
+        <div>
+          <h1 class="panel-title">🏆 Résultats</h1>
+          <p class="panel-text">Chargement des résultats…</p>
+        </div>
+        <div class="panel-tag">Direct</div>
+      </div>
+
+      <div class="placeholder">
+        <strong>Connexion en cours…</strong><br>
+        Vérification de la visibilité publique.
+      </div>
+    </div>
+  </section>
+
+  <section class="section" id="maintenancePanel" style="display:none;">
     <div class="panel">
       <div class="panel-head">
         <div>
           <h1 class="panel-title">🏆 Résultats</h1>
           <p class="panel-text">
-            Scores, classements, podiums et suivi sportif du championnat.
+            La page résultats est momentanément indisponible.
           </p>
         </div>
-        <div class="panel-tag">À venir</div>
+        <div class="panel-tag">Maintenance</div>
       </div>
 
       <div class="placeholder">
-        <strong>🚧 Résultats en attente</strong><br>
-        Cette page affichera prochainement les scores, les classements par catégorie et les podiums.
+        <strong>🔒 Résultats en maintenance</strong><br>
+        Les résultats seront publiés après validation par l’organisation.
+      </div>
+    </div>
+  </section>
+
+  <section class="section" id="workPanel" style="display:none;">
+    <div class="panel">
+      <div class="panel-head">
+        <div>
+          <h1 class="panel-title">🏆 Résultats</h1>
+          <p class="panel-text" id="workIntro">
+            Scores, classements, podiums et suivi sportif du championnat.
+          </p>
+        </div>
+        <div class="panel-tag" id="workTag">À venir</div>
+      </div>
+
+      <div class="placeholder">
+        <strong id="workTitle">🚧 Résultats en attente</strong><br>
+        <span id="workText">
+          Cette page affichera prochainement les scores, les classements par catégorie et les podiums.
+        </span>
       </div>
 
       <div class="quick-grid">
@@ -195,6 +238,10 @@
           <span>Les podiums seront publiés à l’issue des tableaux.</span>
         </div>
       </div>
+
+      <div class="status-mini" id="zoneStatus">
+        Affichage : U14 — Double Messieurs
+      </div>
     </div>
   </section>
 
@@ -202,12 +249,47 @@
 
 <script type="module" src="../assets/js/public-header.js"></script>
 
-<script>
+<script type="module">
+  import { auth, db } from "../assets/js/firebase.js";
+  import { getRoleByUid } from "../assets/js/session.js";
+  import { onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.12.5/firebase-auth.js";
+  import {
+    doc,
+    onSnapshot
+  } from "https://www.gstatic.com/firebasejs/10.12.5/firebase-firestore.js";
+
+  const EVENT_ID = "championnats-2026";
+
+  const EPREUVE_LABELS = {
+    DM: "Double Messieurs",
+    DD: "Double Dames"
+  };
+
+  const params = new URLSearchParams(location.search);
+  const adminPreview = params.get("adminPreview") === "1";
+
   const zoneCatBtns = Array.from(document.querySelectorAll(".zone-cat-btn"));
   const zoneEpreuveBtns = Array.from(document.querySelectorAll(".zone-epreuve-btn"));
 
+  const loadingPanel = document.getElementById("loadingPanel");
+  const maintenancePanel = document.getElementById("maintenancePanel");
+  const workPanel = document.getElementById("workPanel");
+
+  const workIntro = document.getElementById("workIntro");
+  const workTag = document.getElementById("workTag");
+  const workTitle = document.getElementById("workTitle");
+  const workText = document.getElementById("workText");
+  const zoneStatus = document.getElementById("zoneStatus");
+
   let currentCategorie = "U14";
   let currentEpreuve = "DM";
+  let currentRole = null;
+  let publicVisible = false;
+  let visibilityLoaded = false;
+
+  function visibilityRef(){
+    return doc(db, "events", EVENT_ID, "config", "resultats");
+  }
 
   function syncZoneButtons(){
     zoneCatBtns.forEach(btn => {
@@ -217,6 +299,45 @@
     zoneEpreuveBtns.forEach(btn => {
       btn.setAttribute("aria-selected", btn.dataset.epreuve === currentEpreuve ? "true" : "false");
     });
+
+    zoneStatus.textContent = `Affichage : ${currentCategorie} — ${EPREUVE_LABELS[currentEpreuve]}`;
+  }
+
+  function canSeeWorkVersion(){
+    return publicVisible === true || currentRole === "admin" || currentRole === "jat" || adminPreview === true;
+  }
+
+  function renderAccess(){
+    if(!visibilityLoaded){
+      loadingPanel.style.display = "block";
+      maintenancePanel.style.display = "none";
+      workPanel.style.display = "none";
+      return;
+    }
+
+    loadingPanel.style.display = "none";
+
+    if(canSeeWorkVersion()){
+      maintenancePanel.style.display = "none";
+      workPanel.style.display = "block";
+
+      if(publicVisible === true){
+        workTag.textContent = "Public";
+        workIntro.textContent = "Scores, classements, podiums et suivi sportif du championnat.";
+        workTitle.textContent = "🚧 Résultats en attente";
+        workText.textContent = "Cette page affichera prochainement les scores, les classements par catégorie et les podiums.";
+      }else{
+        workTag.textContent = "Travail";
+        workIntro.textContent = "Fichier de travail résultats visible par l’organisation.";
+        workTitle.textContent = "🛠️ Fichier de travail résultats";
+        workText.textContent = "La page est actuellement en maintenance pour le public, mais reste visible pour les administrateurs et JAT.";
+      }
+
+      return;
+    }
+
+    maintenancePanel.style.display = "block";
+    workPanel.style.display = "none";
   }
 
   zoneCatBtns.forEach(btn => {
@@ -234,6 +355,37 @@
   });
 
   syncZoneButtons();
+  renderAccess();
+
+  onSnapshot(visibilityRef(), (snap) => {
+    const data = snap.exists() ? (snap.data() || {}) : {};
+    publicVisible = data.publicVisible === true;
+    visibilityLoaded = true;
+    renderAccess();
+  }, (error) => {
+    console.error(error);
+    publicVisible = false;
+    visibilityLoaded = true;
+    renderAccess();
+  });
+
+  onAuthStateChanged(auth, async (user) => {
+    currentRole = null;
+
+    if(!user){
+      renderAccess();
+      return;
+    }
+
+    try{
+      currentRole = await getRoleByUid(user.uid);
+    }catch(error){
+      console.error(error);
+      currentRole = null;
+    }
+
+    renderAccess();
+  });
 </script>
 
 </body>
