@@ -92,10 +92,7 @@
 
     .placeholder p{margin:0;}
     .placeholder p + p{margin-top:8px;}
-
-    .status-box{
-      margin-top:12px;
-    }
+    .status-box{margin-top:12px;}
 
     .muted{
       color:var(--muted);
@@ -127,7 +124,8 @@
       margin-bottom:10px;
     }
 
-    .pool-list{
+    .pool-list,
+    .item-list{
       display:grid;
       gap:8px;
     }
@@ -158,11 +156,7 @@
       border-color:#f1dca1;
     }
 
-    .item-list{
-      display:grid;
-      gap:8px;
-      margin-top:10px;
-    }
+    .item-list{margin-top:10px;}
 
     .item-card{
       border:1px solid rgba(16,24,40,.08);
@@ -283,6 +277,18 @@
     </div>
   </section>
 
+  <section class="section panel" id="orderedPanel" style="display:none;">
+    <div class="panel-head">
+      <div>
+        <h2 class="panel-title">📋 Équipes</h2>
+        <p class="panel-text" id="orderedInfo">Pas de tirage au sort nécessaire pour cette catégorie.</p>
+      </div>
+      <div class="panel-tag">Ordre</div>
+    </div>
+
+    <div id="orderedList" class="item-list"></div>
+  </section>
+
   <section class="section panel" id="detailsPanel" style="display:none;">
     <div class="panel-head">
       <div>
@@ -341,6 +347,7 @@
   const maintenancePanel = document.getElementById("maintenancePanel");
   const workPanel = document.getElementById("workPanel");
   const drawPanel = document.getElementById("drawPanel");
+  const orderedPanel = document.getElementById("orderedPanel");
   const detailsPanel = document.getElementById("detailsPanel");
 
   const workIntro = document.getElementById("workIntro");
@@ -348,9 +355,11 @@
   const zoneLabel = document.getElementById("zoneLabel");
   const drawStatus = document.getElementById("drawStatus");
   const drawInfo = document.getElementById("drawInfo");
+  const orderedInfo = document.getElementById("orderedInfo");
 
   const poolAList = document.getElementById("poolAList");
   const poolBList = document.getElementById("poolBList");
+  const orderedList = document.getElementById("orderedList");
   const revealedList = document.getElementById("revealedList");
   const remainingList = document.getElementById("remainingList");
 
@@ -392,6 +401,22 @@
 
   function zoneText(){
     return `${currentCategorie} — ${EPREUVE_LABELS[currentEpreuve]}`;
+  }
+
+  function needsDraw(){
+    return currentCategorie === "Seniors" && (currentEpreuve === "DM" || currentEpreuve === "DD");
+  }
+
+  function maxPoolA(){
+    if(currentCategorie === "Seniors" && currentEpreuve === "DM") return 4;
+    if(currentCategorie === "Seniors" && currentEpreuve === "DD") return 3;
+    return 0;
+  }
+
+  function maxPoolB(){
+    if(currentCategorie === "Seniors" && currentEpreuve === "DM") return 3;
+    if(currentCategorie === "Seniors" && currentEpreuve === "DD") return 3;
+    return 0;
   }
 
   function drawRef(){
@@ -538,10 +563,13 @@
 
     maintenancePanel.style.display = showWork ? "none" : "block";
     workPanel.style.display = showWork ? "block" : "none";
-    drawPanel.style.display = showWork ? "block" : "none";
-    detailsPanel.style.display = showWork ? "block" : "none";
 
-    if(!showWork) return;
+    if(!showWork){
+      drawPanel.style.display = "none";
+      orderedPanel.style.display = "none";
+      detailsPanel.style.display = "none";
+      return;
+    }
 
     if(publicVisible){
       workIntro.textContent = "Tirage publié officiellement.";
@@ -554,10 +582,25 @@
     renderCurrent();
   }
 
-  function renderCurrent(){
-    syncZoneButtons();
+  function renderOrderedTeams(){
+    drawPanel.style.display = "none";
+    detailsPanel.style.display = "none";
+    orderedPanel.style.display = "block";
 
-    if(!canSeeWork()) return;
+    drawStatus.textContent = "Pas de tirage au sort nécessaire pour cette catégorie.";
+
+    orderedInfo.textContent =
+      `${zoneText()} : pas de tirage au sort nécessaire. Les équipes sont affichées dans l’ordre du classement.`;
+
+    orderedList.innerHTML = cachedTeams.length
+      ? cachedTeams.map((team, index) => itemCardHtml(`#${index + 1} — ${teamLabel(team)}`, "équipe")).join("")
+      : `<p class="muted" style="margin:0;">Aucune équipe en liste principale pour le moment.</p>`;
+  }
+
+  function renderDraw(){
+    drawPanel.style.display = "block";
+    detailsPanel.style.display = "block";
+    orderedPanel.style.display = "none";
 
     if(!currentDraw){
       drawStatus.textContent = "Aucun tirage préparé.";
@@ -581,23 +624,21 @@
 
     const state = buildState();
 
-    poolAList.innerHTML = [
-      poolSlotHtml(state.poolA[0], 0, { seed:true, seedLabel:"TS1" }),
-      poolSlotHtml(state.poolA[1], 1),
-      poolSlotHtml(state.poolA[2], 2),
-      poolSlotHtml(state.poolA[3], 3),
-      poolSlotHtml(state.poolA[4], 4),
-      poolSlotHtml(state.poolA[5], 5)
-    ].join("");
+    poolAList.innerHTML = Array.from({ length:maxPoolA() }, (_, index) => {
+      return poolSlotHtml(
+        state.poolA[index],
+        index,
+        index === 0 ? { seed:true, seedLabel:"TS1" } : {}
+      );
+    }).join("");
 
-    poolBList.innerHTML = [
-      poolSlotHtml(state.poolB[0], 0, { seed:true, seedLabel:"TS2" }),
-      poolSlotHtml(state.poolB[1], 1),
-      poolSlotHtml(state.poolB[2], 2),
-      poolSlotHtml(state.poolB[3], 3),
-      poolSlotHtml(state.poolB[4], 4),
-      poolSlotHtml(state.poolB[5], 5)
-    ].join("");
+    poolBList.innerHTML = Array.from({ length:maxPoolB() }, (_, index) => {
+      return poolSlotHtml(
+        state.poolB[index],
+        index,
+        index === 0 ? { seed:true, seedLabel:"TS2" } : {}
+      );
+    }).join("");
 
     const remaining = remainingTokens();
     const revealed = revealedTokens();
@@ -616,6 +657,18 @@
     drawInfo.textContent = `${placed}/${total} équipe(s) placée(s).`;
   }
 
+  function renderCurrent(){
+    syncZoneButtons();
+
+    if(!canSeeWork()) return;
+
+    if(needsDraw()){
+      renderDraw();
+    }else{
+      renderOrderedTeams();
+    }
+  }
+
   function stopDrawListener(){
     if(unsubDraw){
       unsubDraw();
@@ -623,11 +676,22 @@
     }
   }
 
+  async function loadTeamsOnly(){
+    cachedTeams = await fetchTeams();
+    currentDraw = null;
+    renderCurrent();
+  }
+
   function startDrawListener(){
     stopDrawListener();
 
     currentDraw = null;
     cachedTeams = [];
+
+    if(!needsDraw()){
+      loadTeamsOnly();
+      return;
+    }
 
     unsubDraw = onSnapshot(drawRef(), async (snap) => {
       currentDraw = snap.exists() ? (snap.data() || {}) : null;
