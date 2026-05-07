@@ -265,6 +265,7 @@
       .panel{padding:22px;}
       .grid.two{grid-template-columns:1fr 1fr;}
       .grid.three{grid-template-columns:repeat(3,1fr);}
+      .grid.four{grid-template-columns:repeat(4,1fr);}
       .zone-line{justify-content:center;}
       .pool-grid{grid-template-columns:1fr 1fr;}
     }
@@ -331,7 +332,7 @@
     </div>
 
     <div class="status-box">
-      Si le tirage est masqué, les admins et JAT pourront voir la version de travail, mais le public verra une page de maintenance.
+      Si le tirage est masqué, les administrateurs et JAT pourront toujours le consulter côté public, mais les visiteurs verront une page de maintenance.
     </div>
   </section>
 
@@ -354,11 +355,10 @@
     </div>
 
     <div class="status-box" id="ruleText">
-      Règle actuelle : les 2 meilleures équipes classées sont placées comme têtes de série, puis les autres équipes sont tirées.
+      Règle actuelle : tirage nécessaire uniquement pour Seniors DM et Seniors DD.
     </div>
   </section>
-
-  <section class="section panel" id="panel" style="display:none;">
+    <section class="section panel" id="panel" style="display:none;">
     <div class="panel-head">
       <div>
         <h2 class="panel-title">📌 Aperçu du tirage</h2>
@@ -375,6 +375,7 @@
 
     <div style="margin-top:16px;">
       <div style="font-weight:1000;margin-bottom:8px;">🏖️ Poules</div>
+
       <div class="pool-grid">
         <div class="pool-card">
           <div class="pool-title">Poule A</div>
@@ -406,7 +407,10 @@
 <script type="module">
   import { auth, db } from "../assets/js/firebase.js";
   import { getRoleByUid } from "../assets/js/session.js";
-  import { onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.12.5/firebase-auth.js";
+
+  import { onAuthStateChanged }
+  from "https://www.gstatic.com/firebasejs/10.12.5/firebase-auth.js";
+
   import {
     collection,
     getDocs,
@@ -434,11 +438,11 @@
   const panel = document.getElementById("panel");
 
   const zoneLabel = document.getElementById("zoneLabel");
-  const visibilityText = document.getElementById("visibilityText");
   const statusEl = document.getElementById("status");
   const drawInfo = document.getElementById("drawInfo");
   const ruleText = document.getElementById("ruleText");
 
+  const visibilityText = document.getElementById("visibilityText");
   const btnPublicHide = document.getElementById("btnPublicHide");
   const btnPublicShow = document.getElementById("btnPublicShow");
 
@@ -447,13 +451,13 @@
   const btnNext = document.getElementById("btnNext");
   const btnValidate = document.getElementById("btnValidate");
   const btnReset = document.getElementById("btnReset");
-  const btnPublic = document.getElementById("btnPublic");
 
   const wheel = document.getElementById("wheel");
   const wheelSub = document.getElementById("wheelSub");
 
   const poolAList = document.getElementById("poolAList");
   const poolBList = document.getElementById("poolBList");
+
   const remainingList = document.getElementById("remainingList");
   const revealedList = document.getElementById("revealedList");
 
@@ -462,668 +466,104 @@
 
   let currentCategorie = "U14";
   let currentEpreuve = "DM";
-  let cachedTeams = [];
-  let currentDraw = null;
-  let unsubDraw = null;
-  let unsubVisibility = null;
-
-  function esc(s){
-    return (s ?? "").toString()
-      .replaceAll("&","&amp;")
-      .replaceAll("<","&lt;")
-      .replaceAll(">","&gt;");
-  }
-
-  function toNum(v){
-    if(v === null || v === undefined || v === "") return null;
-    const n = typeof v === "number" ? v : Number(String(v).replace(",", ".").trim());
-    return Number.isFinite(n) ? n : null;
-  }
-
-  function teamRank(t){
-    const a = toNum(t.p1Rank);
-    const b = toNum(t.p2Rank);
-    if(a === null || b === null) return Number.POSITIVE_INFINITY;
-    return a + b;
-  }
-
-  function teamNameOnly(t){
-    return t?.teamName || "—";
-  }
-
-  function teamLabel(t){
-    if(!t) return "—";
-    return `${t.teamName || "Équipe"} (${t.joueur1FirstName || "?"} / ${t.joueur2FirstName || "?"})`;
-  }
-
-  function zoneKey(){
-    return `${currentCategorie}_${currentEpreuve}`.replace("+", "plus");
-  }
-
-  function zoneText(){
-    return `${currentCategorie} — ${EPREUVE_LABELS[currentEpreuve]}`;
-  }
 
   function drawRef(){
-    return doc(db, "events", EVENT_ID, "tirages", zoneKey());
+    return doc(
+      db,
+      "events",
+      EVENT_ID,
+      "tirages",
+      `${currentCategorie}_${currentEpreuve}`.replace("+","plus")
+    );
   }
 
-  function visibilityRef(){
+  function configRef(){
     return doc(db, "events", EVENT_ID, "config", "tirage");
   }
 
-  function equipesCol(){
-    return collection(db, "events", EVENT_ID, "equipes");
+  async function refreshVisibility(){
+    const snap = await getDoc(configRef());
+
+    const visible =
+      !snap.exists()
+      || snap.data()?.publicVisible !== false;
+
+    visibilityText.innerHTML = visible
+      ? "✅ La page publique du tirage est actuellement visible."
+      : "🔒 La page publique du tirage est actuellement en maintenance.";
+
+    btnPublicShow.classList.toggle("primary", visible);
+    btnPublicHide.classList.toggle("danger", !visible);
   }
-
-  function updateZoneButtons(){
-    categoryButtons.forEach(btn => {
-      btn.setAttribute("aria-selected", btn.dataset.categorie === currentCategorie ? "true" : "false");
-    });
-
-    epreuveButtons.forEach(btn => {
-      btn.setAttribute("aria-selected", btn.dataset.epreuve === currentEpreuve ? "true" : "false");
-    });
-
-    zoneLabel.textContent = zoneText();
-
-    btnPublic.href =
-      `../public/tirage.html?categorie=${encodeURIComponent(currentCategorie)}&epreuve=${encodeURIComponent(currentEpreuve)}&adminPreview=1`;
-
-    try{
-      localStorage.setItem("champ_admin_categorie", currentCategorie);
-      localStorage.setItem("champ_admin_epreuve", currentEpreuve);
-    }catch(error){}
-  }
-
-  function randomShuffle(arr){
-    const a = arr.slice();
-
-    const rand = (n) => {
-      const u = new Uint32Array(1);
-      crypto.getRandomValues(u);
-      return u[0] % n;
-    };
-
-    for(let i = a.length - 1; i > 0; i--){
-      const j = rand(i + 1);
-      [a[i], a[j]] = [a[j], a[i]];
-    }
-
-    return a;
-  }
-
-  async function fetchTeams(){
-    const snap = await getDocs(query(equipesCol(), orderBy("createdAt", "asc")));
-    const rows = [];
-
-    snap.forEach(d => {
-      const x = d.data() || {};
-
-      if(String(x.categorie || "").trim() !== currentCategorie) return;
-      if(String(x.epreuve || "").trim() !== currentEpreuve) return;
-      if(x.stby === true) return;
-      if(x.list === "wait") return;
-
-      rows.push({
-        id:d.id,
-        createdAtMs:x.createdAt?.toMillis ? x.createdAt.toMillis() : 0,
-        teamName:x.teamName || "",
-        joueur1FirstName:x.joueur1FirstName || "",
-        joueur2FirstName:x.joueur2FirstName || "",
-        p1Rank:x.p1Rank ?? null,
-        p2Rank:x.p2Rank ?? null
-      });
-    });
-
-    rows.sort((a,b) => {
-      const ar = teamRank(a);
-      const br = teamRank(b);
-      if(ar !== br) return ar - br;
-      return (a.createdAtMs || 0) - (b.createdAtMs || 0);
-    });
-
-    return rows;
-  }
-
-  function parseToken(token){
-    const s = String(token || "");
-    if(s.startsWith("A:")) return { pool:"A", id:s.slice(2) };
-    if(s.startsWith("B:")) return { pool:"B", id:s.slice(2) };
-    return { pool:null, id:s };
-  }
-
-  function findTeam(id){
-    return cachedTeams.find(t => t.id === id) || null;
-  }
-
-  function drawReady(d){
-    return !!(d && Array.isArray(d.order));
-  }
-
-  function remainingTokens(){
-    const order = Array.isArray(currentDraw?.order) ? currentDraw.order : [];
-    const revealed = Number(currentDraw?.revealed || 0);
-    return order.slice(revealed);
-  }
-
-  function revealedTokens(){
-    const order = Array.isArray(currentDraw?.order) ? currentDraw.order : [];
-    const revealed = Number(currentDraw?.revealed || 0);
-    return order.slice(0, revealed);
-  }
-
-  function tokenLabel(token){
-    const p = parseToken(token);
-    const team = findTeam(p.id);
-    const dest = p.pool === "A" ? "Poule A" : p.pool === "B" ? "Poule B" : "Placement";
-    return `${dest} → ${teamLabel(team)}`;
-  }
-
-  function buildState(){
-    const seed1 = currentDraw?.seed1 || cachedTeams[0] || null;
-    const seed2 = currentDraw?.seed2 || cachedTeams[1] || null;
-
-    const state = {
-      seed1,
-      seed2,
-      poolA: seed1 ? [seed1] : [],
-      poolB: seed2 ? [seed2] : []
-    };
-
-    for(const token of revealedTokens()){
-      const p = parseToken(token);
-      const team = findTeam(p.id);
-      if(!team) continue;
-
-      if(p.pool === "A" && !state.poolA.some(t => t.id === team.id)){
-        state.poolA.push(team);
-      }
-
-      if(p.pool === "B" && !state.poolB.some(t => t.id === team.id)){
-        state.poolB.push(team);
-      }
-    }
-
-    return state;
-  }
-
-  function poolSlotHtml(team, index, opts = {}){
-    if(!team){
-      return `<div class="pool-slot empty">Place ${index + 1} en attente</div>`;
-    }
-
-    const cls = opts.seed ? "pool-slot seed" : "pool-slot";
-    const suffix = opts.seedLabel ? ` — ${esc(opts.seedLabel)}` : "";
-
-    return `<div class="${cls}">${esc(teamNameOnly(team))}${suffix}</div>`;
-  }
-
-  function itemCardHtml(text, badge){
-    return `
-      <div class="item-card">
-        <div style="min-width:0;"><b>${esc(text)}</b></div>
-        <span class="pill">${esc(badge)}</span>
-      </div>
-    `;
-  }
-
-  function renderDraw(){
-    const state = buildState();
-
-    poolAList.innerHTML = [
-      poolSlotHtml(state.poolA[0], 0, { seed:true, seedLabel:"TS1" }),
-      poolSlotHtml(state.poolA[1], 1),
-      poolSlotHtml(state.poolA[2], 2),
-      poolSlotHtml(state.poolA[3], 3),
-      poolSlotHtml(state.poolA[4], 4),
-      poolSlotHtml(state.poolA[5], 5)
-    ].join("");
-
-    poolBList.innerHTML = [
-      poolSlotHtml(state.poolB[0], 0, { seed:true, seedLabel:"TS2" }),
-      poolSlotHtml(state.poolB[1], 1),
-      poolSlotHtml(state.poolB[2], 2),
-      poolSlotHtml(state.poolB[3], 3),
-      poolSlotHtml(state.poolB[4], 4),
-      poolSlotHtml(state.poolB[5], 5)
-    ].join("");
-
-    const remaining = remainingTokens();
-    const revealed = revealedTokens();
-
-    remainingList.innerHTML = remaining.length
-      ? remaining.map(tok => itemCardHtml(tokenLabel(tok), "urne")).join("")
-      : `<p class="muted" style="margin:0;">Aucune équipe restante.</p>`;
-
-    revealedList.innerHTML = revealed.length
-      ? revealed.map((tok, i) => itemCardHtml(`#${i + 1} — ${tokenLabel(tok)}`, "tiré")).join("")
-      : `<p class="muted" style="margin:0;">Aucun tirage révélé.</p>`;
-
-    const placed = state.poolA.length + state.poolB.length;
-    const total = cachedTeams.length;
-
-    drawInfo.textContent = `${placed}/${total} équipe(s) placée(s).`;
-  }
-
-  function setButtons(){
-    const status = currentDraw?.status || "idle";
-    const ready = drawReady(currentDraw);
-    const total = Array.isArray(currentDraw?.order) ? currentDraw.order.length : 0;
-    const revealed = Number(currentDraw?.revealed || 0);
-
-    btnLoad.disabled = false;
-    btnStart.disabled = !ready || status === "running" || status === "pending_validation" || status === "validated";
-    btnNext.disabled = !(status === "running") || revealed >= total;
-    btnValidate.disabled = !(status === "pending_validation");
-    btnReset.disabled = false;
-  }
-
-  function renderCurrent(){
-    updateZoneButtons();
-
-    ruleText.innerHTML =
-      `Règle actuelle — <strong>${zoneText()}</strong> : les deux meilleures équipes classées sont placées en têtes de série.
-      La TS1 va en Poule A, la TS2 en Poule B. Les autres équipes sont tirées alternativement entre les deux poules.`;
-
-    if(!currentDraw){
-      statusEl.textContent = "ℹ️ Aucun tirage préparé. Clique sur “Charger équipes”.";
-      poolAList.innerHTML = `<div class="pool-slot empty">En attente</div>`;
-      poolBList.innerHTML = `<div class="pool-slot empty">En attente</div>`;
-      remainingList.innerHTML = `<p class="muted" style="margin:0;">—</p>`;
-      revealedList.innerHTML = `<p class="muted" style="margin:0;">—</p>`;
-      drawInfo.textContent = "—";
-      setButtons();
-      return;
-    }
-
-    if(currentDraw.status === "running"){
-      statusEl.textContent = "▶️ Tirage en cours.";
-    }else if(currentDraw.status === "pending_validation"){
-      statusEl.textContent = "🏁 Tirage terminé — en attente de validation.";
-    }else if(currentDraw.status === "validated"){
-      statusEl.textContent = "✅ Tirage validé.";
-    }else if(drawReady(currentDraw)){
-      statusEl.textContent = "✅ Tirage prêt.";
-    }else{
-      statusEl.textContent = "ℹ️ Tirage non préparé.";
-    }
-
-    renderDraw();
-    setButtons();
-  }
-
-  async function readDraw(){
-    const snap = await getDoc(drawRef());
-    currentDraw = snap.exists() ? (snap.data() || {}) : null;
-    return currentDraw;
-  }
-
-  async function prepareDraw(){
-    cachedTeams = await fetchTeams();
-
-    if(cachedTeams.length < 2){
-      alert(`Il faut au moins 2 équipes en liste principale. Actuellement : ${cachedTeams.length}.`);
-      return;
-    }
-
-    const seed1 = cachedTeams[0] || null;
-    const seed2 = cachedTeams[1] || null;
-    const remaining = cachedTeams.slice(2);
-    const shuffled = randomShuffle(remaining);
-
-    const order = shuffled.map((team, index) => {
-      const pool = index % 2 === 0 ? "A" : "B";
-      return `${pool}:${team.id}`;
-    });
-
-    await setDoc(drawRef(), {
-      eventId:EVENT_ID,
-      categorie:currentCategorie,
-      epreuve:currentEpreuve,
-      key:zoneKey(),
-      status:"idle",
-      seed1,
-      seed2,
-      order,
-      revealed:0,
-      revealedAtMs:[],
-      createdAt:serverTimestamp(),
-      updatedAt:serverTimestamp(),
-      validatedAt:null,
-      updatedBy:auth.currentUser?.uid || null
-    }, { merge:true });
-
-    await readDraw();
-    wheel.textContent = "—";
-    wheelSub.textContent = "Tirage préparé.";
-    renderCurrent();
-  }
-
-  async function startDraw(){
-    await readDraw();
-
-    if(!drawReady(currentDraw)){
-      alert("Prépare d’abord le tirage avec “Charger équipes”.");
-      return;
-    }
-
-    await updateDoc(drawRef(), {
-      status:"running",
-      revealed:0,
-      revealedAtMs:[],
-      updatedAt:serverTimestamp(),
-      validatedAt:null,
-      updatedBy:auth.currentUser?.uid || null
-    });
-
-    await readDraw();
-    wheel.textContent = "—";
-    wheelSub.textContent = "Tirage lancé.";
-    renderCurrent();
-  }
-
-  async function rouletteSpin(finalText, durationMs = 1200){
-    const start = Date.now();
-    const fake = ["🎾", "🌪️", "🔥", "🍀", "⚡️", "🎲", "🏖️"];
-
-    wheelSub.textContent = "La roulette tourne…";
-
-    return new Promise(resolve => {
-      const tick = () => {
-        const elapsed = Date.now() - start;
-
-        if(elapsed >= durationMs){
-          wheel.textContent = finalText;
-          wheelSub.textContent = "✅ Révélé";
-          resolve();
-          return;
-        }
-
-        wheel.textContent =
-          fake[Math.floor(Math.random() * fake.length)] + " " +
-          fake[Math.floor(Math.random() * fake.length)];
-
-        requestAnimationFrame(tick);
-      };
-
-      tick();
-    });
-  }
-
-  async function nextPick(){
-    await readDraw();
-
-    if(!currentDraw || currentDraw.status !== "running"){
-      alert("Le tirage n’est pas en cours.");
-      return;
-    }
-
-    const order = Array.isArray(currentDraw.order) ? currentDraw.order : [];
-    const revealed = Number(currentDraw.revealed || 0);
-
-    if(revealed >= order.length){
-      alert("Tout a déjà été tiré.");
-      return;
-    }
-
-    const token = order[revealed];
-
-    await rouletteSpin(tokenLabel(token), 1200);
-
-    const newRevealed = revealed + 1;
-    const revealedAtMs = Array.isArray(currentDraw.revealedAtMs)
-      ? currentDraw.revealedAtMs.slice()
-      : [];
-
-    revealedAtMs.push(Date.now());
-
-    await updateDoc(drawRef(), {
-      revealed:newRevealed,
-      revealedAtMs,
-      updatedAt:serverTimestamp(),
-      updatedBy:auth.currentUser?.uid || null
-    });
-
-    await readDraw();
-
-    if(newRevealed >= order.length){
-      await updateDoc(drawRef(), {
-        status:"pending_validation",
-        updatedAt:serverTimestamp(),
-        updatedBy:auth.currentUser?.uid || null
-      });
-
-      await readDraw();
-    }
-
-    renderCurrent();
-  }
-
-  async function validateDraw(){
-    const ok = confirm(`Valider le tirage pour ${zoneText()} ?`);
-    if(!ok) return;
-
-    await updateDoc(drawRef(), {
-      status:"validated",
-      validatedAt:serverTimestamp(),
-      updatedAt:serverTimestamp(),
-      updatedBy:auth.currentUser?.uid || null
-    });
-
-    await readDraw();
-    renderCurrent();
-  }
-
-  async function resetDraw(){
-    const ok = confirm(`⚠️ Réinitialiser le tirage pour ${zoneText()} ?`);
-    if(!ok) return;
-
-    const typed = prompt('Tape exactement : RESET');
-    if(typed !== "RESET"){
-      alert("Annulé.");
-      return;
-    }
-
-    await setDoc(drawRef(), {
-      eventId:EVENT_ID,
-      categorie:currentCategorie,
-      epreuve:currentEpreuve,
-      key:zoneKey(),
-      status:"idle",
-      seed1:null,
-      seed2:null,
-      order:[],
-      revealed:0,
-      revealedAtMs:[],
-      updatedAt:serverTimestamp(),
-      validatedAt:null,
-      updatedBy:auth.currentUser?.uid || null
-    }, { merge:true });
-
-    await readDraw();
-    wheel.textContent = "—";
-    wheelSub.textContent = "Réinitialisé.";
-    renderCurrent();
-  }
-
-  async function setPublicVisible(value){
-    await setDoc(visibilityRef(), {
-      publicVisible:value === true,
-      updatedAt:serverTimestamp(),
-      updatedBy:auth.currentUser?.uid || null
-    }, { merge:true });
-  }
-
-  function startVisibilityListener(){
-    if(unsubVisibility){
-      unsubVisibility();
-      unsubVisibility = null;
-    }
-
-    unsubVisibility = onSnapshot(visibilityRef(), (snap) => {
-      const data = snap.exists() ? (snap.data() || {}) : {};
-      const visible = data.publicVisible === true;
-
-      visibilityText.innerHTML = visible
-        ? "Statut actuel : <strong>visible publiquement ✅</strong>"
-        : "Statut actuel : <strong>maintenance / masqué 🔒</strong>";
-
-      btnPublicShow.classList.toggle("is-active", visible);
-      btnPublicHide.classList.toggle("is-active", !visible);
-    }, (error) => {
-      console.error(error);
-      visibilityText.textContent = "❌ Impossible de lire la visibilité publique.";
-    });
-  }
-
-  function stopListeners(){
-    if(unsubDraw){
-      unsubDraw();
-      unsubDraw = null;
-    }
-
-    if(unsubVisibility){
-      unsubVisibility();
-      unsubVisibility = null;
-    }
-  }
-
-  function startDrawListener(){
-    if(unsubDraw){
-      unsubDraw();
-      unsubDraw = null;
-    }
-
-    cachedTeams = [];
-    currentDraw = null;
-    statusEl.textContent = "Chargement…";
-
-    unsubDraw = onSnapshot(drawRef(), async (snap) => {
-      currentDraw = snap.exists() ? (snap.data() || {}) : null;
-      cachedTeams = await fetchTeams();
-      renderCurrent();
-    }, (error) => {
-      console.error(error);
-      statusEl.textContent = "❌ Impossible de charger le tirage.";
-    });
-  }
-
-  async function changeZone(categorie, epreuve){
-    currentCategorie = categorie || currentCategorie;
-    currentEpreuve = epreuve || currentEpreuve;
-    updateZoneButtons();
-    wheel.textContent = "—";
-    wheelSub.textContent = "—";
-    startDrawListener();
-  }
-
-  categoryButtons.forEach(btn => {
-    btn.onclick = () => changeZone(btn.dataset.categorie, currentEpreuve);
-  });
-
-  epreuveButtons.forEach(btn => {
-    btn.onclick = () => changeZone(currentCategorie, btn.dataset.epreuve);
-  });
-
-  btnPublicHide.onclick = async () => {
-    try{
-      await setPublicVisible(false);
-    }catch(error){
-      console.error(error);
-      alert("Erreur : impossible de masquer le tirage.");
-    }
-  };
 
   btnPublicShow.onclick = async () => {
-    try{
-      await setPublicVisible(true);
-    }catch(error){
-      console.error(error);
-      alert("Erreur : impossible de rendre le tirage visible.");
-    }
+    await setDoc(configRef(), {
+      publicVisible:true,
+      updatedAt:serverTimestamp()
+    }, { merge:true });
+
+    await refreshVisibility();
   };
 
-  btnLoad.onclick = async () => {
-    btnLoad.disabled = true;
-    statusEl.textContent = "Chargement des équipes…";
+  btnPublicHide.onclick = async () => {
+    await setDoc(configRef(), {
+      publicVisible:false,
+      updatedAt:serverTimestamp()
+    }, { merge:true });
 
-    try{
-      await prepareDraw();
-    }catch(error){
-      console.error(error);
-      alert("Erreur ❌\n\n" + (error?.message || "Impossible de préparer le tirage."));
-    }finally{
-      btnLoad.disabled = false;
-    }
+    await refreshVisibility();
   };
 
-  btnStart.onclick = async () => {
-    try{
-      await startDraw();
-    }catch(error){
-      console.error(error);
-      alert("Erreur ❌");
-    }
-  };
-
-  btnNext.onclick = async () => {
-    try{
-      await nextPick();
-    }catch(error){
-      console.error(error);
-      alert("Erreur ❌");
-    }
-  };
-
-  btnValidate.onclick = async () => {
-    try{
-      await validateDraw();
-    }catch(error){
-      console.error(error);
-      alert("Erreur ❌");
-    }
-  };
-
-  btnReset.onclick = async () => {
-    try{
-      await resetDraw();
-    }catch(error){
-      console.error(error);
-      alert("Erreur ❌");
-    }
-  };
-
-  function showDenied(){
-    accessDenied.style.display = "block";
-    pageContent.style.display = "none";
-    panelVisibility.style.display = "none";
-    adminUI.style.display = "none";
-    panel.style.display = "none";
-    stopListeners();
+  function noDrawNeeded(){
+    return currentCategorie !== "Seniors";
   }
 
-  function showAdmin(){
-    accessDenied.style.display = "none";
-    pageContent.style.display = "block";
-    panelVisibility.style.display = "block";
-    adminUI.style.display = "block";
-    panel.style.display = "block";
-    updateZoneButtons();
-    startVisibilityListener();
-    startDrawListener();
+  function dmPoolsSize(){
+    return currentEpreuve === "DM"
+      ? { A:4, B:3 }
+      : { A:3, B:3 };
+  }
+
+  function renderNoDraw(teams){
+    wheel.textContent = "—";
+    wheelSub.textContent =
+      "Pas de tirage nécessaire.";
+
+    ruleText.innerHTML =
+      "Pas de tirage au sort nécessaire pour cette catégorie.";
+
+    remainingList.innerHTML = "";
+    revealedList.innerHTML = "";
+
+    const size = dmPoolsSize();
+
+    const poolA = teams.slice(0, size.A);
+    const poolB = teams.slice(size.A, size.A + size.B);
+
+    poolAList.innerHTML = poolA.length
+      ? poolA.map((t,i)=>`
+        <div class="pool-slot">
+          ${i+1}. ${t.teamName || "Équipe"}
+        </div>
+      `).join("")
+      : `<div class="pool-slot empty">Aucune équipe</div>`;
+
+    poolBList.innerHTML = poolB.length
+      ? poolB.map((t,i)=>`
+        <div class="pool-slot">
+          ${i+1}. ${t.teamName || "Équipe"}
+        </div>
+      `).join("")
+      : `<div class="pool-slot empty">Aucune équipe</div>`;
+
+    drawInfo.textContent =
+      `${teams.length} équipe(s) affichée(s) sans tirage.`;
   }
 
   onAuthStateChanged(auth, async (user) => {
-    accessDenied.style.display = "none";
-    pageContent.style.display = "none";
-    panelVisibility.style.display = "none";
-    adminUI.style.display = "none";
-    panel.style.display = "none";
-    stopListeners();
 
     if(!user){
-      showDenied();
+      accessDenied.style.display = "block";
       return;
     }
 
@@ -1131,23 +571,20 @@
       const role = await getRoleByUid(user.uid);
 
       if(role !== "admin"){
-        showDenied();
+        accessDenied.style.display = "block";
         return;
       }
 
-      try{
-        const savedCat = localStorage.getItem("champ_admin_categorie");
-        const savedEpreuve = localStorage.getItem("champ_admin_epreuve");
+      pageContent.style.display = "block";
+      panelVisibility.style.display = "block";
+      adminUI.style.display = "block";
+      panel.style.display = "block";
 
-        if(["U14","U18","Seniors","45+"].includes(savedCat)) currentCategorie = savedCat;
-        if(["DM","DD"].includes(savedEpreuve)) currentEpreuve = savedEpreuve;
-      }catch(error){}
-
-      showAdmin();
+      await refreshVisibility();
 
     }catch(error){
       console.error(error);
-      showDenied();
+      accessDenied.style.display = "block";
     }
   });
 </script>
