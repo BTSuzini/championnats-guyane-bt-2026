@@ -28,7 +28,12 @@
     }
 
     a{color:inherit;text-decoration:none;}
-    .container{width:min(var(--container), calc(100% - 28px));margin:0 auto;}
+    img{display:block;max-width:100%;}
+
+    .container{
+      width:min(var(--container), calc(100% - 28px));
+      margin:0 auto;
+    }
 
     main{
       padding-top:calc(var(--public-total-top, 158px) + var(--zone-h) + 30px);
@@ -79,53 +84,65 @@
       letter-spacing:.06em;
     }
 
-    .placeholder{
+    .tabs{
+      display:grid;
+      grid-template-columns:1fr;
+      gap:10px;
+      margin-bottom:14px;
+    }
+
+    .tab-btn{
+      appearance:none;
+      border:1px solid rgba(7,91,154,.14);
+      background:#fff;
+      border-radius:999px;
+      min-height:46px;
+      padding:10px 16px;
+      font-size:14px;
+      font-weight:1000;
+      cursor:pointer;
+      color:#1c2430;
+      text-align:center;
+      box-shadow:0 6px 14px rgba(16,24,40,.05);
+    }
+
+    .tab-btn[aria-selected="true"]{
+      background:linear-gradient(180deg,var(--blue),var(--blue-dark));
+      color:#fff;
+      border-color:var(--blue);
+      box-shadow:0 10px 22px rgba(7,91,154,.22);
+    }
+
+    .content-box{
       margin-top:12px;
       padding:15px 16px;
       border-radius:18px;
       background:linear-gradient(135deg,rgba(39,188,237,.12),rgba(198,90,30,.08));
       border:1px solid rgba(39,188,237,.22);
       color:#475467;
-      font-size:14px;
+      font-size:15px;
       line-height:1.5;
     }
 
-    .placeholder strong{
+    .content-box strong{
       color:var(--blue-dark);
     }
 
-    .quick-grid{
-      display:grid;
-      grid-template-columns:1fr;
-      gap:10px;
-      margin-top:12px;
-    }
-
-    .quick-card{
-      border-radius:16px;
-      padding:12px 14px;
-      background:#fff;
+    .menu-img{
+      margin-top:14px;
+      width:100%;
+      border-radius:18px;
       border:1px solid rgba(16,24,40,.08);
-      box-shadow:0 6px 14px rgba(16,24,40,.04);
+      box-shadow:0 8px 18px rgba(16,24,40,.08);
+      background:#fff;
     }
 
-    .quick-card strong{
-      display:block;
-      color:var(--blue-dark);
-      margin-bottom:4px;
-      font-weight:1000;
-    }
-
-    .quick-card span{
-      color:var(--muted);
-      font-size:13px;
-      line-height:1.35;
-    }
+    .tab-panel[hidden]{display:none;}
 
     @media (min-width:760px){
       :root{--zone-h:104px;}
       .panel{padding:22px;}
-      .quick-grid{grid-template-columns:repeat(3,1fr);}
+      .tabs{grid-template-columns:repeat(3,1fr);}
     }
 
     @media (max-width:759px){
@@ -168,39 +185,79 @@
         <div>
           <h1 class="panel-title">🍽️ Restauration</h1>
           <p class="panel-text">
-            Repas, buvette et informations pratiques pour le week-end.
+            Repas, buvette et rafraîchissements pendant les Championnats.
           </p>
         </div>
-        <div class="panel-tag">À venir</div>
+        <div class="panel-tag">Infos</div>
       </div>
 
-      <div class="placeholder">
-        <strong>🍽️ Informations à venir</strong><br>
-        Cette page affichera les menus, les tarifs, les horaires et les modalités de réservation éventuelles.
+      <div class="tabs" role="tablist" aria-label="Restauration">
+        <button class="tab-btn" id="tab-restauration" type="button" role="tab" aria-selected="true" aria-controls="panel-restauration" data-tab="restauration">
+          🍽️ Restauration
+        </button>
+
+        <button class="tab-btn" id="tab-buvette" type="button" role="tab" aria-selected="false" aria-controls="panel-buvette" data-tab="buvette">
+          ☕ Buvette
+        </button>
+
+        <button class="tab-btn" id="tab-glacieres" type="button" role="tab" aria-selected="false" aria-controls="panel-glacieres" data-tab="glacieres">
+          🧊 Glacières
+        </button>
       </div>
 
-      <div class="quick-grid">
-        <div class="quick-card">
-          <strong>🥘 Menus</strong>
-          <span>Les repas proposés seront affichés ici dès validation.</span>
+      <div class="tab-panel" id="panel-restauration" role="tabpanel" aria-labelledby="tab-restauration">
+        <div class="content-box">
+          <strong>🍽️ Snack Amazonie</strong><br>
+          Le Snack Amazonie sera présent à partir de 18h00.
         </div>
 
-        <div class="quick-card">
-          <strong>🕒 Horaires</strong>
-          <span>Les créneaux de restauration seront précisés avant le tournoi.</span>
+        <img class="menu-img" src="../assets/img/snack.png" alt="Carte du Snack Amazonie">
+      </div>
+
+      <div class="tab-panel" id="panel-buvette" role="tabpanel" aria-labelledby="tab-buvette" hidden>
+        <div class="content-box">
+          <strong>☕ Passing Shot Kafé</strong><br>
+          Le Passing Shot Kafé sera ouvert à partir de 18h00.
         </div>
 
-        <div class="quick-card">
-          <strong>💳 Tarifs</strong>
-          <span>Les tarifs et modalités de paiement seront ajoutés prochainement.</span>
+        <img class="menu-img" src="../assets/img/psk.png" alt="Passing Shot Kafé">
+      </div>
+
+      <div class="tab-panel" id="panel-glacieres" role="tabpanel" aria-labelledby="tab-glacieres" hidden>
+        <div class="content-box">
+          <strong>🧊 Glacières</strong><br>
+          Rafraîchissements disponibles toute la journée.
         </div>
       </div>
+
     </div>
   </section>
 
 </main>
 
 <script type="module" src="../assets/js/public-header.js"></script>
+
+<script>
+  const tabButtons = Array.from(document.querySelectorAll(".tab-btn"));
+  const tabPanels = Array.from(document.querySelectorAll(".tab-panel"));
+
+  function activateTab(tabName){
+    tabButtons.forEach(btn => {
+      const active = btn.dataset.tab === tabName;
+      btn.setAttribute("aria-selected", active ? "true" : "false");
+    });
+
+    tabPanels.forEach(panel => {
+      panel.hidden = panel.id !== `panel-${tabName}`;
+    });
+  }
+
+  tabButtons.forEach(btn => {
+    btn.addEventListener("click", () => {
+      activateTab(btn.dataset.tab);
+    });
+  });
+</script>
 
 </body>
 </html>
