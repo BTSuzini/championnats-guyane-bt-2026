@@ -1,0 +1,1347 @@
+<!doctype html>
+<html lang="fr">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>JAT — Arbitrage — Championnats Guyane Beach Tennis</title>
+
+  <style>
+    :root{
+      --clay:#c65a1e;
+      --clay-dark:#8e3a13;
+      --clay-light:#ee8a3a;
+      --sky:#27bced;
+      --aqua:#00a9c8;
+      --blue:#075b9a;
+      --blue-dark:#063b72;
+      --text:#17212b;
+      --muted:#667085;
+      --card:rgba(255,255,255,.94);
+      --shadow:0 16px 40px rgba(16,24,40,.12);
+      --container:1180px;
+      --modebar-h:64px;
+    }
+
+    *{box-sizing:border-box;}
+    html,body{max-width:100%;overflow-x:hidden;}
+
+    body{
+      margin:0;
+      font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;
+      color:var(--text);
+      background:
+        radial-gradient(circle at 20% 0%, rgba(39,188,237,.22), transparent 28%),
+        radial-gradient(circle at 85% 10%, rgba(0,169,200,.16), transparent 26%),
+        linear-gradient(180deg,#f4fcff 0%,#e9f8ff 48%,#fff 100%);
+    }
+
+    a{color:inherit;text-decoration:none;}
+
+    .container{
+      width:min(var(--container), calc(100% - 20px));
+      margin:0 auto;
+    }
+
+    main{
+      padding-top:calc(var(--jat-total-top, 276px) + var(--modebar-h) + 24px);
+      padding-bottom:42px;
+    }
+
+    .section{margin-top:16px;}
+
+    .panel{
+      background:var(--card);
+      border:1px solid rgba(255,255,255,.6);
+      border-radius:24px;
+      box-shadow:var(--shadow);
+      padding:16px;
+    }
+
+    .panel-head{
+      display:flex;
+      justify-content:space-between;
+      align-items:flex-start;
+      gap:12px;
+      margin-bottom:12px;
+    }
+
+    .panel-title{
+      margin:0;
+      font-size:25px;
+      line-height:1.05;
+      letter-spacing:-.03em;
+    }
+
+    .panel-text{
+      margin:6px 0 0;
+      color:var(--muted);
+      font-size:14px;
+      line-height:1.35;
+    }
+
+    .panel-tag{
+      flex-shrink:0;
+      padding:8px 13px;
+      border-radius:999px;
+      background:#e4f7ff;
+      color:var(--blue-dark);
+      font-size:12px;
+      font-weight:1000;
+      text-transform:uppercase;
+      letter-spacing:.06em;
+    }
+
+    .placeholder{
+      padding:13px 15px;
+      border-radius:18px;
+      background:linear-gradient(135deg,rgba(39,188,237,.12),rgba(198,90,30,.08));
+      border:1px solid rgba(39,188,237,.22);
+      color:#475467;
+      font-size:14px;
+      line-height:1.5;
+    }
+
+    .modebar{
+      position:fixed;
+      top:var(--jat-total-top, 276px);
+      left:0;
+      right:0;
+      z-index:998;
+      background:
+        radial-gradient(circle at 18% 10%, rgba(255,255,255,.42), transparent 24%),
+        radial-gradient(circle at 80% 24%, rgba(255,255,255,.26), transparent 24%),
+        linear-gradient(135deg,#23b7ea 0%,#7fdfff 48%,#f5fdff 100%);
+      box-shadow:0 8px 18px rgba(16,24,40,.08);
+      border-bottom:1px solid rgba(7,91,154,.10);
+      padding:10px 0 12px;
+    }
+
+    .modebar-inner{
+      width:min(var(--container), calc(100% - 20px));
+      margin:0 auto;
+      display:flex;
+      gap:10px;
+    }
+
+    .mode-btn{
+      flex:1;
+      appearance:none;
+      border:1px solid rgba(255,255,255,.36);
+      border-radius:999px;
+      min-height:42px;
+      padding:10px 16px;
+      font-weight:1000;
+      cursor:pointer;
+      background:rgba(255,255,255,.82);
+      color:#1c2430;
+      box-shadow:0 5px 12px rgba(16,24,40,.08);
+      white-space:nowrap;
+    }
+
+    .mode-btn.active{
+      background:linear-gradient(180deg,var(--blue),var(--blue-dark));
+      color:#fff;
+      border-color:var(--blue);
+      box-shadow:0 8px 18px rgba(7,91,154,.24);
+    }
+
+    .match-list{
+      display:grid;
+      gap:14px;
+      margin-top:12px;
+    }
+
+    .match-card{
+      border-radius:18px;
+      border:1px solid rgba(16,24,40,.08);
+      padding:14px;
+      background:#fff;
+      box-shadow:0 8px 18px rgba(16,24,40,.06);
+    }
+
+    .match-card.courtA{
+      background:#fff8dd;
+      border-color:rgba(255,196,0,.35);
+    }
+
+    .match-card.courtB{
+      background:#ffeef2;
+      border-color:rgba(255,0,60,.20);
+    }
+
+    .match-head{
+      display:flex;
+      align-items:center;
+      gap:9px;
+      flex-wrap:wrap;
+      margin-bottom:11px;
+    }
+
+    .m-slot{
+      font-size:12px;
+      font-weight:1000;
+      color:#667085;
+      white-space:nowrap;
+    }
+
+    .m-time{
+      font-size:14px;
+      font-weight:1000;
+      white-space:nowrap;
+    }
+
+    .m-court{
+      flex:1;
+      min-width:0;
+      font-size:13px;
+      font-style:italic;
+      color:#475467;
+      white-space:nowrap;
+      overflow:hidden;
+      text-overflow:ellipsis;
+    }
+
+    .m-label{
+      padding:5px 10px;
+      border-radius:999px;
+      background:#f4f8ff;
+      color:var(--blue-dark);
+      border:1px solid rgba(7,91,154,.12);
+      font-size:12px;
+      font-weight:1000;
+      white-space:nowrap;
+    }
+
+    .status-pill{
+      display:inline-flex;
+      align-items:center;
+      gap:7px;
+      padding:6px 10px;
+      border-radius:999px;
+      font-size:12px;
+      font-weight:1000;
+      border:1px solid rgba(16,24,40,.10);
+      background:#fff;
+      white-space:nowrap;
+    }
+
+    .dot{
+      width:10px;
+      height:10px;
+      border-radius:999px;
+      display:inline-block;
+      background:#f59e0b;
+    }
+
+    .dot.gray{background:#94a3b8;}
+    .dot.blue{background:#0ea5e9;}
+    .dot.orange{background:#f59e0b;}
+    .dot.green{background:#22c55e;}
+    .dot.red{background:#ef4444;}
+
+    .teams{
+      display:grid;
+      gap:8px;
+      margin-top:8px;
+    }
+
+    .team-row{
+      display:flex;
+      justify-content:space-between;
+      gap:12px;
+      align-items:center;
+      padding:10px 12px;
+      border-radius:14px;
+      background:rgba(255,255,255,.70);
+      border:1px solid rgba(16,24,40,.07);
+    }
+
+    .team-name{
+      min-width:0;
+      font-weight:1000;
+      line-height:1.15;
+      white-space:nowrap;
+      overflow:hidden;
+      text-overflow:ellipsis;
+    }
+
+    .team-name.placeholder{
+      color:#667085;
+      font-style:italic;
+    }
+
+    .score-live{
+      display:grid;
+      grid-template-columns:48px 48px 58px;
+      gap:6px;
+      flex:0 0 auto;
+      text-align:center;
+    }
+
+    .score-cell{
+      border-radius:12px;
+      background:#fff;
+      border:1px solid rgba(16,24,40,.10);
+      min-height:34px;
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      font-size:14px;
+      font-weight:1000;
+      font-variant-numeric:tabular-nums;
+    }
+
+    .score-head{
+      font-size:10px;
+      color:#667085;
+      font-weight:1000;
+      text-transform:uppercase;
+    }
+
+    .live-meta{
+      margin-top:10px;
+      font-size:13px;
+      color:#475467;
+      line-height:1.35;
+      display:grid;
+      gap:4px;
+    }
+
+    .actions{
+      margin-top:12px;
+      display:flex;
+      gap:8px;
+      flex-wrap:wrap;
+      justify-content:flex-end;
+    }
+
+    .btn{
+      appearance:none;
+      border:1px solid rgba(7,91,154,.14);
+      background:#fff;
+      border-radius:999px;
+      min-height:40px;
+      padding:9px 14px;
+      font-size:13px;
+      font-weight:1000;
+      cursor:pointer;
+      color:#1c2430;
+      text-align:center;
+      box-shadow:0 6px 14px rgba(16,24,40,.05);
+      white-space:nowrap;
+    }
+
+    .btn.primary{
+      background:linear-gradient(180deg,var(--blue),var(--blue-dark));
+      color:#fff;
+      border-color:var(--blue);
+      box-shadow:0 10px 22px rgba(7,91,154,.22);
+    }
+
+    .btn.danger{
+      background:#fff5f5;
+      color:#8a1f1f;
+      border-color:#f1b2b2;
+    }
+
+    .btn.ok{
+      background:#ecfdf5;
+      color:#065f46;
+      border-color:#a7f3d0;
+    }
+
+    .btn:disabled{
+      opacity:.5;
+      cursor:not-allowed;
+    }
+
+    .muted{
+      color:var(--muted);
+      font-size:14px;
+      line-height:1.45;
+    }
+
+    @media (min-width:760px){
+      .panel{padding:22px;}
+    }
+
+    @media (max-width:759px){
+      :root{
+        --modebar-h:62px;
+      }
+
+      main{
+        padding-top:calc(var(--jat-total-top, 268px) + var(--modebar-h) + 18px);
+      }
+
+      .panel-title{font-size:23px;}
+
+      .team-row{
+        align-items:flex-start;
+        flex-direction:column;
+      }
+
+      .score-live{
+        width:100%;
+        grid-template-columns:1fr 1fr 1fr;
+      }
+
+      .actions{
+        justify-content:stretch;
+      }
+
+      .actions .btn{
+        flex:1 1 auto;
+      }
+    }
+
+    @media (orientation:landscape) and (max-height:520px){
+      #jatHeader{display:none !important;}
+
+      :root{
+        --jat-total-top:0px !important;
+        --modebar-h:50px;
+      }
+
+      .modebar{
+        top:0 !important;
+        padding:6px 0;
+      }
+
+      .mode-btn{
+        min-height:36px;
+        padding:7px 12px;
+        font-size:13px;
+      }
+
+      main{
+        padding-top:calc(var(--modebar-h) + 8px) !important;
+      }
+
+      .panel.summary-panel{
+        display:none;
+      }
+    }
+  </style>
+</head>
+
+<body data-zone-selector="select">
+
+<div id="jatHeader"></div>
+
+<div class="modebar">
+  <div class="modebar-inner">
+    <button class="mode-btn active" id="btnModeAll" type="button">🌍 Tous les matchs</button>
+    <button class="mode-btn" id="btnModeCategory" type="button">🎾 Catégorie active</button>
+  </div>
+</div>
+
+<main class="container">
+
+  <section class="section panel" id="accessDenied" style="display:none;">
+    <h2 class="panel-title">⛔ Accès refusé</h2>
+    <p class="panel-text">Cette page est réservée au JAT et aux administrateurs.</p>
+  </section>
+
+  <section class="section panel summary-panel" id="pageContent" style="display:none;">
+    <div class="panel-head">
+      <div>
+        <h1 class="panel-title">🧑‍⚖️ Arbitrage JAT</h1>
+        <p class="panel-text">
+          Envoie les matchs aux arbitres, suis les scores live, puis valide le résultat officiel.
+        </p>
+      </div>
+      <div class="panel-tag">JAT</div>
+    </div>
+
+    <div class="placeholder">
+      <strong id="zoneLabel">Tous les matchs</strong>
+      <div id="statusText" style="margin-top:6px;">Chargement…</div>
+    </div>
+  </section>
+
+  <section class="section panel" id="panelMatches" style="display:none;">
+    <div class="panel-head">
+      <div>
+        <h2 class="panel-title">📡 Matchs arbitrables</h2>
+        <p class="panel-text">
+          Un match envoyé au live devient disponible pour un profil arbitre.
+        </p>
+      </div>
+      <div class="panel-tag">Live</div>
+    </div>
+
+    <div id="matchList"></div>
+  </section>
+
+</main>
+
+<script type="module" src="../assets/js/jat-header.js"></script>
+
+<script type="module">
+  import { auth, db } from "../assets/js/firebase.js";
+  import { getRoleByUid } from "../assets/js/session.js";
+
+  import { onAuthStateChanged }
+  from "https://www.gstatic.com/firebasejs/10.12.5/firebase-auth.js";
+
+  import {
+    doc,
+    collection,
+    onSnapshot,
+    setDoc,
+    updateDoc,
+    deleteDoc,
+    serverTimestamp
+  } from "https://www.gstatic.com/firebasejs/10.12.5/firebase-firestore.js";
+
+  const EVENT_ID = "championnats-2026";
+
+  const CATEGORIES = ["U14", "U18", "Seniors", "45+"];
+  const EPREUVES = ["DM", "DD"];
+
+  const EPREUVE_LABELS = {
+    DM:"Double Messieurs",
+    DD:"Double Dames"
+  };
+
+  const accessDenied = document.getElementById("accessDenied");
+  const pageContent = document.getElementById("pageContent");
+  const panelMatches = document.getElementById("panelMatches");
+
+  const btnModeAll = document.getElementById("btnModeAll");
+  const btnModeCategory = document.getElementById("btnModeCategory");
+
+  const zoneLabel = document.getElementById("zoneLabel");
+  const statusText = document.getElementById("statusText");
+  const matchList = document.getElementById("matchList");
+
+  let mode = "all";
+  let currentCategorie = "Seniors";
+  let currentEpreuve = "DM";
+
+  let currentProg = null;
+  let resultsByMatch = new Map();
+  let liveByMatch = new Map();
+  let currentRole = null;
+
+  let unsubProg = null;
+  let unsubResults = null;
+  let unsubLive = null;
+
+  function esc(s){
+    return (s ?? "").toString()
+      .replaceAll("&","&amp;")
+      .replaceAll("<","&lt;")
+      .replaceAll(">","&gt;")
+      .replaceAll('"',"&quot;")
+      .replaceAll("'","&#039;");
+  }
+
+  function generalProgRef(){
+    return doc(db, "events", EVENT_ID, "programmations", "general");
+  }
+
+  function resultsCol(){
+    return collection(db, "events", EVENT_ID, "resultats", "general", "matches");
+  }
+
+  function liveCol(){
+    return collection(db, "events", EVENT_ID, "live_matches");
+  }
+
+  function liveRef(matchId){
+    return doc(db, "events", EVENT_ID, "live_matches", matchId);
+  }
+
+  function resultRef(matchId){
+    return doc(db, "events", EVENT_ID, "resultats", "general", "matches", matchId);
+  }
+
+  function zoneText(){
+    if(mode === "all") return "Tous les matchs";
+    return `${currentCategorie} — ${EPREUVE_LABELS[currentEpreuve] || currentEpreuve}`;
+  }
+
+  function courtLabel(court){
+    if(court === "A") return "🐝 Manon Queen Bee";
+    if(court === "B") return "🌶️ Lisa de Los Pimentos";
+    if(court === "AUTO") return "🏆 Vainqueur";
+    return "🎾 terrain";
+  }
+
+  function toNum(v){
+    if(v === null || v === undefined || v === "") return null;
+    const n = Number(String(v).replace(",", ".").trim());
+    return Number.isFinite(n) ? n : null;
+  }
+
+  function getResult(mid){
+    return resultsByMatch.get(mid) || null;
+  }
+
+  function getLive(mid){
+    return liveByMatch.get(mid) || null;
+  }
+
+  function winnerSide(res){
+    if(!res) return null;
+
+    if(res.winnerSide === "A" || res.winnerSide === "B"){
+      return res.winnerSide;
+    }
+
+    let a = 0;
+    let b = 0;
+
+    [
+      ["s1A","s1B"],
+      ["s2A","s2B"],
+      ["s3A","s3B"]
+    ].forEach(([ka,kb]) => {
+      const na = toNum(res[ka]);
+      const nb = toNum(res[kb]);
+
+      if(na === null || nb === null || na === nb) return;
+
+      if(na > nb) a++;
+      else b++;
+    });
+
+    if(a > b) return "A";
+    if(b > a) return "B";
+
+    return null;
+  }
+    function allMatches(){
+    return Array.isArray(currentProg?.matches)
+      ? [...currentProg.matches]
+      : [];
+  }
+
+  function matchById(id){
+    return allMatches().find(m => m.id === id) || null;
+  }
+
+  function resolveDynamicName(match, side, guard = new Set()){
+    if(!match) return "—";
+
+    const raw = side === "A"
+      ? match.teamA
+      : match.teamB;
+
+    const ref = side === "A"
+      ? match.A
+      : match.B;
+
+    if(ref?.type === "team"){
+      return ref.team?.teamName
+        || raw
+        || "Équipe";
+    }
+
+    if(ref?.type === "winner" || ref?.type === "loser"){
+
+      const sourceId = ref.matchId;
+
+      if(!sourceId || guard.has(sourceId)){
+        return raw || "Équipe";
+      }
+
+      guard.add(sourceId);
+
+      const source = matchById(sourceId);
+      const res = getResult(sourceId);
+      const w = winnerSide(res);
+
+      if(!source || (w !== "A" && w !== "B")){
+        return ref.type === "winner"
+          ? `Vainqueur ${sourceId}`
+          : `Perdant ${sourceId}`;
+      }
+
+      const wantedSide = ref.type === "winner"
+        ? w
+        : (w === "A" ? "B" : "A");
+
+      return resolveDynamicName(source, wantedSide, guard);
+    }
+
+    if(ref?.type === "poolRank"){
+      return `${ref.rank}${Number(ref.rank) === 1 ? "er" : "e"} poule ${ref.pool}`;
+    }
+
+    return raw || "Équipe";
+  }
+
+  function teamName(match, side){
+    return resolveDynamicName(match, side);
+  }
+
+  function visibleMatches(){
+    return allMatches()
+      .filter(m => m.type !== "winner")
+      .filter(m => {
+        if(mode === "all") return true;
+
+        return String(m.categorie || "") === currentCategorie
+          && String(m.epreuve || "") === currentEpreuve;
+      })
+      .sort((a,b)=>{
+        if(Number(a.order) !== Number(b.order)){
+          return Number(a.order) - Number(b.order);
+        }
+
+        return String(a.court || "")
+          .localeCompare(String(b.court || ""));
+      });
+  }
+
+  function statusInfo(live){
+    if(!live){
+      return {
+        cls:"gray",
+        text:"Non envoyé"
+      };
+    }
+
+    if(live.status === "available"){
+      return {
+        cls:"orange",
+        text:"Disponible arbitre"
+      };
+    }
+
+    if(live.status === "taken"){
+      return {
+        cls:"blue",
+        text:"Pris par arbitre"
+      };
+    }
+
+    if(live.status === "finished"){
+      return {
+        cls:"red",
+        text:"En attente validation"
+      };
+    }
+
+    if(live.status === "validated"){
+      return {
+        cls:"green",
+        text:"Score validé"
+      };
+    }
+
+    return {
+      cls:"gray",
+      text:"Inconnu"
+    };
+  }
+
+  function scoreCell(v){
+    if(v === null || v === undefined || v === ""){
+      return "—";
+    }
+
+    return String(v);
+  }
+
+  function renderMatchCard(match){
+
+    const live = getLive(match.id);
+    const status = statusInfo(live);
+
+    const cls =
+      match.court === "A"
+        ? "courtA"
+        : match.court === "B"
+          ? "courtB"
+          : "";
+
+    const teamA = teamName(match, "A");
+    const teamB = teamName(match, "B");
+
+    const score = live?.score || {};
+
+    return `
+      <div class="match-card ${esc(cls)}">
+
+        <div class="match-head">
+
+          <div class="m-slot">
+            #${esc(match.order || "—")}
+          </div>
+
+          <div class="m-time">
+            ${esc(match.time || "—")}
+          </div>
+
+          <div class="m-court">
+            ${esc(courtLabel(match.court))}
+          </div>
+
+          <div class="m-label">
+            ${esc(match.label || match.id)}
+          </div>
+
+          <div class="status-pill">
+            <span class="dot ${esc(status.cls)}"></span>
+            ${esc(status.text)}
+          </div>
+
+        </div>
+
+        <div class="teams">
+
+          <div class="team-row">
+
+            <div class="team-name ${teamA.includes("Vainqueur") || teamA.includes("Perdant") ? "placeholder" : ""}">
+              ${esc(teamA)}
+            </div>
+
+            <div class="score-live">
+
+              <div>
+                <div class="score-head">Pts</div>
+                <div class="score-cell">
+                  ${esc(scoreCell(score.pointsA))}
+                </div>
+              </div>
+
+              <div>
+                <div class="score-head">Set</div>
+                <div class="score-cell">
+                  ${esc(scoreCell(score.s1A))}
+                </div>
+              </div>
+
+              <div>
+                <div class="score-head">STB</div>
+                <div class="score-cell">
+                  ${esc(scoreCell(score.stbA))}
+                </div>
+              </div>
+
+            </div>
+
+          </div>
+
+          <div class="team-row">
+
+            <div class="team-name ${teamB.includes("Vainqueur") || teamB.includes("Perdant") ? "placeholder" : ""}">
+              ${esc(teamB)}
+            </div>
+
+            <div class="score-live">
+
+              <div>
+                <div class="score-head">Pts</div>
+                <div class="score-cell">
+                  ${esc(scoreCell(score.pointsB))}
+                </div>
+              </div>
+
+              <div>
+                <div class="score-head">Set</div>
+                <div class="score-cell">
+                  ${esc(scoreCell(score.s1B))}
+                </div>
+              </div>
+
+              <div>
+                <div class="score-head">STB</div>
+                <div class="score-cell">
+                  ${esc(scoreCell(score.stbB))}
+                </div>
+              </div>
+
+            </div>
+
+          </div>
+
+        </div>
+
+        <div class="live-meta">
+
+          ${
+            live?.refereeName
+              ? `<div>🧑‍⚖️ Arbitre : <strong>${esc(live.refereeName)}</strong></div>`
+              : `<div>🧑‍⚖️ Aucun arbitre connecté</div>`
+          }
+
+          ${
+            live?.servingSide
+              ? `<div>🎾 Service : <strong>${esc(live.servingSide === "A" ? teamA : teamB)}</strong></div>`
+              : ``
+          }
+
+          ${
+            live?.inputMode
+              ? `<div>⌨️ Saisie : <strong>${esc(live.inputMode === "points" ? "Points" : "Jeux")}</strong></div>`
+              : ``
+          }
+
+        </div>
+
+        <div class="actions">
+
+          ${
+            !live
+              ? `
+                <button
+                  class="btn primary"
+                  type="button"
+                  data-act="open"
+                  data-id="${esc(match.id)}"
+                >
+                  📡 Envoyer au live
+                </button>
+              `
+              : ""
+          }
+
+          ${
+            live?.status === "available"
+              ? `
+                <button
+                  class="btn danger"
+                  type="button"
+                  data-act="close"
+                  data-id="${esc(match.id)}"
+                >
+                  ❌ Retirer du live
+                </button>
+              `
+              : ""
+          }
+
+          ${
+            live?.status === "taken"
+              ? `
+                <button
+                  class="btn danger"
+                  type="button"
+                  data-act="forceclose"
+                  data-id="${esc(match.id)}"
+                >
+                  ⛔ Fermer live
+                </button>
+              `
+              : ""
+          }
+
+          ${
+            live?.status === "finished"
+              ? `
+                <button
+                  class="btn ok"
+                  type="button"
+                  data-act="validate"
+                  data-id="${esc(match.id)}"
+                >
+                  ✅ Valider score
+                </button>
+              `
+              : ""
+          }
+
+          ${
+            live?.status === "validated"
+              ? `
+                <button
+                  class="btn"
+                  type="button"
+                  disabled
+                >
+                  ✔️ Score officiel
+                </button>
+              `
+              : ""
+          }
+
+        </div>
+
+      </div>
+    `;
+  }
+
+  function render(){
+
+    zoneLabel.textContent = zoneText();
+
+    btnModeAll.classList.toggle("active", mode === "all");
+    btnModeCategory.classList.toggle("active", mode === "category");
+
+    if(!currentProg){
+
+      statusText.textContent =
+        "Programmation générale non disponible.";
+
+      matchList.innerHTML =
+        `<p class="muted">Aucun match disponible.</p>`;
+
+      return;
+    }
+
+    const rows = visibleMatches();
+
+    statusText.textContent =
+      `${rows.length} match(s) affiché(s).`;
+
+    matchList.innerHTML = rows.length
+      ? `<div class="match-list">
+          ${rows.map(renderMatchCard).join("")}
+        </div>`
+      : `<p class="muted">Aucun match dans cette zone.</p>`;
+  }
+
+  async function openLive(matchId){
+
+    const match = matchById(matchId);
+
+    if(!match) return;
+
+    await setDoc(liveRef(matchId), {
+
+      matchId,
+
+      categorie:match.categorie || null,
+      epreuve:match.epreuve || null,
+
+      label:match.label || null,
+
+      status:"available",
+
+      sentByJat:true,
+
+      refereeUid:null,
+      refereeName:null,
+
+      servingSide:"A",
+
+      inputMode:"points",
+
+      score:{
+        pointsA:"0",
+        pointsB:"0",
+        s1A:0,
+        s1B:0,
+        stbA:0,
+        stbB:0,
+        currentPhase:"set1"
+      },
+
+      sets:{
+        set1Validated:false,
+        superTieBreakValidated:false
+      },
+
+      createdAt:serverTimestamp(),
+      updatedAt:serverTimestamp(),
+      updatedBy:auth.currentUser?.uid || null
+
+    }, { merge:true });
+  }
+
+  async function closeLive(matchId){
+
+    const ok = confirm(
+      "Retirer ce match du live arbitre ?"
+    );
+
+    if(!ok) return;
+
+    await deleteDoc(liveRef(matchId));
+  }
+
+  async function validateScore(matchId){
+
+    const live = getLive(matchId);
+
+    if(!live){
+      alert("Live introuvable ❌");
+      return;
+    }
+
+    const ok = confirm(
+      "Valider ce score comme résultat officiel ?"
+    );
+
+    if(!ok) return;
+
+    const s = live.score || {};
+
+    const s1A = Number(s.s1A || 0);
+    const s1B = Number(s.s1B || 0);
+
+    const s3A = Number(s.stbA || 0);
+    const s3B = Number(s.stbB || 0);
+
+    let winnerSide = null;
+
+    let setsA = 0;
+    let setsB = 0;
+
+    if(s1A > s1B) setsA++;
+    else if(s1B > s1A) setsB++;
+
+    if(s3A > s3B) setsA++;
+    else if(s3B > s3A) setsB++;
+
+    if(setsA > setsB){
+      winnerSide = "A";
+    }else if(setsB > setsA){
+      winnerSide = "B";
+    }
+
+    await setDoc(resultRef(matchId), {
+
+      s1A,
+      s1B,
+
+      s2A:"",
+      s2B:"",
+
+      s3A,
+      s3B,
+
+      winnerSide,
+
+      updatedAt:serverTimestamp(),
+      updatedBy:
+        auth.currentUser?.email
+        || auth.currentUser?.uid
+        || null
+
+    }, { merge:true });
+
+    await updateDoc(liveRef(matchId), {
+      status:"validated",
+      validatedAt:serverTimestamp(),
+      validatedBy:
+        auth.currentUser?.email
+        || auth.currentUser?.uid
+        || null
+    });
+  }
+
+  matchList.addEventListener("click", async (event) => {
+
+    const btn = event.target.closest("button[data-act]");
+
+    if(!btn) return;
+
+    const act = btn.dataset.act;
+    const id = btn.dataset.id;
+
+    if(!id) return;
+
+    try{
+
+      if(act === "open"){
+        await openLive(id);
+      }
+
+      else if(act === "close"){
+        await closeLive(id);
+      }
+
+      else if(act === "forceclose"){
+        await closeLive(id);
+      }
+
+      else if(act === "validate"){
+        await validateScore(id);
+      }
+
+    }catch(error){
+
+      console.error(error);
+
+      alert("Erreur Firestore ❌");
+    }
+  });
+
+  function setMode(next){
+    mode = next === "category"
+      ? "category"
+      : "all";
+
+    render();
+  }
+
+  btnModeAll.onclick = () => setMode("all");
+  btnModeCategory.onclick = () => setMode("category");
+
+  document.addEventListener("jatZoneChange", (event) => {
+
+    const d = event.detail || {};
+
+    if(CATEGORIES.includes(d.categorie)){
+      currentCategorie = d.categorie;
+    }
+
+    if(EPREUVES.includes(d.epreuve)){
+      currentEpreuve = d.epreuve;
+    }
+
+    try{
+      localStorage.setItem(
+        "champ_jat_categorie",
+        currentCategorie
+      );
+
+      localStorage.setItem(
+        "champ_jat_epreuve",
+        currentEpreuve
+      );
+
+    }catch(error){}
+
+    mode = "category";
+
+    render();
+  });
+
+  function startListeners(){
+
+    if(unsubProg) unsubProg();
+    if(unsubResults) unsubResults();
+    if(unsubLive) unsubLive();
+
+    unsubProg = onSnapshot(generalProgRef(), (snap) => {
+
+      currentProg = snap.exists()
+        ? (snap.data() || null)
+        : null;
+
+      render();
+
+    }, (error) => {
+
+      console.error(error);
+
+      statusText.textContent =
+        "Impossible de charger la programmation.";
+    });
+
+    unsubResults = onSnapshot(resultsCol(), (snap) => {
+
+      resultsByMatch = new Map();
+
+      snap.forEach(d => {
+        resultsByMatch.set(d.id, d.data() || {});
+      });
+
+      render();
+
+    }, (error) => {
+
+      console.error(error);
+    });
+
+    unsubLive = onSnapshot(liveCol(), (snap) => {
+
+      liveByMatch = new Map();
+
+      snap.forEach(d => {
+        liveByMatch.set(d.id, d.data() || {});
+      });
+
+      render();
+
+    }, (error) => {
+
+      console.error(error);
+    });
+  }
+
+  function stopListeners(){
+
+    if(unsubProg){
+      unsubProg();
+      unsubProg = null;
+    }
+
+    if(unsubResults){
+      unsubResults();
+      unsubResults = null;
+    }
+
+    if(unsubLive){
+      unsubLive();
+      unsubLive = null;
+    }
+  }
+
+  function showDenied(){
+
+    accessDenied.style.display = "block";
+    pageContent.style.display = "none";
+    panelMatches.style.display = "none";
+
+    stopListeners();
+  }
+
+  function showJat(){
+
+    accessDenied.style.display = "none";
+    pageContent.style.display = "block";
+    panelMatches.style.display = "block";
+
+    try{
+
+      const savedCat =
+        localStorage.getItem("champ_jat_categorie");
+
+      const savedEpreuve =
+        localStorage.getItem("champ_jat_epreuve");
+
+      if(CATEGORIES.includes(savedCat)){
+        currentCategorie = savedCat;
+      }
+
+      if(EPREUVES.includes(savedEpreuve)){
+        currentEpreuve = savedEpreuve;
+      }
+
+    }catch(error){}
+
+    startListeners();
+  }
+
+  onAuthStateChanged(auth, async (user) => {
+
+    accessDenied.style.display = "none";
+    pageContent.style.display = "none";
+    panelMatches.style.display = "none";
+
+    if(!user){
+      showDenied();
+      return;
+    }
+
+    try{
+
+      currentRole = await getRoleByUid(user.uid);
+
+      if(currentRole !== "admin" && currentRole !== "jat"){
+        showDenied();
+        return;
+      }
+
+      showJat();
+
+    }catch(error){
+
+      console.error(error);
+
+      showDenied();
+    }
+  });
+
+</script>
+
+</body>
+</html>
