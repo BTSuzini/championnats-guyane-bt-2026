@@ -807,7 +807,10 @@
   import {
     doc,
     collection,
-    onSnapshot
+    onSnapshot,
+    getDocs,
+    query,
+    orderBy
   } from "https://www.gstatic.com/firebasejs/10.12.5/firebase-firestore.js";
 
   const EVENT_ID = "championnats-2026";
@@ -880,9 +883,13 @@
   let currentProg = null;
   let resultsByMatch = new Map();
 
+  let currentDraw = null;
+  let cachedTeams = [];
+
   let unsubVisibility = null;
   let unsubProg = null;
   let unsubResults = null;
+  let unsubDraw = null;
 
   function esc(s){
     return (s ?? "").toString()
@@ -901,6 +908,18 @@
 
   function resultsCol(){
     return collection(db, "events", EVENT_ID, "resultats", "general", "matches");
+  }
+
+  function zoneKey(){
+    return `${currentCategorie}_${currentEpreuve}`.replace("+", "plus");
+  }
+
+  function drawRef(){
+    return doc(db, "events", EVENT_ID, "tirages", zoneKey());
+  }
+
+  function equipesCol(){
+    return collection(db, "events", EVENT_ID, "equipes");
   }
 
   function canSeeWork(){
@@ -1228,6 +1247,267 @@
     resultatsList.innerHTML = winnersHtml + matchesHtml;
   }
 
+  function teamRank(t){
+    const a = toNum(t?.p1Rank);
+    const b = toNum(t?.p2Rank);
+    if(a === null || b === null) return Number.POSITIVE_INFINITY;
+    return a + b;
+  }
+
+  function teamNameOnly(t){
+    return t?.teamName || "—";
+  }
+
+  async function fetchTeams(){
+    const snap = await getDocs(query(equipesCol(), orderBy("createdAt", "asc")));
+    const rows = [];
+
+    snap.forEach(d => {
+      const x = d.data() || {};
+
+      if(String(x.categorie || "").trim() !== currentCategorie) return;
+      if(String(x.epreuve || "").trim() !== currentEpreuve) return;
+      if(x.stby === true) return;
+      if(x.list === "wait") return;
+
+      rows.push({
+        id:d.id,
+        createdAtMs:x.createdAt?.toMillis ? x.createdAt.toMillis() : 0,
+        teamName:x.teamName || "",
+        joueur1FirstName:x.joueur1FirstName || "",
+        joueur2FirstName:x.joueur2FirstName || "",
+        p1Rank:x.p1Rank ?? null,
+        p2Rank:x.p2Rank ?? null
+      });
+    });
+
+    rows.sort((a,b) => {
+      const ar = teamRank(a);
+      const br = teamRank(b);
+      if(ar !== br) return ar - br;
+      return (a.createdAtMs || 0) - (b.createdAtMs || 0);
+    });
+
+    return rows;
+  }
+
+  function parseToken(token){
+    const s = String(token || "");
+    if(s.startsWith("A:")) return { pool:"A", id:s.slice(2) };
+    if(s.startsWith("B:")) return { pool:"B", id:s.slice(2) };
+    return { pool:null, id:s };
+  }
+
+  function findTeam(id){
+    return cachedTeams.find(t => t.id === id) || null;
+  }
+
+  function revealedTokens(){
+    const order = Array.isArray(currentDraw?.order) ? currentDraw.order : [];
+    const revealed = Number(currentDraw?.revealed || 0);
+    return order.slice(0, revealed);
+  }
+
+  function buildDrawPools(){
+    const seed1 = currentDraw?.seed1 || cachedTeams[0] || null;
+    const seed2 = currentDraw?.seed2 || cachedTeams[1] || null;
+
+    const state = {
+      A: seed1 ? [seed1] : [],
+      B: seed2 ? [seed2] : []
+    };
+
+    revealedTokens().forEach(token => {
+      const p = parseToken(token);
+      const team = findTeam(p.id);
+      if(!team) return;
+
+      if(p.pool === "A" && !state.A.some(t => t.id === team.id)){
+        state.A.push(team);
+      }
+
+      if(p.pool === "B" && !state.B.some(t => t.id === team.id)){
+        state.B.push(team);
+      }
+    });
+
+    return state;
+  }
+
+  function matchPoolFromText(match){
+    const txt = `${match.id || ""} ${match.label || ""}`.toUpperCase();
+
+    if(txt.includes("POULE A") || txt.includes("POOL A")) return "A";
+    if(txt.includes("POULE B") || txt.includes("POOL B")) return "B";
+
+    return "";
+  }
+
+  function matchTeamId(match, side){
+    const ref = side === "A" ? match.A : match.B;
+
+    if(ref?.type === "team" && ref.team?.id) return ref.team.id;
+    if(ref?.type === "team" && ref.id) return ref.id;
+
+    return "";
+  }
+
+  function poolMatches(pool){
+    const pools = buildDrawPools();
+    const ids = new Set((pools[pool] || []).map(t => t.id));
+    const names = new Set((pools[pool] || []).map(t => String(t.teamName || "").trim()).filter(Boolean));
+
+    return normalMatches().filter(match => {
+      const textualPool = matchPoolFromText(match);
+      if(textualPool) return textualPool === pool;
+
+      const idA = matchTeamId(match, "A");
+      const idB = matchTeamId(match, "B");
+
+      if(idA || idB){
+        return ids.has(idA) && ids.has(idB);
+      }
+
+      const a = String(teamName(match, "A") || "").trim();
+      const b = String(teamName(match, "B") || "").trim();
+
+      return names.has(a) && names.has(b);
+    });
+  }
+
+  function renderPoolMatches(pool){
+    const matches = poolMatches(pool);
+
+    if(!matches.length){
+      return `<p class="muted">Aucun match de poule ${esc(pool)} à afficher.</p>`;
+    }
+
+    return `<div class="match-list">${matches.map(renderMatchCard).join("")}</div>`;
+  }
+
+  function renderPoolStandings(pool){
+    const pools = buildDrawPools();
+    const teams = pools[pool] || [];
+    const stats = new Map();
+
+    function ensure(name){
+      if(!stats.has(name)){
+        stats.set(name, {
+          name,
+          played:0,
+          wins:0,
+          setsFor:0,
+          setsAgainst:0,
+          gamesFor:0,
+          gamesAgainst:0
+        });
+      }
+
+      return stats.get(name);
+    }
+
+    teams.forEach(team => {
+      ensure(teamNameOnly(team));
+    });
+
+    poolMatches(pool).forEach(match => {
+      const res = getResult(match.id);
+      const winner = winnerSide(res);
+
+      const nameA = teamName(match, "A");
+      const nameB = teamName(match, "B");
+
+      const A = ensure(nameA);
+      const B = ensure(nameB);
+
+      if(winner === "A" || winner === "B"){
+        A.played++;
+        B.played++;
+
+        if(winner === "A") A.wins++;
+        if(winner === "B") B.wins++;
+      }
+
+      [
+        ["s1A","s1B"],
+        ["s2A","s2B"],
+        ["s3A","s3B"]
+      ].forEach(([ka,kb])=>{
+        const a = toNum(res?.[ka]);
+        const b = toNum(res?.[kb]);
+
+        if(a === null || b === null || a === b) return;
+
+        A.gamesFor += a;
+        A.gamesAgainst += b;
+        B.gamesFor += b;
+        B.gamesAgainst += a;
+
+        if(a > b){
+          A.setsFor++;
+          B.setsAgainst++;
+        }else{
+          B.setsFor++;
+          A.setsAgainst++;
+        }
+      });
+    });
+
+    const rows = [...stats.values()].sort((a,b)=>{
+      if(b.wins !== a.wins) return b.wins - a.wins;
+
+      const setDiffA = a.setsFor - a.setsAgainst;
+      const setDiffB = b.setsFor - b.setsAgainst;
+
+      if(setDiffB !== setDiffA) return setDiffB - setDiffA;
+
+      const gameDiffA = a.gamesFor - a.gamesAgainst;
+      const gameDiffB = b.gamesFor - b.gamesAgainst;
+
+      if(gameDiffB !== gameDiffA) return gameDiffB - gameDiffA;
+
+      return a.name.localeCompare(b.name);
+    });
+
+    if(!rows.length){
+      return `<p class="muted">Classement non disponible.</p>`;
+    }
+
+    return `
+      <table class="pool-table">
+        <thead>
+          <tr>
+            <th>#</th>
+            <th>Équipe</th>
+            <th>J</th>
+            <th>V</th>
+            <th>Sets</th>
+            <th>Jeux</th>
+          </tr>
+        </thead>
+        <tbody>
+          ${rows.map((r,i)=>`
+            <tr>
+              <td>${i + 1}</td>
+              <td>${esc(r.name)}</td>
+              <td>${r.played}</td>
+              <td>${r.wins}</td>
+              <td>${r.setsFor - r.setsAgainst}</td>
+              <td>${r.gamesFor - r.gamesAgainst}</td>
+            </tr>
+          `).join("")}
+        </tbody>
+      </table>
+    `;
+  }
+
+  function renderPoules(){
+    poolAStandings.innerHTML = renderPoolStandings("A");
+    poolBStandings.innerHTML = renderPoolStandings("B");
+    poolAMatches.innerHTML = renderPoolMatches("A");
+    poolBMatches.innerHTML = renderPoolMatches("B");
+  }
+
   function hasPoules(){
     if(mode !== "category") return false;
 
@@ -1259,6 +1539,7 @@
 
     if(tab === "chrono") renderChrono();
     if(tab === "resultats") renderResultats();
+    if(tab === "poules") renderPoules();
   }
 
   function syncControls(){
@@ -1326,6 +1607,11 @@
 
   function setMode(next){
     mode = next === "category" ? "category" : "all";
+
+    if(mode === "category"){
+      startDrawListener();
+    }
+
     render();
   }
 
@@ -1333,6 +1619,7 @@
     currentCategorie = categorie || currentCategorie;
     currentEpreuve = epreuve || currentEpreuve;
     mode = "category";
+    startDrawListener();
     render();
   }
 
@@ -1389,6 +1676,31 @@
     });
   }
 
+  function startDrawListener(){
+    if(unsubDraw){
+      unsubDraw();
+      unsubDraw = null;
+    }
+
+    currentDraw = null;
+    cachedTeams = [];
+
+    if(!hasPoules()){
+      render();
+      return;
+    }
+
+    unsubDraw = onSnapshot(drawRef(), async (snap)=>{
+      currentDraw = snap.exists() ? (snap.data() || {}) : null;
+      cachedTeams = await fetchTeams();
+      render();
+    }, async ()=>{
+      currentDraw = null;
+      cachedTeams = await fetchTeams();
+      render();
+    });
+  }
+
   onAuthStateChanged(auth, async (user)=>{
     currentRole = null;
 
@@ -1405,6 +1717,7 @@
 
   startVisibilityListener();
   startDataListeners();
+  startDrawListener();
 </script>
 
 </body>
