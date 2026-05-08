@@ -194,6 +194,7 @@
     }
 
     .order-cell{
+      position:relative;
       border-radius:16px;
       background:#fff;
       border:1px solid rgba(16,24,40,.08);
@@ -219,6 +220,22 @@
       font-size:12px;
       font-weight:900;
       color:#667085;
+    }
+
+    .slot-gear{
+      position:absolute;
+      right:6px;
+      top:6px;
+      width:26px;
+      height:26px;
+      border-radius:999px;
+      border:1px solid rgba(16,24,40,.10);
+      background:rgba(255,255,255,.88);
+      cursor:pointer;
+      font-size:14px;
+      display:flex;
+      align-items:center;
+      justify-content:center;
     }
 
     .slot-cell{
@@ -499,6 +516,14 @@
         font-size:10px;
       }
 
+      .slot-gear{
+        width:22px;
+        height:22px;
+        font-size:12px;
+        right:4px;
+        top:4px;
+      }
+
       .match-mini{
         min-height:96px;
         padding:7px 6px;
@@ -586,7 +611,7 @@
       <div>
         <h1 class="panel-title">📅 Programmation JAT</h1>
         <p class="panel-text">
-          Vue synthétique par ordre de match et par terrain. Les scores ne sont pas affichés ici.
+          Vue synthétique par créneau et par terrain. Les scores ne sont pas affichés ici.
         </p>
       </div>
       <div class="panel-tag">JAT</div>
@@ -605,7 +630,7 @@
       <div>
         <h2 class="panel-title">🧭 Vue globale</h2>
         <p class="panel-text">
-          Clique sur ⚙️ pour modifier l’ordre, l’heure ou le terrain.
+          Clique sur ⚙️ dans un match pour modifier l’ordre, l’heure ou le terrain. Clique sur ⚙️ dans le créneau pour modifier tous les matchs du créneau.
         </p>
       </div>
       <div class="panel-tag">Direct</div>
@@ -613,7 +638,7 @@
 
     <div class="schedule-wrap">
       <div class="schedule-grid schedule-head">
-        <div class="head-cell head-order">Ordre</div>
+        <div class="head-cell head-order">Créneau</div>
         <div class="head-cell head-a">🐝 Manon Queen Bee</div>
         <div class="head-cell head-b">🌶️ Lisa de Los Pimentos</div>
       </div>
@@ -654,6 +679,22 @@
   </div>
 </div>
 
+<div class="modal-backdrop" id="slotModal">
+  <div class="modal" role="dialog" aria-modal="true">
+    <h2 class="modal-title">⚙️ Modifier le créneau</h2>
+    <p class="modal-text" id="slotModalSub">—</p>
+
+    <div class="field">
+      <label for="slotTime">Nouvel horaire du créneau</label>
+      <input id="slotTime" type="text" placeholder="Ex : 19h30" />
+    </div>
+
+    <div class="modal-actions">
+      <button class="btn danger" id="btnSlotCancel" type="button">Annuler</button>
+      <button class="btn primary" id="btnSlotSave" type="button">💾 Enregistrer</button>
+    </div>
+  </div>
+</div>
 <script type="module" src="../assets/js/jat-header.js"></script>
 <script type="module">
   import { auth, db } from "../assets/js/firebase.js";
@@ -686,7 +727,8 @@
     1:"09h00", 2:"09h45", 3:"10h30", 4:"11h15", 5:"12h00",
     6:"12h45", 7:"13h30", 8:"14h00", 9:"14h30", 10:"15h00",
     11:"15h30", 12:"16h00", 13:"16h30", 14:"17h30",
-    15:"18h30", 16:"19h30", 17:"20h15", 18:"21h15"
+    15:"18h30", 16:"19h00", 17:"19h30", 18:"20h00",
+    19:"20h30", 20:"21h30"
   };
 
   const accessDenied = document.getElementById("accessDenied");
@@ -709,6 +751,12 @@
   const btnModalCancel = document.getElementById("btnModalCancel");
   const btnModalSave = document.getElementById("btnModalSave");
 
+  const slotModal = document.getElementById("slotModal");
+  const slotModalSub = document.getElementById("slotModalSub");
+  const slotTime = document.getElementById("slotTime");
+  const btnSlotCancel = document.getElementById("btnSlotCancel");
+  const btnSlotSave = document.getElementById("btnSlotSave");
+
   let mode = "all";
   let currentCategorie = "Seniors";
   let currentEpreuve = "DM";
@@ -717,6 +765,7 @@
   let resultsByMatch = new Map();
   let currentRole = null;
   let editMatchId = null;
+  let editSlotOrder = null;
 
   let unsubProg = null;
   let unsubResults = null;
@@ -795,16 +844,13 @@
     ].forEach(([ka,kb]) => {
       const na = toNum(res[ka]);
       const nb = toNum(res[kb]);
-
       if(na === null || nb === null || na === nb) return;
-
       if(na > nb) a++;
       else b++;
     });
 
     if(a > b) return "A";
     if(b > a) return "B";
-
     return null;
   }
 
@@ -874,6 +920,31 @@
     return ORDER_TIMES[String(n)] || "À confirmer";
   }
 
+  function timeSortValue(time){
+    const raw = String(time || "").trim();
+    const m = raw.match(/^(\d{1,2})h(\d{2})?$/i);
+
+    if(!m) return Number.POSITIVE_INFINITY;
+
+    const h = Number(m[1]);
+    const mn = Number(m[2] || 0);
+
+    if(!Number.isFinite(h) || !Number.isFinite(mn)) return Number.POSITIVE_INFINITY;
+
+    return h * 60 + mn;
+  }
+
+  function slotKeyFor(match){
+    const time = String(match?.time || orderTimeFor(match?.order) || "À confirmer").trim();
+    const order = Number(match?.order);
+
+    if(Number.isFinite(order)){
+      return `order:${order}`;
+    }
+
+    return `time:${time}`;
+  }
+
   function renderWinnerCard(match){
     return `
       <div class="winner-card">
@@ -891,16 +962,24 @@
       : "";
   }
 
-  function groupByOrder(){
+  function groupBySlot(){
     const rows = normalMatches();
     const map = new Map();
 
     rows.forEach(match => {
-      const order = Number(match.order || 9999);
-      const key = Number.isFinite(order) ? order : 9999;
+      const key = slotKeyFor(match);
+      const order = Number(match.order);
+      const time = String(match.time || orderTimeFor(match.order) || "À confirmer").trim();
 
       if(!map.has(key)){
-        map.set(key, { order:key, A:null, B:null, fallback:[] });
+        map.set(key, {
+          key,
+          order:Number.isFinite(order) ? order : 9999,
+          time,
+          A:null,
+          B:null,
+          overflow:[]
+        });
       }
 
       const row = map.get(key);
@@ -910,16 +989,19 @@
       }else if(match.court === "B" && !row.B){
         row.B = match;
       }else{
-        row.fallback.push(match);
+        row.overflow.push(match);
       }
     });
 
-    return Array.from(map.values()).sort((a,b) => a.order - b.order);
-  }
+    return Array.from(map.values()).sort((a,b) => {
+      if(a.order !== b.order) return a.order - b.order;
 
-  function orderTime(row){
-    const m = row.A || row.B || row.fallback[0] || null;
-    return m?.time || orderTimeFor(row.order);
+      const ta = timeSortValue(a.time);
+      const tb = timeSortValue(b.time);
+      if(ta !== tb) return ta - tb;
+
+      return String(a.time).localeCompare(String(b.time), "fr");
+    });
   }
 
   function renderMatchMini(match){
@@ -953,8 +1035,28 @@
     `;
   }
 
+  function renderOrderCell(row){
+    const orderLabel = Number(row.order) === 9999 ? "—" : `#${row.order}`;
+
+    return `
+      <div class="order-cell">
+        <button
+          class="slot-gear"
+          data-act="slot"
+          data-order="${esc(row.order)}"
+          data-time="${esc(row.time)}"
+          type="button"
+          title="Modifier le créneau"
+        >⚙️</button>
+
+        <div class="order-num">${esc(orderLabel)}</div>
+        <div class="order-time">${esc(row.time || "—")}</div>
+      </div>
+    `;
+  }
+
   function renderSchedule(){
-    const rows = groupByOrder();
+    const rows = groupBySlot();
 
     if(!rows.length){
       scheduleGrid.innerHTML = `<p class="muted" style="grid-column:1 / -1;margin:0;">Aucun match à afficher.</p>`;
@@ -962,20 +1064,17 @@
     }
 
     scheduleGrid.innerHTML = rows.map(row => `
-      <div class="order-cell">
-        <div class="order-num">#${esc(row.order)}</div>
-        <div class="order-time">${esc(orderTime(row))}</div>
-      </div>
-
+      ${renderOrderCell(row)}
       <div class="slot-cell">${renderMatchMini(row.A)}</div>
       <div class="slot-cell">${renderMatchMini(row.B)}</div>
 
-      ${row.fallback.map(m => `
+      ${row.overflow.map(m => `
         <div class="order-cell">
-          <div class="order-num">#${esc(row.order)}</div>
-          <div class="order-time">${esc(m.time || orderTimeFor(row.order))}</div>
+          <div class="order-num">#${esc(m.order || "—")}</div>
+          <div class="order-time">${esc(m.time || row.time || "—")}</div>
         </div>
-        <div class="slot-cell" style="grid-column:2 / 4;">${renderMatchMini(m)}</div>
+        <div class="slot-cell">${m.court === "A" ? renderMatchMini(m) : `<div class="empty-cell"></div>`}</div>
+        <div class="slot-cell">${m.court === "B" ? renderMatchMini(m) : `<div class="empty-cell"></div>`}</div>
       `).join("")}
     `).join("");
   }
@@ -1028,7 +1127,7 @@
     render();
   });
 
-  function buildOrderOptions(selectedOrder){
+  function uniqueOrders(){
     const orders = new Set();
 
     allMatches()
@@ -1043,9 +1142,11 @@
       if(Number.isFinite(n) && n > 0) orders.add(n);
     });
 
-    const sorted = Array.from(orders).sort((a,b)=>a-b);
+    return Array.from(orders).sort((a,b)=>a-b);
+  }
 
-    editOrder.innerHTML = sorted.map(order => {
+  function buildOrderOptions(selectedOrder){
+    editOrder.innerHTML = uniqueOrders().map(order => {
       const selected = Number(selectedOrder) === Number(order) ? "selected" : "";
       return `<option value="${esc(order)}" ${selected}>#${esc(order)} — ${esc(orderTimeFor(order))}</option>`;
     }).join("");
@@ -1071,16 +1172,27 @@
     editModal.style.display = "none";
   }
 
-  function findSwapTarget(matches, edited, nextOrder){
+  function openSlotModal(order, time){
+    editSlotOrder = Number(order);
+    slotModalSub.textContent = Number.isFinite(editSlotOrder) && editSlotOrder !== 9999
+      ? `Créneau #${editSlotOrder} — ${time || orderTimeFor(editSlotOrder)}`
+      : `Créneau — ${time || "horaire libre"}`;
+
+    slotTime.value = time || (Number.isFinite(editSlotOrder) ? orderTimeFor(editSlotOrder) : "");
+    slotModal.style.display = "flex";
+  }
+
+  function closeSlotModal(){
+    editSlotOrder = null;
+    slotModal.style.display = "none";
+  }
+
+  function findSwapTarget(matches, edited, nextOrder, nextCourt){
     return matches.find(m =>
       m.id !== edited.id &&
       m.type !== "winner" &&
       Number(m.order) === Number(nextOrder) &&
-      String(m.court || "") === String(edited.court || "")
-    ) || matches.find(m =>
-      m.id !== edited.id &&
-      m.type !== "winner" &&
-      Number(m.order) === Number(nextOrder)
+      String(m.court || "") === String(nextCourt || edited.court || "")
     ) || null;
   }
 
@@ -1097,23 +1209,30 @@
 
     const oldMatch = { ...matches[idx] };
     const oldOrder = Number(oldMatch.order);
+    const oldTime = oldMatch.time || orderTimeFor(oldOrder);
+    const oldCourt = oldMatch.court === "B" ? "B" : "A";
+
     const nextOrder = Number(editOrder.value);
     const nextCourt = editCourt.value === "B" ? "B" : "A";
     const nextTime = (editTime.value || "").trim() || orderTimeFor(nextOrder);
 
-    if(Number.isFinite(nextOrder) && nextOrder !== oldOrder){
-      const swapTarget = findSwapTarget(matches, oldMatch, nextOrder);
+    const orderChanged = Number.isFinite(nextOrder) && nextOrder !== oldOrder;
+    const courtChanged = nextCourt !== oldCourt;
 
-      if(swapTarget){
-        const swapIdx = matches.findIndex(m => m.id === swapTarget.id);
+    const target = Number.isFinite(nextOrder)
+      ? findSwapTarget(matches, oldMatch, nextOrder, nextCourt)
+      : null;
 
-        if(swapIdx >= 0){
-          matches[swapIdx] = {
-            ...matches[swapIdx],
-            order:oldOrder,
-            time:oldMatch.time || orderTimeFor(oldOrder)
-          };
-        }
+    if(target){
+      const targetIdx = matches.findIndex(m => m.id === target.id);
+
+      if(targetIdx >= 0){
+        matches[targetIdx] = {
+          ...matches[targetIdx],
+          order:oldOrder,
+          time:oldTime,
+          court:oldCourt
+        };
       }
     }
 
@@ -1123,6 +1242,10 @@
       time:nextTime,
       court:nextCourt
     };
+
+    if(!target && !orderChanged && courtChanged){
+      matches[idx].time = nextTime;
+    }
 
     btnModalSave.disabled = true;
 
@@ -1142,7 +1265,52 @@
     }
   }
 
+  async function saveSlotEdit(){
+    if(!currentProg) return;
+
+    const newTime = (slotTime.value || "").trim();
+    if(!newTime) return alert("Horaire obligatoire.");
+
+    const matches = allMatches();
+    const order = Number(editSlotOrder);
+
+    if(!Number.isFinite(order)){
+      closeSlotModal();
+      return;
+    }
+
+    matches.forEach(m => {
+      if(m.type === "winner") return;
+      if(Number(m.order) === order){
+        m.time = newTime;
+      }
+    });
+
+    btnSlotSave.disabled = true;
+
+    try{
+      await updateDoc(generalProgRef(), {
+        matches,
+        updatedAt:serverTimestamp(),
+        updatedBy:auth.currentUser?.uid || null
+      });
+
+      closeSlotModal();
+    }catch(error){
+      console.error(error);
+      alert("Erreur Firestore ❌");
+    }finally{
+      btnSlotSave.disabled = false;
+    }
+  }
+
   scheduleGrid.addEventListener("click", (event) => {
+    const slotBtn = event.target.closest("button[data-act='slot']");
+    if(slotBtn){
+      openSlotModal(slotBtn.dataset.order, slotBtn.dataset.time);
+      return;
+    }
+
     const btn = event.target.closest("button[data-act='edit']");
     if(!btn) return;
 
@@ -1153,10 +1321,15 @@
   btnModalCancel.onclick = closeEditModal;
   btnModalSave.onclick = saveEdit;
 
+  btnSlotCancel.onclick = closeSlotModal;
+  btnSlotSave.onclick = saveSlotEdit;
+
   editModal.addEventListener("click", (event) => {
-    if(event.target === editModal){
-      closeEditModal();
-    }
+    if(event.target === editModal) closeEditModal();
+  });
+
+  slotModal.addEventListener("click", (event) => {
+    if(event.target === slotModal) closeSlotModal();
   });
 
   function startListeners(){
