@@ -19,7 +19,8 @@
       --card:rgba(255,255,255,.94);
       --shadow:0 16px 40px rgba(16,24,40,.12);
       --container:1180px;
-      --zone-h:160px;
+      --zone-h:104px;
+      --modebar-h:64px;
     }
 
     *{box-sizing:border-box;}
@@ -43,7 +44,7 @@
     }
 
     main{
-      padding-top:calc(var(--public-total-top, 158px) + var(--zone-h) + 28px);
+      padding-top:calc(var(--public-total-top, 158px) + var(--zone-h) + var(--modebar-h) + 28px);
       padding-bottom:42px;
     }
 
@@ -116,18 +117,23 @@
     }
 
     .modebar{
-      position:sticky;
-      top:var(--public-total-top, 0px);
-      z-index:40;
-      backdrop-filter:blur(12px);
-      background:rgba(255,255,255,.92);
-      border-bottom:1px solid rgba(0,0,0,.06);
+      position:fixed;
+      top:calc(var(--public-total-top, 158px) + var(--zone-h));
+      left:0;
+      right:0;
+      z-index:998;
+      background:
+        radial-gradient(circle at 18% 10%, rgba(255,255,255,.42), transparent 24%),
+        radial-gradient(circle at 80% 24%, rgba(255,255,255,.26), transparent 24%),
+        linear-gradient(135deg,#23b7ea 0%,#7fdfff 48%,#f5fdff 100%);
+      box-shadow:0 8px 18px rgba(16,24,40,.08);
+      border-bottom:1px solid rgba(7,91,154,.10);
+      padding:10px 0 12px;
     }
 
     .modebar-inner{
       width:min(var(--container), calc(100% - 28px));
       margin:0 auto;
-      padding:10px 0;
       display:flex;
       gap:10px;
     }
@@ -135,66 +141,29 @@
     .mode-btn{
       flex:1;
       appearance:none;
-      border:none;
+      border:1px solid rgba(255,255,255,.36);
       border-radius:999px;
       min-height:42px;
       padding:10px 16px;
       font-weight:1000;
       cursor:pointer;
-      background:#eef6ff;
-      color:#063b72;
+      background:rgba(255,255,255,.82);
+      color:#1c2430;
+      box-shadow:0 5px 12px rgba(16,24,40,.08);
     }
 
     .mode-btn.active{
       background:linear-gradient(180deg,var(--blue),var(--blue-dark));
       color:#fff;
+      border-color:var(--blue);
+      box-shadow:0 8px 18px rgba(7,91,154,.24);
     }
 
-    .zone-wrapper{
-      position:sticky;
-      top:calc(var(--public-total-top, 0px) + 62px);
-      z-index:35;
-      backdrop-filter:blur(12px);
-      background:rgba(255,255,255,.92);
-      border-bottom:1px solid rgba(0,0,0,.06);
-    }
-
-    .zone-inner{
-      width:min(var(--container), calc(100% - 28px));
-      margin:0 auto;
-      padding:10px 0 14px;
-      display:grid;
-      gap:10px;
-    }
-
-    .zone-line{
-      display:flex;
-      gap:10px;
-      overflow:auto;
-      padding-bottom:2px;
-    }
-
-    .zone-btn{
-      appearance:none;
-      border:none;
-      border-radius:999px;
-      min-height:42px;
-      padding:10px 16px;
-      white-space:nowrap;
-      font-weight:1000;
-      cursor:pointer;
-      background:#edf2f7;
-      color:#344054;
-    }
-
-    .zone-btn.active{
-      background:linear-gradient(180deg,var(--blue),var(--blue-dark));
-      color:#fff;
-    }
-
-    .zone-btn.all-active{
-      background:linear-gradient(180deg,var(--clay-light),var(--clay-dark));
-      color:#fff;
+    .public-zone-btn.all-active{
+      background:linear-gradient(180deg,var(--blue),var(--blue-dark)) !important;
+      color:#fff !important;
+      border-color:var(--blue) !important;
+      box-shadow:0 8px 18px rgba(7,91,154,.24) !important;
     }
 
     .tabs{
@@ -247,6 +216,29 @@
     .match-card.courtB{
       background:#ffeef2;
       border-color:rgba(255,0,60,.20);
+    }
+
+    .winner-card{
+      border-radius:18px;
+      border:1px solid rgba(46,204,113,.25);
+      padding:15px 16px;
+      background:linear-gradient(135deg,#f3fff6,#ffffff);
+      box-shadow:0 8px 18px rgba(16,24,40,.06);
+    }
+
+    .winner-card strong{
+      display:block;
+      font-size:16px;
+      color:#14532d;
+      font-weight:1000;
+    }
+
+    .winner-card span{
+      display:block;
+      margin-top:4px;
+      color:#475467;
+      font-size:14px;
+      font-weight:800;
     }
 
     .match-head{
@@ -439,6 +431,15 @@
     }
 
     @media (max-width:759px){
+      :root{
+        --zone-h:104px;
+        --modebar-h:64px;
+      }
+
+      main{
+        padding-top:calc(var(--public-total-top, 150px) + var(--zone-h) + var(--modebar-h) + 26px);
+      }
+
       .panel-title{font-size:24px;}
 
       .team-row{
@@ -456,38 +457,26 @@
 
 <div id="publicHeader"></div>
 
+<section class="public-zonebar">
+  <div class="public-container public-zonebar-inner">
+    <div class="public-zone-line" aria-label="Sélection catégorie">
+      <button class="public-zone-btn zone-cat-btn" data-categorie="U14" type="button" aria-selected="false">U14</button>
+      <button class="public-zone-btn zone-cat-btn" data-categorie="U18" type="button" aria-selected="false">U18</button>
+      <button class="public-zone-btn zone-cat-btn" data-categorie="Seniors" type="button" aria-selected="true">Seniors</button>
+      <button class="public-zone-btn zone-cat-btn" data-categorie="45+" type="button" aria-selected="false">45+</button>
+    </div>
+
+    <div class="public-zone-line" aria-label="Sélection épreuve">
+      <button class="public-zone-btn zone-epreuve-btn" data-epreuve="DM" type="button" aria-selected="true">👨 Double Messieurs</button>
+      <button class="public-zone-btn zone-epreuve-btn" data-epreuve="DD" type="button" aria-selected="false">👩 Double Dames</button>
+    </div>
+  </div>
+</section>
+
 <div class="modebar">
   <div class="modebar-inner">
-    <button class="mode-btn active" id="btnModeAll">
-      🌍 Toutes catégories
-    </button>
-
-    <button class="mode-btn" id="btnModeCategory">
-      🎾 Par catégorie
-    </button>
-  </div>
-</div>
-
-<div class="zone-wrapper" id="zoneWrapper">
-  <div class="zone-inner">
-
-    <div class="zone-line">
-      <button class="zone-btn zone-cat-btn" data-categorie="U14">U14</button>
-      <button class="zone-btn zone-cat-btn" data-categorie="U18">U18</button>
-      <button class="zone-btn zone-cat-btn active" data-categorie="Seniors">Seniors</button>
-      <button class="zone-btn zone-cat-btn" data-categorie="45+">45+</button>
-    </div>
-
-    <div class="zone-line">
-      <button class="zone-btn zone-epreuve-btn active" data-epreuve="DM">
-        👨 Double Messieurs
-      </button>
-
-      <button class="zone-btn zone-epreuve-btn" data-epreuve="DD">
-        👩 Double Dames
-      </button>
-    </div>
-
+    <button class="mode-btn active" id="btnModeAll" type="button">🌍 Toutes catégories</button>
+    <button class="mode-btn" id="btnModeCategory" type="button">🎾 Par catégorie</button>
   </div>
 </div>
 
@@ -498,15 +487,10 @@
     <div class="panel-head">
       <div>
         <h1 class="panel-title">📅 Programmation</h1>
-
-        <p class="panel-text" id="pageIntro">
-          Planning des matchs, horaires, terrains et scores.
-        </p>
+        <p class="panel-text" id="pageIntro">Planning des matchs, horaires, terrains et scores.</p>
       </div>
 
-      <div class="panel-tag" id="pageTag">
-        Direct
-      </div>
+      <div class="panel-tag" id="pageTag">Direct</div>
     </div>
 
     <div id="maintenanceBox" class="placeholder" style="display:none;">
@@ -514,35 +498,18 @@
     </div>
 
     <div id="workBox">
-
-      <div class="work-badge" id="workBadge" style="display:none;">
-        Fichier de travail
-      </div>
+      <div class="work-badge" id="workBadge" style="display:none;">Fichier de travail</div>
 
       <div class="placeholder">
-        <strong id="zoneLabel">
-          Toutes catégories
-        </strong>
-
-        <div id="statusText" style="margin-top:6px;">
-          Chargement…
-        </div>
+        <strong id="zoneLabel">Toutes catégories</strong>
+        <div id="statusText" style="margin-top:6px;">Chargement…</div>
       </div>
 
       <div class="tabs">
-        <button class="tab-btn" id="tabChrono" aria-selected="true">
-          🕒 Chrono
-        </button>
-
-        <button class="tab-btn" id="tabPoules" aria-selected="false">
-          🏖️ Poules
-        </button>
-
-        <button class="tab-btn" id="tabFinal" aria-selected="false">
-          🏆 Tableau final
-        </button>
+        <button class="tab-btn" id="tabChrono" type="button" aria-selected="true">🕒 Chrono</button>
+        <button class="tab-btn" id="tabPoules" type="button" aria-selected="false">🏖️ Poules</button>
+        <button class="tab-btn" id="tabFinal" type="button" aria-selected="false">🏆 Tableau final</button>
       </div>
-
     </div>
 
   </section>
@@ -556,7 +523,6 @@
     <h2 class="panel-title">🏖️ Poules</h2>
 
     <div class="pool-grid">
-
       <div class="pool-card">
         <h3 class="pool-title">Classement — Poule A</h3>
         <div id="poolAStandings"></div>
@@ -566,11 +532,9 @@
         <h3 class="pool-title">Classement — Poule B</h3>
         <div id="poolBStandings"></div>
       </div>
-
     </div>
 
     <div class="pool-grid">
-
       <div class="pool-card">
         <h3 class="pool-title">Résultats — Poule A</h3>
         <div id="poolAMatches"></div>
@@ -580,23 +544,16 @@
         <h3 class="pool-title">Résultats — Poule B</h3>
         <div id="poolBMatches"></div>
       </div>
-
     </div>
-
   </section>
 
   <section class="section panel" id="panelFinal" style="display:none;">
-
     <h2 class="panel-title">🏆 Tableau final</h2>
 
     <div class="bracket-wrap">
       <div class="bracket">
-
         <div class="bracket-col">
-
-          <div class="bracket-title">
-            Demi-finales
-          </div>
+          <div class="bracket-title">Demi-finales</div>
 
           <div class="bmatch" style="top:70px;">
             <div class="btitle">DF1</div>
@@ -609,40 +566,29 @@
             <div id="sf2a"></div>
             <div id="sf2b"></div>
           </div>
-
         </div>
 
         <div class="bracket-col">
-
-          <div class="bracket-title">
-            Petite finale
-          </div>
+          <div class="bracket-title">Petite finale</div>
 
           <div class="bmatch" style="top:200px;">
             <div class="btitle">Place 3/4</div>
             <div id="p3a"></div>
             <div id="p3b"></div>
           </div>
-
         </div>
 
         <div class="bracket-col">
-
-          <div class="bracket-title">
-            Finale
-          </div>
+          <div class="bracket-title">Finale</div>
 
           <div class="bmatch" style="top:200px;">
             <div class="btitle">Finale</div>
             <div id="fa"></div>
             <div id="fb"></div>
           </div>
-
         </div>
-
       </div>
     </div>
-
   </section>
   </main>
 
@@ -651,7 +597,10 @@
 <script type="module">
   import { auth, db } from "../assets/js/firebase.js";
   import { getRoleByUid } from "../assets/js/session.js";
-  import { onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.12.5/firebase-auth.js";
+
+  import { onAuthStateChanged }
+  from "https://www.gstatic.com/firebasejs/10.12.5/firebase-auth.js";
+
   import {
     doc,
     collection,
@@ -665,18 +614,15 @@
     DD:"Double Dames"
   };
 
-  const CATEGORIES = ["U14", "U18", "Seniors", "45+"];
-  const EPREUVES = ["DM", "DD"];
-
   const btnModeAll = document.getElementById("btnModeAll");
   const btnModeCategory = document.getElementById("btnModeCategory");
-  const zoneWrapper = document.getElementById("zoneWrapper");
 
   const pageIntro = document.getElementById("pageIntro");
   const pageTag = document.getElementById("pageTag");
   const maintenanceBox = document.getElementById("maintenanceBox");
   const workBox = document.getElementById("workBox");
   const workBadge = document.getElementById("workBadge");
+
   const zoneLabel = document.getElementById("zoneLabel");
   const statusText = document.getElementById("statusText");
 
@@ -689,8 +635,10 @@
   const panelFinal = document.getElementById("panelFinal");
 
   const chronoList = document.getElementById("chronoList");
+
   const poolAStandings = document.getElementById("poolAStandings");
   const poolBStandings = document.getElementById("poolBStandings");
+
   const poolAMatches = document.getElementById("poolAMatches");
   const poolBMatches = document.getElementById("poolBMatches");
 
@@ -709,13 +657,17 @@
   };
 
   let mode = "all";
+
   let currentCategorie = "Seniors";
   let currentEpreuve = "DM";
+
   let currentTab = "chrono";
 
   let currentRole = null;
   let publicVisible = false;
+
   let currentProg = null;
+
   let resultsByMatch = new Map();
 
   let unsubVisibility = null;
@@ -730,111 +682,199 @@
   }
 
   function visibilityRef(){
-    return doc(db, "events", EVENT_ID, "config", "programmation");
+    return doc(
+      db,
+      "events",
+      EVENT_ID,
+      "config",
+      "programmation"
+    );
   }
 
   function generalProgRef(){
-    return doc(db, "events", EVENT_ID, "programmations", "general");
+    return doc(
+      db,
+      "events",
+      EVENT_ID,
+      "programmations",
+      "general"
+    );
   }
 
   function resultsCol(){
-    return collection(db, "events", EVENT_ID, "resultats", "general", "matches");
+    return collection(
+      db,
+      "events",
+      EVENT_ID,
+      "resultats",
+      "general",
+      "matches"
+    );
   }
 
   function canSeeWork(){
-    return publicVisible === true || currentRole === "admin" || currentRole === "jat";
+    return publicVisible === true
+      || currentRole === "admin"
+      || currentRole === "jat";
   }
 
   function zoneText(){
-    if(mode === "all") return "Toutes catégories";
+
+    if(mode === "all"){
+      return "Toutes catégories";
+    }
+
     return `${currentCategorie} — ${EPREUVE_LABELS[currentEpreuve]}`;
   }
 
-  function isCurrentZone(match){
-    if(mode === "all") return true;
+  function syncHeaderButtons(){
 
-    return String(match.categorie || "") === currentCategorie &&
-      String(match.epreuve || "") === currentEpreuve;
+    zoneCatBtns.forEach(btn => {
+
+      const active =
+        btn.dataset.categorie === currentCategorie;
+
+      btn.setAttribute(
+        "aria-selected",
+        mode === "category" && active
+          ? "true"
+          : "false"
+      );
+
+      btn.classList.toggle(
+        "all-active",
+        mode === "all"
+      );
+    });
+
+    zoneEpreuveBtns.forEach(btn => {
+
+      const active =
+        btn.dataset.epreuve === currentEpreuve;
+
+      btn.setAttribute(
+        "aria-selected",
+        mode === "category" && active
+          ? "true"
+          : "false"
+      );
+
+      btn.classList.toggle(
+        "all-active",
+        mode === "all"
+      );
+    });
+  }
+
+  function allMatches(){
+
+    return Array.isArray(currentProg?.matches)
+      ? [...currentProg.matches]
+      : [];
   }
 
   function visibleMatches(){
-    const all = Array.isArray(currentProg?.matches)
-      ? [...currentProg.matches]
-      : [];
 
-    return all
-      .filter(isCurrentZone)
-      .sort((a,b) => {
+    return allMatches()
+      .filter(m => {
+
+        if(mode === "all"){
+          return true;
+        }
+
+        return String(m.categorie || "") === currentCategorie
+          && String(m.epreuve || "") === currentEpreuve;
+      })
+      .sort((a,b)=>{
+
         if(Number(a.order) !== Number(b.order)){
           return Number(a.order) - Number(b.order);
         }
 
-        return String(a.court || "").localeCompare(String(b.court || ""));
+        return String(a.court || "")
+          .localeCompare(String(b.court || ""));
       });
   }
 
-  function poolMatches(pool){
-    return visibleMatches().filter(m => {
-      const label = String(m.label || "").toLowerCase();
-      const id = String(m.id || "");
+  function normalMatches(){
 
-      if(pool === "A"){
-        return id.includes("_A") || label.includes("poule a");
-      }
-
-      return id.includes("_B") || label.includes("poule b");
-    });
+    return visibleMatches()
+      .filter(m => m.type !== "winner");
   }
 
-  function hasPoules(){
-    if(mode === "all") return false;
+  function winnerOnlyCards(){
 
-    if(currentCategorie === "Seniors" && currentEpreuve === "DM") return true;
-    if(currentCategorie === "Seniors" && currentEpreuve === "DD") return true;
-    if(currentCategorie === "U18" && currentEpreuve === "DM") return true;
-
-    return poolMatches("A").length > 0 || poolMatches("B").length > 0;
-  }
-
-  function hasFinalBracket(){
-    return mode === "category" &&
-      currentCategorie === "Seniors" &&
-      (currentEpreuve === "DM" || currentEpreuve === "DD");
+    return visibleMatches()
+      .filter(m => m.type === "winner");
   }
 
   function getResult(mid){
+
     return resultsByMatch.get(mid) || null;
   }
 
   function fmtScore(v){
-    if(v === null || v === undefined || v === "") return "—";
+
+    if(v === null || v === undefined || v === ""){
+      return "—";
+    }
+
     return String(v);
   }
 
   function toNum(v){
-    if(v === null || v === undefined || v === "") return null;
-    const n = Number(String(v).replace(",", ".").trim());
-    return Number.isFinite(n) ? n : null;
+
+    if(v === null || v === undefined || v === ""){
+      return null;
+    }
+
+    const n = Number(
+      String(v).replace(",", ".").trim()
+    );
+
+    return Number.isFinite(n)
+      ? n
+      : null;
   }
 
   function winnerSide(res){
-    if(!res) return null;
 
-    if(res.winnerSide === "A" || res.winnerSide === "B"){
+    if(!res){
+      return null;
+    }
+
+    if(
+      res.winnerSide === "A"
+      || res.winnerSide === "B"
+    ){
       return res.winnerSide;
     }
 
     let a = 0;
     let b = 0;
 
-    [["s1A","s1B"],["s2A","s2B"],["s3A","s3B"]].forEach(([ka,kb])=>{
+    [
+      ["s1A","s1B"],
+      ["s2A","s2B"],
+      ["s3A","s3B"]
+    ].forEach(([ka,kb])=>{
+
       const na = toNum(res[ka]);
       const nb = toNum(res[kb]);
 
-      if(na === null || nb === null || na === nb) return;
+      if(
+        na === null
+        || nb === null
+        || na === nb
+      ){
+        return;
+      }
 
-      if(na > nb) a++;
-      else b++;
+      if(na > nb){
+        a++;
+      }else{
+        b++;
+      }
     });
 
     if(a > b) return "A";
@@ -844,77 +884,121 @@
   }
 
   function courtLabel(court){
-    if(court === "A") return "🐝 Manon Queen Bee";
-    if(court === "B") return "🌶️ Lisa de Los Pimentos";
+
+    if(court === "A"){
+      return "🐝 Manon Queen Bee";
+    }
+
+    if(court === "B"){
+      return "🌶️ Lisa de Los Pimentos";
+    }
+
+    if(court === "AUTO"){
+      return "🏆 Vainqueur";
+    }
+
     return "🎾 terrain";
   }
 
-  function teamFromDirect(match, side){
-    const team = side === "A" ? match.teamA : match.teamB;
-    return team || "Équipe";
+  function matchById(id){
+
+    return allMatches()
+      .find(m => m.id === id);
   }
 
-  function resolvePoolRank(categorie, epreuve, pool, rank){
-    const ranking = buildPoolRanking(categorie, epreuve, pool);
+  function resolveDynamicName(match, side, guard = new Set()){
 
-    if(!isPoolComplete(categorie, epreuve, pool)){
-      return null;
+    if(!match){
+      return "—";
     }
 
-    return ranking[rank - 1]?.teamName || null;
-  }
+    const raw =
+      side === "A"
+        ? match.teamA
+        : match.teamB;
 
-  function matchById(id){
-    return Array.isArray(currentProg?.matches)
-      ? currentProg.matches.find(m => m.id === id)
-      : null;
-  }
-
-  function resolveDynamicName(match, side){
-    const raw = side === "A" ? match.teamA : match.teamB;
-    const ref = side === "A" ? match.A : match.B;
+    const ref =
+      side === "A"
+        ? match.A
+        : match.B;
 
     if(ref?.type === "team"){
-      return ref.team?.teamName || raw || "Équipe";
-    }
 
-    if(ref?.type === "poolRank"){
-      const resolved = resolvePoolRank(
-        match.categorie,
-        match.epreuve,
-        ref.pool,
-        Number(ref.rank)
-      );
-
-      return resolved || `${ref.rank}${Number(ref.rank) === 1 ? "er" : "e"} poule ${ref.pool}`;
+      return ref.team?.teamName
+        || raw
+        || "Équipe";
     }
 
     if(ref?.type === "winner" || ref?.type === "loser"){
-      const source = matchById(ref.matchId);
-      const res = getResult(ref.matchId);
-      const w = winnerSide(res);
 
-      if(!source || (w !== "A" && w !== "B")){
-        return ref.type === "winner"
-          ? `Vainqueur ${ref.matchId}`
-          : `Perdant ${ref.matchId}`;
+      const sourceId = ref.matchId;
+
+      if(!sourceId || guard.has(sourceId)){
+        return raw || "Équipe";
       }
 
-      const wantedSide = ref.type === "winner"
-        ? w
-        : (w === "A" ? "B" : "A");
+      guard.add(sourceId);
 
-      return resolveDynamicName(source, wantedSide);
+      const source = matchById(sourceId);
+
+      const res = getResult(sourceId);
+
+      const w = winnerSide(res);
+
+      if(
+        !source
+        || (w !== "A" && w !== "B")
+      ){
+
+        return ref.type === "winner"
+          ? `Vainqueur ${sourceId}`
+          : `Perdant ${sourceId}`;
+      }
+
+      const wantedSide =
+        ref.type === "winner"
+          ? w
+          : (w === "A" ? "B" : "A");
+
+      return resolveDynamicName(
+        source,
+        wantedSide,
+        guard
+      );
+    }
+
+    if(ref?.type === "poolRank"){
+
+      return `${ref.rank}${Number(ref.rank) === 1 ? "er" : "e"} poule ${ref.pool}`;
     }
 
     return raw || "Équipe";
   }
 
   function teamName(match, side){
+
     return resolveDynamicName(match, side);
   }
 
+  function renderWinnerCard(match){
+
+    return `
+      <div class="winner-card">
+
+        <strong>
+          🏆 ${esc(match.teamA || "Vainqueur")}
+        </strong>
+
+        <span>
+          ${esc(match.label || "Catégorie avec une seule équipe")}
+        </span>
+
+      </div>
+    `;
+  }
+
   function renderMatchCard(match){
+
     const res = getResult(match.id);
 
     const cls =
@@ -926,290 +1010,197 @@
 
     return `
       <div class="match-card ${esc(cls)}">
+
         <div class="match-head">
-          <div class="m-slot">#${esc(match.order || "—")}</div>
-          <div class="m-time">${esc(match.time || "—")}</div>
-          <div class="m-court">${esc(courtLabel(match.court))}</div>
-          <div class="m-label">${esc(match.label || match.id)}</div>
+
+          <div class="m-slot">
+            #${esc(match.order || "—")}
+          </div>
+
+          <div class="m-time">
+            ${esc(match.time || "—")}
+          </div>
+
+          <div class="m-court">
+            ${esc(courtLabel(match.court))}
+          </div>
+
+          <div class="m-label">
+            ${esc(match.label || match.id)}
+          </div>
+
         </div>
 
         <div class="team-row">
-          <div class="team-name">${esc(teamName(match, "A"))}</div>
-          <div class="score-cell">${esc(fmtScore(res?.s1A))}</div>
-          <div class="score-cell">${esc(fmtScore(res?.s2A))}</div>
-          <div class="score-cell">${esc(fmtScore(res?.s3A))}</div>
+
+          <div class="team-name">
+            ${esc(teamName(match, "A"))}
+          </div>
+
+          <div class="score-cell">
+            ${esc(fmtScore(res?.s1A))}
+          </div>
+
+          <div class="score-cell">
+            ${esc(fmtScore(res?.s2A))}
+          </div>
+
+          <div class="score-cell">
+            ${esc(fmtScore(res?.s3A))}
+          </div>
+
         </div>
 
-        <div class="vs-line">VS</div>
+        <div class="vs-line">
+          VS
+        </div>
 
         <div class="team-row">
-          <div class="team-name">${esc(teamName(match, "B"))}</div>
-          <div class="score-cell">${esc(fmtScore(res?.s1B))}</div>
-          <div class="score-cell">${esc(fmtScore(res?.s2B))}</div>
-          <div class="score-cell">${esc(fmtScore(res?.s3B))}</div>
+
+          <div class="team-name">
+            ${esc(teamName(match, "B"))}
+          </div>
+
+          <div class="score-cell">
+            ${esc(fmtScore(res?.s1B))}
+          </div>
+
+          <div class="score-cell">
+            ${esc(fmtScore(res?.s2B))}
+          </div>
+
+          <div class="score-cell">
+            ${esc(fmtScore(res?.s3B))}
+          </div>
+
         </div>
+
       </div>
     `;
   }
 
   function renderChrono(){
-    const rows = visibleMatches();
 
-    chronoList.innerHTML = rows.length
-      ? `<div class="match-list">${rows.map(renderMatchCard).join("")}</div>`
-      : `<p class="muted">Aucun match à afficher.</p>`;
+    const winners = winnerOnlyCards();
+    const matches = normalMatches();
+
+    const winnersHtml = winners.length
+      ? `
+        <div class="match-list">
+          ${winners.map(renderWinnerCard).join("")}
+        </div>
+      `
+      : "";
+
+    const matchesHtml = matches.length
+      ? `
+        <div class="match-list">
+          ${matches.map(renderMatchCard).join("")}
+        </div>
+      `
+      : `
+        <p class="muted">
+          Aucun match à afficher.
+        </p>
+      `;
+
+    chronoList.innerHTML =
+      winnersHtml + matchesHtml;
   }
 
-  function isPoolComplete(categorie, epreuve, pool){
-    const rows = (Array.isArray(currentProg?.matches) ? currentProg.matches : [])
-      .filter(m =>
-        String(m.categorie || "") === categorie &&
-        String(m.epreuve || "") === epreuve &&
-        (
-          pool === "A"
-            ? (String(m.id || "").includes("_A") || String(m.label || "").toLowerCase().includes("poule a"))
-            : (String(m.id || "").includes("_B") || String(m.label || "").toLowerCase().includes("poule b"))
-        )
+  function hasPoules(){
+
+    if(mode !== "category"){
+      return false;
+    }
+
+    if(currentCategorie === "Seniors" && currentEpreuve === "DM"){
+      return true;
+    }
+
+    if(currentCategorie === "Seniors" && currentEpreuve === "DD"){
+      return true;
+    }
+
+    if(currentCategorie === "U18" && currentEpreuve === "DM"){
+      return true;
+    }
+
+    return false;
+  }
+
+  function hasFinalBracket(){
+
+    return mode === "category"
+      && currentCategorie === "Seniors"
+      && (
+        currentEpreuve === "DM"
+        || currentEpreuve === "DD"
       );
-
-    if(!rows.length) return false;
-
-    return rows.every(m => winnerSide(getResult(m.id)) !== null);
-  }
-
-  function buildPoolRanking(categorie, epreuve, pool){
-    const rows = (Array.isArray(currentProg?.matches) ? currentProg.matches : [])
-      .filter(m =>
-        String(m.categorie || "") === categorie &&
-        String(m.epreuve || "") === epreuve &&
-        (
-          pool === "A"
-            ? (String(m.id || "").includes("_A") || String(m.label || "").toLowerCase().includes("poule a"))
-            : (String(m.id || "").includes("_B") || String(m.label || "").toLowerCase().includes("poule b"))
-        )
-      );
-
-    const stats = new Map();
-
-    function ensure(name){
-      const key = name || "Équipe";
-
-      if(!stats.has(key)){
-        stats.set(key, {
-          teamName:key,
-          points:0,
-          setsWon:0,
-          setsLost:0,
-          gamesWon:0,
-          gamesLost:0
-        });
-      }
-
-      return stats.get(key);
-    }
-
-    rows.forEach(match => {
-      const res = getResult(match.id);
-      const w = winnerSide(res);
-
-      const A = ensure(teamName(match, "A"));
-      const B = ensure(teamName(match, "B"));
-
-      if(!w) return;
-
-      let setsA = 0;
-      let setsB = 0;
-
-      [["s1A","s1B"],["s2A","s2B"],["s3A","s3B"]].forEach(([ka,kb])=>{
-        const ga = toNum(res?.[ka]);
-        const gb = toNum(res?.[kb]);
-
-        if(ga === null || gb === null) return;
-
-        A.gamesWon += ga;
-        A.gamesLost += gb;
-        B.gamesWon += gb;
-        B.gamesLost += ga;
-
-        if(ga > gb) setsA++;
-        else if(gb > ga) setsB++;
-      });
-
-      A.setsWon += setsA;
-      A.setsLost += setsB;
-      B.setsWon += setsB;
-      B.setsLost += setsA;
-
-      if(w === "A"){
-        A.points += 2;
-        B.points += 1;
-      }else{
-        B.points += 2;
-        A.points += 1;
-      }
-    });
-
-    return Array.from(stats.values()).sort((x,y)=>{
-      if(y.points !== x.points) return y.points - x.points;
-
-      const dsX = x.setsWon - x.setsLost;
-      const dsY = y.setsWon - y.setsLost;
-      if(dsY !== dsX) return dsY - dsX;
-
-      const dgX = x.gamesWon - x.gamesLost;
-      const dgY = y.gamesWon - y.gamesLost;
-      return dgY - dgX;
-    });
-  }
-
-  function renderPoolTable(pool){
-    const rows = buildPoolRanking(currentCategorie, currentEpreuve, pool);
-
-    if(!rows.length){
-      return `<p class="muted">Aucune poule ${pool}.</p>`;
-    }
-
-    return `
-      <table class="pool-table">
-        <thead>
-          <tr>
-            <th>#</th>
-            <th>Équipe</th>
-            <th>Pts</th>
-            <th>Sets</th>
-            <th>Jeux</th>
-          </tr>
-        </thead>
-
-        <tbody>
-          ${rows.map((r,i)=>`
-            <tr>
-              <td>${i + 1}</td>
-              <td>${esc(r.teamName)}</td>
-              <td>${esc(r.points)}</td>
-              <td>${esc(r.setsWon - r.setsLost)}</td>
-              <td>${esc(r.gamesWon - r.gamesLost)}</td>
-            </tr>
-          `).join("")}
-        </tbody>
-      </table>
-    `;
-  }
-
-  function renderPoolMatches(pool){
-    const rows = poolMatches(pool);
-
-    return rows.length
-      ? `<div class="match-list">${rows.map(renderMatchCard).join("")}</div>`
-      : `<p class="muted">Aucun match de poule ${pool}.</p>`;
-  }
-
-  function renderPoules(){
-    poolAStandings.innerHTML = renderPoolTable("A");
-    poolBStandings.innerHTML = renderPoolTable("B");
-
-    poolAMatches.innerHTML = renderPoolMatches("A");
-    poolBMatches.innerHTML = renderPoolMatches("B");
-  }
-
-  function bteam(name){
-    return `<div class="bteam">${esc(name || "—")}</div>`;
-  }
-
-  function setBracketEl(id, html){
-    if(bracketEls[id]) bracketEls[id].innerHTML = html;
-  }
-
-  function findFinalMatch(kind){
-    const rows = visibleMatches();
-    const labelNeedle = currentEpreuve === "DM" ? "seniors dm" : "seniors dd";
-
-    if(kind === "sf1"){
-      return rows.find(m =>
-        String(m.id || "").includes("SF1") ||
-        (String(m.label || "").toLowerCase().includes(labelNeedle) &&
-         String(m.label || "").toLowerCase().includes("1/2"))
-      );
-    }
-
-    if(kind === "sf2"){
-      const sfs = rows.filter(m =>
-        String(m.id || "").includes("SF") ||
-        (String(m.label || "").toLowerCase().includes(labelNeedle) &&
-         String(m.label || "").toLowerCase().includes("1/2"))
-      );
-      return sfs[1] || null;
-    }
-
-    if(kind === "p3"){
-      return rows.find(m =>
-        String(m.id || "").includes("3_4") ||
-        String(m.label || "").toLowerCase().includes("place 3")
-      );
-    }
-
-    if(kind === "final"){
-      return rows.find(m =>
-        String(m.id || "").includes("FINAL") ||
-        String(m.label || "").toLowerCase().includes("finale")
-      );
-    }
-
-    return null;
-  }
-
-  function renderBracketMatch(prefixA, prefixB, match){
-    if(!match){
-      setBracketEl(prefixA, bteam("—"));
-      setBracketEl(prefixB, bteam("—"));
-      return;
-    }
-
-    setBracketEl(prefixA, bteam(teamName(match, "A")));
-    setBracketEl(prefixB, bteam(teamName(match, "B")));
-  }
-
-  function renderFinal(){
-    renderBracketMatch("sf1a","sf1b", findFinalMatch("sf1"));
-    renderBracketMatch("sf2a","sf2b", findFinalMatch("sf2"));
-    renderBracketMatch("p3a","p3b", findFinalMatch("p3"));
-    renderBracketMatch("fa","fb", findFinalMatch("final"));
   }
 
   function setActiveTab(tab){
+
     currentTab = tab;
 
-    tabChrono.setAttribute("aria-selected", tab === "chrono" ? "true" : "false");
-    tabPoules.setAttribute("aria-selected", tab === "poules" ? "true" : "false");
-    tabFinal.setAttribute("aria-selected", tab === "final" ? "true" : "false");
+    tabChrono.setAttribute(
+      "aria-selected",
+      tab === "chrono" ? "true" : "false"
+    );
 
-    panelChrono.style.display = canSeeWork() && tab === "chrono" ? "block" : "none";
-    panelPoules.style.display = canSeeWork() && tab === "poules" ? "block" : "none";
-    panelFinal.style.display = canSeeWork() && tab === "final" ? "block" : "none";
+    tabPoules.setAttribute(
+      "aria-selected",
+      tab === "poules" ? "true" : "false"
+    );
 
-    if(tab === "chrono") renderChrono();
-    if(tab === "poules") renderPoules();
-    if(tab === "final") renderFinal();
+    tabFinal.setAttribute(
+      "aria-selected",
+      tab === "final" ? "true" : "false"
+    );
+
+    panelChrono.style.display =
+      canSeeWork() && tab === "chrono"
+        ? "block"
+        : "none";
+
+    panelPoules.style.display =
+      canSeeWork() && tab === "poules"
+        ? "block"
+        : "none";
+
+    panelFinal.style.display =
+      canSeeWork() && tab === "final"
+        ? "block"
+        : "none";
+
+    if(tab === "chrono"){
+      renderChrono();
+    }
   }
 
   function syncControls(){
-    btnModeAll.classList.toggle("active", mode === "all");
-    btnModeCategory.classList.toggle("active", mode === "category");
 
-    zoneCatBtns.forEach(btn => {
-      const active = btn.dataset.categorie === currentCategorie;
-      btn.classList.toggle("active", mode === "category" && active);
-      btn.classList.toggle("all-active", mode === "all");
-    });
+    btnModeAll.classList.toggle(
+      "active",
+      mode === "all"
+    );
 
-    zoneEpreuveBtns.forEach(btn => {
-      const active = btn.dataset.epreuve === currentEpreuve;
-      btn.classList.toggle("active", mode === "category" && active);
-      btn.classList.toggle("all-active", mode === "all");
-    });
+    btnModeCategory.classList.toggle(
+      "active",
+      mode === "category"
+    );
 
-    tabPoules.style.display = hasPoules() ? "block" : "none";
-    tabFinal.style.display = hasFinalBracket() ? "block" : "none";
+    syncHeaderButtons();
+
+    tabPoules.style.display =
+      hasPoules()
+        ? "block"
+        : "none";
+
+    tabFinal.style.display =
+      hasFinalBracket()
+        ? "block"
+        : "none";
 
     if(mode === "all"){
       currentTab = "chrono";
@@ -1227,104 +1218,202 @@
   }
 
   function render(){
+
     syncControls();
 
     if(!canSeeWork()){
-      pageIntro.textContent = "La programmation est en cours de préparation.";
-      pageTag.textContent = "Maintenance";
-      maintenanceBox.style.display = "block";
-      workBox.style.display = "none";
-      panelChrono.style.display = "none";
-      panelPoules.style.display = "none";
-      panelFinal.style.display = "none";
+
+      pageIntro.textContent =
+        "La programmation est en cours de préparation.";
+
+      pageTag.textContent =
+        "Maintenance";
+
+      maintenanceBox.style.display =
+        "block";
+
+      workBox.style.display =
+        "none";
+
+      panelChrono.style.display =
+        "none";
+
+      panelPoules.style.display =
+        "none";
+
+      panelFinal.style.display =
+        "none";
+
       return;
     }
 
-    pageIntro.textContent = publicVisible
-      ? "Planning des matchs, horaires, terrains et scores."
-      : "Aperçu réservé aux admins et JAT pendant la maintenance.";
+    pageIntro.textContent =
+      publicVisible
+        ? "Planning des matchs, horaires, terrains et scores."
+        : "Aperçu réservé aux admins et JAT.";
 
-    pageTag.textContent = publicVisible ? "Direct" : "Travail";
-    workBadge.style.display = publicVisible ? "none" : "inline-flex";
+    pageTag.textContent =
+      publicVisible
+        ? "Direct"
+        : "Travail";
 
-    maintenanceBox.style.display = "none";
-    workBox.style.display = "block";
+    workBadge.style.display =
+      publicVisible
+        ? "none"
+        : "inline-flex";
+
+    maintenanceBox.style.display =
+      "none";
+
+    workBox.style.display =
+      "block";
 
     if(!currentProg){
-      statusText.textContent = "Aucune programmation générale enregistrée.";
+
+      statusText.textContent =
+        "Aucune programmation générale enregistrée.";
+
     }else{
-      statusText.textContent = mode === "all"
-        ? `✅ ${visibleMatches().length} match(s) dans la chronologie générale.`
-        : `✅ ${visibleMatches().length} match(s) pour cette catégorie / épreuve.`;
+
+      statusText.textContent =
+        mode === "all"
+          ? `✅ ${normalMatches().length} match(s) dans la chronologie générale.`
+          : `✅ ${normalMatches().length} match(s) pour cette catégorie / épreuve.`;
     }
 
     setActiveTab(currentTab);
   }
 
   function setMode(next){
-    mode = next === "category" ? "category" : "all";
+
+    mode =
+      next === "category"
+        ? "category"
+        : "all";
+
     render();
   }
 
   function changeZone(categorie, epreuve){
-    currentCategorie = categorie || currentCategorie;
-    currentEpreuve = epreuve || currentEpreuve;
+
+    currentCategorie =
+      categorie || currentCategorie;
+
+    currentEpreuve =
+      epreuve || currentEpreuve;
+
     mode = "category";
+
     render();
   }
 
   btnModeAll.onclick = () => setMode("all");
+
   btnModeCategory.onclick = () => setMode("category");
 
   zoneCatBtns.forEach(btn => {
-    btn.onclick = () => changeZone(btn.dataset.categorie, currentEpreuve);
+
+    btn.onclick = () =>
+      changeZone(
+        btn.dataset.categorie,
+        currentEpreuve
+      );
   });
 
   zoneEpreuveBtns.forEach(btn => {
-    btn.onclick = () => changeZone(currentCategorie, btn.dataset.epreuve);
+
+    btn.onclick = () =>
+      changeZone(
+        currentCategorie,
+        btn.dataset.epreuve
+      );
   });
 
-  tabChrono.onclick = () => setActiveTab("chrono");
-  tabPoules.onclick = () => setActiveTab("poules");
-  tabFinal.onclick = () => setActiveTab("final");
+  tabChrono.onclick = () =>
+    setActiveTab("chrono");
+
+  tabPoules.onclick = () =>
+    setActiveTab("poules");
+
+  tabFinal.onclick = () =>
+    setActiveTab("final");
 
   function startVisibilityListener(){
-    if(unsubVisibility) unsubVisibility();
 
-    unsubVisibility = onSnapshot(visibilityRef(), (snap) => {
-      const data = snap.exists() ? (snap.data() || {}) : {};
-      publicVisible = data.publicVisible === true;
-      render();
-    });
+    if(unsubVisibility){
+      unsubVisibility();
+    }
+
+    unsubVisibility = onSnapshot(
+      visibilityRef(),
+      (snap)=>{
+
+        const data = snap.exists()
+          ? (snap.data() || {})
+          : {};
+
+        publicVisible =
+          data.publicVisible === true;
+
+        render();
+      }
+    );
   }
 
   function startDataListeners(){
-    if(unsubProg) unsubProg();
-    if(unsubResults) unsubResults();
 
-    unsubProg = onSnapshot(generalProgRef(), (snap) => {
-      currentProg = snap.exists() ? (snap.data() || null) : null;
-      render();
-    });
+    if(unsubProg){
+      unsubProg();
+    }
 
-    unsubResults = onSnapshot(resultsCol(), (snap) => {
-      resultsByMatch = new Map();
+    if(unsubResults){
+      unsubResults();
+    }
 
-      snap.forEach(d => {
-        resultsByMatch.set(d.id, d.data() || {});
-      });
+    unsubProg = onSnapshot(
+      generalProgRef(),
+      (snap)=>{
 
-      render();
-    });
+        currentProg = snap.exists()
+          ? (snap.data() || null)
+          : null;
+
+        render();
+      }
+    );
+
+    unsubResults = onSnapshot(
+      resultsCol(),
+      (snap)=>{
+
+        resultsByMatch = new Map();
+
+        snap.forEach(d => {
+
+          resultsByMatch.set(
+            d.id,
+            d.data() || {}
+          );
+        });
+
+        render();
+      }
+    );
   }
 
-  onAuthStateChanged(auth, async (user) => {
+  onAuthStateChanged(auth, async (user)=>{
+
     currentRole = null;
 
     if(user){
+
       try{
-        currentRole = await getRoleByUid(user.uid);
+
+        currentRole =
+          await getRoleByUid(user.uid);
+
       }catch(error){
+
         currentRole = null;
       }
     }
@@ -1334,6 +1423,7 @@
 
   startVisibilityListener();
   startDataListeners();
+
 </script>
 
 </body>
