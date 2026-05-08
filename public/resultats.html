@@ -16,6 +16,7 @@
     }
 
     *{box-sizing:border-box;}
+    html,body{max-width:100%;overflow-x:hidden;}
 
     body{
       margin:0;
@@ -28,7 +29,11 @@
     }
 
     a{color:inherit;text-decoration:none;}
-    .container{width:min(var(--container), calc(100% - 28px));margin:0 auto;}
+
+    .container{
+      width:min(var(--container), calc(100% - 28px));
+      margin:0 auto;
+    }
 
     main{
       padding-top:calc(var(--public-total-top, 158px) + var(--zone-h) + 30px);
@@ -79,7 +84,8 @@
       letter-spacing:.06em;
     }
 
-    .placeholder{
+    .placeholder,
+    .status-box{
       margin-top:12px;
       padding:15px 16px;
       border-radius:18px;
@@ -90,47 +96,210 @@
       line-height:1.5;
     }
 
-    .placeholder strong{color:var(--blue-dark);}
+    .placeholder strong,
+    .status-box strong{
+      color:var(--blue-dark);
+    }
 
-    .quick-grid{
-      display:grid;
-      grid-template-columns:1fr;
+    .muted{
+      color:var(--muted);
+      font-size:14px;
+      line-height:1.45;
+    }
+
+    .warn{
+      border:1px solid rgba(176,0,32,.25);
+      background:rgba(176,0,32,.06);
+      padding:12px 14px;
+      border-radius:16px;
+      font-weight:900;
+      margin-top:12px;
+      color:#7f1d1d;
+    }
+
+    .okbox{
+      border:1px solid rgba(16,185,129,.30);
+      background:#ecfdf5;
+      padding:12px 14px;
+      border-radius:16px;
+      font-weight:900;
+      margin-top:12px;
+      color:#064e3b;
+    }
+
+    .work-badge{
+      display:inline-flex;
+      margin-top:12px;
+      padding:7px 12px;
+      border-radius:999px;
+      background:#fff7e6;
+      color:#9a5b00;
+      border:1px solid #ffd37a;
+      font-weight:1000;
+      font-size:12px;
+      text-transform:uppercase;
+      letter-spacing:.05em;
+    }
+
+    .section-title{
+      margin:18px 0 8px;
+      font-size:20px;
+      line-height:1.1;
+      letter-spacing:-.02em;
+    }
+
+    .list{
+      display:flex;
+      flex-direction:column;
       gap:10px;
       margin-top:12px;
     }
 
-    .quick-card{
-      border-radius:16px;
-      padding:12px 14px;
-      background:#fff;
+    .rank-card{
+      border-radius:18px;
       border:1px solid rgba(16,24,40,.08);
-      box-shadow:0 6px 14px rgba(16,24,40,.04);
+      padding:13px;
+      background:#fff;
+      box-shadow:0 8px 18px rgba(16,24,40,.06);
+      display:flex;
+      gap:12px;
+      align-items:flex-start;
+      justify-content:space-between;
     }
 
-    .quick-card strong{
-      display:block;
+    .rk{
+      width:44px;
+      height:44px;
+      border-radius:15px;
+      border:1px solid rgba(0,0,0,.10);
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      font-weight:1000;
+      font-size:16px;
+      flex:0 0 auto;
+      background:#f8fafc;
       color:var(--blue-dark);
-      margin-bottom:4px;
+    }
+
+    .rmain{
+      min-width:0;
+      flex:1 1 auto;
+    }
+
+    .rtitle{
+      font-weight:1000;
+      line-height:1.15;
+      margin:0;
+      white-space:nowrap;
+      overflow:hidden;
+      text-overflow:ellipsis;
+      font-size:16px;
+    }
+
+    .tag{
+      border:1px solid rgba(0,0,0,.12);
+      border-radius:999px;
+      padding:5px 9px;
+      font-size:11px;
+      font-weight:1000;
+      white-space:nowrap;
+      opacity:.95;
+      flex:0 0 auto;
+      background:#f4f8ff;
+      color:var(--blue-dark);
+    }
+
+    .pending-list{
+      display:grid;
+      gap:12px;
+      margin-top:12px;
+    }
+
+    .pending-card{
+      border-radius:18px;
+      border:1px solid rgba(16,24,40,.08);
+      padding:13px;
+      background:#fff;
+      box-shadow:0 8px 18px rgba(16,24,40,.06);
+    }
+
+    .pending-card.courtA{
+      background:#fff8dd;
+      border-color:rgba(255,196,0,.35);
+    }
+
+    .pending-card.courtB{
+      background:#ffeef2;
+      border-color:rgba(255,0,60,.20);
+    }
+
+    .pending-head{
+      display:flex;
+      align-items:center;
+      gap:8px;
+      margin-bottom:10px;
+      flex-wrap:wrap;
+    }
+
+    .p-slot{
+      font-size:12px;
+      font-weight:1000;
+      color:#667085;
+    }
+
+    .p-time{
+      font-size:14px;
       font-weight:1000;
     }
 
-    .quick-card span{
-      color:var(--muted);
+    .p-court{
+      flex:1;
+      min-width:0;
       font-size:13px;
-      line-height:1.35;
+      font-style:italic;
+      color:#475467;
+      white-space:nowrap;
+      overflow:hidden;
+      text-overflow:ellipsis;
     }
 
-    .status-mini{
-      margin-top:12px;
-      color:var(--muted);
-      font-size:13px;
-      line-height:1.4;
+    .p-label{
+      padding:5px 10px;
+      border-radius:999px;
+      background:#f4f8ff;
+      color:var(--blue-dark);
+      border:1px solid rgba(7,91,154,.12);
+      font-size:12px;
+      font-weight:1000;
+    }
+
+    .p-team{
+      font-size:16px;
+      font-weight:1000;
+      line-height:1.15;
+      white-space:nowrap;
+      overflow:hidden;
+      text-overflow:ellipsis;
+    }
+
+    .p-team.placeholder{
+      color:#667085;
+      font-style:italic;
+    }
+
+    .vs-line{
+      margin:9px 0 5px;
+      text-align:center;
+      font-weight:1000;
+      letter-spacing:2px;
+      opacity:.55;
+      font-size:12px;
     }
 
     @media (min-width:760px){
       :root{--zone-h:104px;}
       .panel{padding:22px;}
-      .quick-grid{grid-template-columns:repeat(3,1fr);}
     }
 
     @media (max-width:759px){
@@ -141,6 +310,24 @@
       }
 
       .panel-title{font-size:24px;}
+
+      .rank-card{
+        gap:10px;
+      }
+
+      .rk{
+        width:40px;
+        height:40px;
+      }
+
+      .tag{
+        font-size:10px;
+        padding:5px 8px;
+      }
+
+      .p-team{
+        font-size:14px;
+      }
     }
   </style>
 </head>
@@ -209,39 +396,34 @@
         <div>
           <h1 class="panel-title">🏆 Résultats</h1>
           <p class="panel-text" id="workIntro">
-            Scores, classements, podiums et suivi sportif du championnat.
+            Classements, podiums et suivi sportif du championnat.
           </p>
         </div>
-        <div class="panel-tag" id="workTag">À venir</div>
+        <div class="panel-tag" id="workTag">Public</div>
       </div>
 
-      <div class="placeholder">
-        <strong id="workTitle">🚧 Résultats en attente</strong><br>
-        <span id="workText">
-          Cette page affichera prochainement les scores, les classements par catégorie et les podiums.
-        </span>
+      <div class="status-box">
+        Zone active :
+        <strong id="zoneLabel">U14 — Double Messieurs</strong>
+        <br>
+        <span id="zoneStatus">Classement de la catégorie sélectionnée.</span>
       </div>
 
-      <div class="quick-grid">
-        <div class="quick-card">
-          <strong>🎾 Scores</strong>
-          <span>Les scores des matchs seront ajoutés ici pendant la compétition.</span>
-        </div>
-
-        <div class="quick-card">
-          <strong>📊 Classements</strong>
-          <span>Les classements par catégorie et par épreuve seront visibles sur cette page.</span>
-        </div>
-
-        <div class="quick-card">
-          <strong>🏆 Podiums</strong>
-          <span>Les podiums seront publiés à l’issue des tableaux.</span>
-        </div>
+      <div id="workBadge" class="work-badge" style="display:none;">
+        Fichier de travail
       </div>
 
-      <div class="status-mini" id="zoneStatus">
-        Affichage : U14 — Double Messieurs
+      <div id="validatedBox" class="okbox" style="display:none;"></div>
+      <div id="notValidatedBox" class="warn" style="display:none;"></div>
+      <div id="warningBox" class="warn" style="display:none;"></div>
+
+      <div id="pendingBox" style="display:none;">
+        <h3 class="section-title">🕒 Matchs restant à jouer</h3>
+        <div id="pendingList"></div>
       </div>
+
+      <h3 class="section-title">👥 Classement des équipes</h3>
+      <div id="teamList"></div>
     </div>
   </section>
 
@@ -249,27 +431,31 @@
 
 <script type="module" src="../assets/js/public-header.js"></script>
 
-<script type="module">
+  <script type="module">
   import { auth, db } from "../assets/js/firebase.js";
   import { getRoleByUid } from "../assets/js/session.js";
-  import { onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.12.5/firebase-auth.js";
+
+  import { onAuthStateChanged }
+  from "https://www.gstatic.com/firebasejs/10.12.5/firebase-auth.js";
+
   import {
     doc,
+    collection,
     onSnapshot
   } from "https://www.gstatic.com/firebasejs/10.12.5/firebase-firestore.js";
 
   const EVENT_ID = "championnats-2026";
 
   const EPREUVE_LABELS = {
-    DM: "Double Messieurs",
-    DD: "Double Dames"
+    DM:"Double Messieurs",
+    DD:"Double Dames"
   };
 
   const params = new URLSearchParams(location.search);
   const adminPreview = params.get("adminPreview") === "1";
 
-  const zoneCatBtns = Array.from(document.querySelectorAll(".zone-cat-btn"));
-  const zoneEpreuveBtns = Array.from(document.querySelectorAll(".zone-epreuve-btn"));
+  const zoneCatBtns = [...document.querySelectorAll(".zone-cat-btn")];
+  const zoneEpreuveBtns = [...document.querySelectorAll(".zone-epreuve-btn")];
 
   const loadingPanel = document.getElementById("loadingPanel");
   const maintenancePanel = document.getElementById("maintenancePanel");
@@ -277,34 +463,668 @@
 
   const workIntro = document.getElementById("workIntro");
   const workTag = document.getElementById("workTag");
-  const workTitle = document.getElementById("workTitle");
-  const workText = document.getElementById("workText");
+  const workBadge = document.getElementById("workBadge");
+
+  const zoneLabel = document.getElementById("zoneLabel");
   const zoneStatus = document.getElementById("zoneStatus");
+
+  const validatedBox = document.getElementById("validatedBox");
+  const notValidatedBox = document.getElementById("notValidatedBox");
+  const warningBox = document.getElementById("warningBox");
+
+  const pendingBox = document.getElementById("pendingBox");
+  const pendingList = document.getElementById("pendingList");
+  const teamList = document.getElementById("teamList");
 
   let currentCategorie = "U14";
   let currentEpreuve = "DM";
+
   let currentRole = null;
   let publicVisible = false;
   let visibilityLoaded = false;
+
+  let currentProg = null;
+  let resultsByMatch = new Map();
+  let currentClassementDoc = null;
+  let equipesById = new Map();
+
+  let unsubVisibility = null;
+  let unsubProg = null;
+  let unsubResults = null;
+  let unsubClassement = null;
+  let unsubEquipes = null;
+
+  function esc(s){
+    return (s ?? "").toString()
+      .replaceAll("&","&amp;")
+      .replaceAll("<","&lt;")
+      .replaceAll(">","&gt;")
+      .replaceAll('"',"&quot;")
+      .replaceAll("'","&#039;");
+  }
+
+  function zoneKey(categorie = currentCategorie, epreuve = currentEpreuve){
+    return `${categorie}_${epreuve}`.replace("+","plus");
+  }
+
+  function zoneText(){
+    return `${currentCategorie} — ${EPREUVE_LABELS[currentEpreuve] || currentEpreuve}`;
+  }
 
   function visibilityRef(){
     return doc(db, "events", EVENT_ID, "config", "resultats");
   }
 
-  function syncZoneButtons(){
-    zoneCatBtns.forEach(btn => {
-      btn.setAttribute("aria-selected", btn.dataset.categorie === currentCategorie ? "true" : "false");
+  function generalProgRef(){
+    return doc(db, "events", EVENT_ID, "programmations", "general");
+  }
+
+  function resultsCol(){
+    return collection(db, "events", EVENT_ID, "resultats", "general", "matches");
+  }
+
+  function classementRef(){
+    return doc(db, "events", EVENT_ID, "classements", zoneKey());
+  }
+
+  function equipesCol(){
+    return collection(db, "events", EVENT_ID, "equipes");
+  }
+
+  function normalizeTeamName(s){
+    return (s || "")
+      .toString()
+      .trim()
+      .toLowerCase()
+      .replaceAll("’","'")
+      .replace(/\s+/g," ");
+  }
+
+  function fmtDate(ts){
+    try{
+      const d = ts?.toDate ? ts.toDate() : null;
+      if(!d) return "—";
+
+      return d.toLocaleString("fr-FR", {
+        year:"numeric",
+        month:"long",
+        day:"numeric",
+        hour:"2-digit",
+        minute:"2-digit"
+      });
+    }catch(error){
+      return "—";
+    }
+  }
+
+  function toNum(v){
+    if(v === null || v === undefined || v === "") return null;
+
+    const n = Number(String(v).replace(",", ".").trim());
+    return Number.isFinite(n) ? n : null;
+  }
+
+  function getResult(mid){
+    return resultsByMatch.get(mid) || null;
+  }
+
+  function winnerSide(res){
+    if(!res) return null;
+
+    if(res.winnerSide === "A" || res.winnerSide === "B"){
+      return res.winnerSide;
+    }
+
+    let a = 0;
+    let b = 0;
+
+    [
+      ["s1A","s1B"],
+      ["s2A","s2B"],
+      ["s3A","s3B"]
+    ].forEach(([ka,kb]) => {
+      const na = toNum(res[ka]);
+      const nb = toNum(res[kb]);
+
+      if(na === null || nb === null || na === nb) return;
+
+      if(na > nb) a++;
+      else b++;
     });
 
-    zoneEpreuveBtns.forEach(btn => {
-      btn.setAttribute("aria-selected", btn.dataset.epreuve === currentEpreuve ? "true" : "false");
-    });
+    if(a > b) return "A";
+    if(b > a) return "B";
 
-    zoneStatus.textContent = `Affichage : ${currentCategorie} — ${EPREUVE_LABELS[currentEpreuve]}`;
+    return null;
+  }
+
+  function allMatches(){
+    return Array.isArray(currentProg?.matches)
+      ? [...currentProg.matches]
+      : [];
+  }
+
+  function zoneMatches(){
+    return allMatches().filter(m =>
+      String(m.categorie || "") === currentCategorie &&
+      String(m.epreuve || "") === currentEpreuve
+    );
+  }
+
+  function normalZoneMatches(){
+    return zoneMatches().filter(m => m.type !== "winner");
+  }
+
+  function winnerOnlyMatches(){
+    return zoneMatches().filter(m => m.type === "winner");
+  }
+
+  function matchById(id){
+    return allMatches().find(m => m.id === id) || null;
+  }
+
+  function courtLabel(court){
+    if(court === "A") return "🐝 Manon Queen Bee";
+    if(court === "B") return "🌶️ Lisa de Los Pimentos";
+    return "🎾 terrain";
+  }
+
+  function resolveDynamicTeam(match, side, guard = new Set()){
+    if(!match) return null;
+
+    const raw = side === "A"
+      ? match.teamA
+      : match.teamB;
+
+    const ref = side === "A"
+      ? match.A
+      : match.B;
+
+    if(ref?.type === "team"){
+      return ref.team
+        || equipesById.get(ref.key)
+        || { teamName: raw || "Équipe" };
+    }
+
+    if(ref?.type === "winner" || ref?.type === "loser"){
+      const sourceId = ref.matchId;
+
+      if(!sourceId || guard.has(sourceId)){
+        return null;
+      }
+
+      guard.add(sourceId);
+
+      const source = matchById(sourceId);
+      const w = winnerSide(getResult(sourceId));
+
+      if(!source || (w !== "A" && w !== "B")){
+        return null;
+      }
+
+      const wantedSide = ref.type === "winner"
+        ? w
+        : (w === "A" ? "B" : "A");
+
+      return resolveDynamicTeam(source, wantedSide, guard);
+    }
+
+    return raw
+      ? { teamName: raw }
+      : null;
+  }
+
+  function teamName(match, side){
+    const t = resolveDynamicTeam(match, side);
+
+    return t?.teamName
+      || (side === "A" ? match.teamA : match.teamB)
+      || "Équipe";
+  }
+
+  function matchWinnerTeam(match){
+    const w = winnerSide(getResult(match.id));
+
+    if(w !== "A" && w !== "B") return null;
+
+    return resolveDynamicTeam(match, w)
+      || { teamName: teamName(match, w) };
+  }
+
+  function matchLoserTeam(match){
+    const w = winnerSide(getResult(match.id));
+
+    if(w !== "A" && w !== "B") return null;
+
+    const loserSide = w === "A" ? "B" : "A";
+
+    return resolveDynamicTeam(match, loserSide)
+      || { teamName: teamName(match, loserSide) };
+  }
+
+  function isFinished(match){
+    return winnerSide(getResult(match.id)) !== null;
+  }
+
+  function pendingMatches(){
+    return normalZoneMatches()
+      .filter(m => !isFinished(m))
+      .sort((a,b)=>{
+        if(Number(a.order) !== Number(b.order)){
+          return Number(a.order) - Number(b.order);
+        }
+
+        return String(a.court || "")
+          .localeCompare(String(b.court || ""));
+      });
+  }
+
+  function humanMatchLabel(match){
+    const label = String(match.label || "").trim();
+
+    if(label){
+      return label;
+    }
+
+    return "Match à jouer";
+  }
+
+  function renderPendingCard(match){
+    const cls =
+      match.court === "A"
+        ? "courtA"
+        : match.court === "B"
+          ? "courtB"
+          : "";
+
+    const a = teamName(match, "A");
+    const b = teamName(match, "B");
+
+    return `
+      <div class="pending-card ${esc(cls)}">
+        <div class="pending-head">
+          <div class="p-slot">#${esc(match.order || "—")}</div>
+          <div class="p-time">${esc(match.time || "—")}</div>
+          <div class="p-court">${esc(courtLabel(match.court))}</div>
+          <div class="p-label">${esc(humanMatchLabel(match))}</div>
+        </div>
+
+        <div class="p-team ${a.includes("Poule") || a.includes("Vainqueur") || a.includes("Perdant") ? "placeholder" : ""}">
+          ${esc(a)}
+        </div>
+
+        <div class="vs-line">VS</div>
+
+        <div class="p-team ${b.includes("Poule") || b.includes("Vainqueur") || b.includes("Perdant") ? "placeholder" : ""}">
+          ${esc(b)}
+        </div>
+      </div>
+    `;
+  }
+
+  function renderPendingMatches(){
+    const list = pendingMatches();
+
+    if(!list.length){
+      pendingBox.style.display = "none";
+      pendingList.innerHTML = "";
+      return;
+    }
+
+    pendingBox.style.display = "block";
+    pendingList.innerHTML = `
+      <div class="pending-list">
+        ${list.map(renderPendingCard).join("")}
+      </div>
+    `;
+  }
+
+  function poolKeyFromMatch(match){
+    const label = String(match?.label || "");
+
+    if(label.includes("Poule A")){
+      return `${match.categorie}_${match.epreuve}_A`;
+    }
+
+    if(label.includes("Poule B")){
+      return `${match.categorie}_${match.epreuve}_B`;
+    }
+
+    if(label.includes("Poule unique")){
+      return `${match.categorie}_${match.epreuve}_U`;
+    }
+
+    if(label.includes("Poule places 5-7")){
+      return `${match.categorie}_${match.epreuve}_5_7`;
+    }
+
+    return null;
+  }
+
+  function getPoolMatches(poolKey){
+    return normalZoneMatches()
+      .filter(m => poolKeyFromMatch(m) === poolKey);
+  }
+
+  function buildPoolRanking(poolKey){
+    const list = getPoolMatches(poolKey);
+    const stats = new Map();
+
+    function ensure(team){
+      const name = team?.teamName || "Équipe";
+      const key = normalizeTeamName(name);
+
+      if(!stats.has(key)){
+        stats.set(key, {
+          team,
+          teamName:name,
+          wins:0,
+          losses:0,
+          points:0,
+          setsWon:0,
+          setsLost:0,
+          gamesWon:0,
+          gamesLost:0
+        });
+      }
+
+      return stats.get(key);
+    }
+
+    for(const match of list){
+      const res = getResult(match.id);
+      const w = winnerSide(res);
+
+      if(w !== "A" && w !== "B") continue;
+
+      const teamA = resolveDynamicTeam(match, "A")
+        || { teamName:teamName(match, "A") };
+
+      const teamB = resolveDynamicTeam(match, "B")
+        || { teamName:teamName(match, "B") };
+
+      const A = ensure(teamA);
+      const B = ensure(teamB);
+
+      let setsA = 0;
+      let setsB = 0;
+
+      [
+        ["s1A","s1B"],
+        ["s2A","s2B"],
+        ["s3A","s3B"]
+      ].forEach(([ka,kb]) => {
+        const ga = toNum(res?.[ka]);
+        const gb = toNum(res?.[kb]);
+
+        if(ga === null || gb === null) return;
+
+        A.gamesWon += ga;
+        A.gamesLost += gb;
+        B.gamesWon += gb;
+        B.gamesLost += ga;
+
+        if(ga > gb) setsA++;
+        else if(gb > ga) setsB++;
+      });
+
+      A.setsWon += setsA;
+      A.setsLost += setsB;
+      B.setsWon += setsB;
+      B.setsLost += setsA;
+
+      if(w === "A"){
+        A.wins++;
+        A.points += 2;
+        B.losses++;
+        B.points += 1;
+      }else{
+        B.wins++;
+        B.points += 2;
+        A.losses++;
+        A.points += 1;
+      }
+    }
+
+    return Array.from(stats.values())
+      .sort((a,b)=>{
+        if(b.points !== a.points) return b.points - a.points;
+        if(b.wins !== a.wins) return b.wins - a.wins;
+
+        const sdA = a.setsWon - a.setsLost;
+        const sdB = b.setsWon - b.setsLost;
+        if(sdB !== sdA) return sdB - sdA;
+
+        const gdA = a.gamesWon - a.gamesLost;
+        const gdB = b.gamesWon - b.gamesLost;
+        if(gdB !== gdA) return gdB - gdA;
+
+        return a.teamName.localeCompare(b.teamName, "fr");
+      })
+      .map(x => ({
+        team:x.team || { teamName:x.teamName },
+        stats:x
+      }));
+  }
+
+  function buildRanking(){
+    const winners = winnerOnlyMatches();
+
+    if(winners.length){
+      return {
+        complete:true,
+        rows:winners.map((m, index) => ({
+          pos:index + 1,
+          team:{ teamName:m.teamA || "Équipe" },
+          label:index === 0
+            ? "🥇 Vainqueur"
+            : `${index + 1}e`
+        })),
+        missing:[]
+      };
+    }
+
+    const rows = normalZoneMatches();
+
+    const missing = rows
+      .filter(m => !isFinished(m))
+      .map(m => humanMatchLabel(m));
+
+    if(missing.length){
+      return {
+        complete:false,
+        rows:[],
+        missing
+      };
+    }
+
+    const finalMatch = rows.find(m =>
+      String(m.label || "").toLowerCase().includes("finale")
+    );
+
+    const thirdMatch = rows.find(m =>
+      String(m.label || "").toLowerCase().includes("3")
+      && String(m.label || "").includes("4")
+    );
+
+    const fifthMatch = rows.find(m =>
+      String(m.label || "").toLowerCase().includes("5")
+      && String(m.label || "").includes("6")
+    );
+
+    const ranking = [];
+
+    if(finalMatch){
+      ranking.push({
+        pos:1,
+        team:matchWinnerTeam(finalMatch),
+        label:"🥇 1er"
+      });
+
+      ranking.push({
+        pos:2,
+        team:matchLoserTeam(finalMatch),
+        label:"🥈 2e"
+      });
+    }
+
+    if(thirdMatch){
+      ranking.push({
+        pos:3,
+        team:matchWinnerTeam(thirdMatch),
+        label:"🥉 3e"
+      });
+
+      ranking.push({
+        pos:4,
+        team:matchLoserTeam(thirdMatch),
+        label:"4e"
+      });
+    }
+
+    const isSeniorDM =
+      currentCategorie === "Seniors"
+      && currentEpreuve === "DM";
+
+    if(isSeniorDM){
+      const pool57 = buildPoolRanking("Seniors_DM_5_7");
+
+      pool57.forEach((row, index) => {
+        ranking.push({
+          pos:5 + index,
+          team:row.team,
+          label:`${5 + index}e`
+        });
+      });
+
+      return {
+        complete:ranking.every(x => x.team?.teamName),
+        rows:ranking,
+        missing:[]
+      };
+    }
+
+    if(fifthMatch){
+      ranking.push({
+        pos:5,
+        team:matchWinnerTeam(fifthMatch),
+        label:"5e"
+      });
+
+      ranking.push({
+        pos:6,
+        team:matchLoserTeam(fifthMatch),
+        label:"6e"
+      });
+    }
+
+    return {
+      complete:ranking.every(x => x.team?.teamName),
+      rows:ranking,
+      missing:[]
+    };
   }
 
   function canSeeWorkVersion(){
-    return publicVisible === true || currentRole === "admin" || currentRole === "jat" || adminPreview === true;
+    return publicVisible === true
+      || currentRole === "admin"
+      || currentRole === "jat"
+      || adminPreview === true;
+  }
+
+  function syncZoneButtons(){
+    zoneCatBtns.forEach(btn => {
+      btn.setAttribute(
+        "aria-selected",
+        btn.dataset.categorie === currentCategorie ? "true" : "false"
+      );
+    });
+
+    zoneEpreuveBtns.forEach(btn => {
+      btn.setAttribute(
+        "aria-selected",
+        btn.dataset.epreuve === currentEpreuve ? "true" : "false"
+      );
+    });
+
+    zoneLabel.textContent = zoneText();
+  }
+
+  function renderClassementStatus(){
+    if(currentClassementDoc?.validatedAt){
+      validatedBox.style.display = "block";
+      validatedBox.innerHTML =
+        `✅ Classement validé par le JAT le <b>${esc(fmtDate(currentClassementDoc.validatedAt))}</b>.`;
+
+      notValidatedBox.style.display = "none";
+      notValidatedBox.innerHTML = "";
+      return;
+    }
+
+    validatedBox.style.display = "none";
+    validatedBox.innerHTML = "";
+
+    notValidatedBox.style.display = "block";
+    notValidatedBox.innerHTML =
+      "⚠️ Classement provisoire — en attente de validation par le JAT.";
+  }
+
+  function renderData(){
+    syncZoneButtons();
+
+    if(!currentProg){
+      zoneStatus.textContent = "Programmation générale non disponible.";
+      warningBox.style.display = "block";
+      warningBox.textContent = "Les résultats ne sont pas encore disponibles.";
+      validatedBox.style.display = "none";
+      notValidatedBox.style.display = "none";
+      pendingBox.style.display = "none";
+      pendingList.innerHTML = "";
+      teamList.innerHTML = "";
+      return;
+    }
+
+    renderClassementStatus();
+
+    const ranking = buildRanking();
+
+    if(!ranking.complete){
+      zoneStatus.textContent = "Classement non disponible pour le moment.";
+      warningBox.style.display = "block";
+      warningBox.textContent = ranking.missing.length
+        ? "Matchs à terminer avant publication du classement final."
+        : "Tous les matchs doivent être terminés.";
+
+      teamList.innerHTML = "";
+      renderPendingMatches();
+      return;
+    }
+
+    pendingBox.style.display = "none";
+    pendingList.innerHTML = "";
+    warningBox.style.display = "none";
+    warningBox.textContent = "";
+
+    zoneStatus.textContent =
+      `Classement affiché : ${ranking.rows.length} équipe(s).`;
+
+    teamList.innerHTML = ranking.rows.length
+      ? `<div class="list">${
+          ranking.rows.map(row => `
+            <div class="rank-card">
+              <div class="rk">${esc(row.pos)}</div>
+
+              <div class="rmain">
+                <div class="rtitle">
+                  ${esc(row.team?.teamName || "Équipe")}
+                </div>
+              </div>
+
+              <div class="tag">${esc(row.label)}</div>
+            </div>
+          `).join("")
+        }</div>`
+      : `<p class="muted">Aucune équipe classée.</p>`;
   }
 
   function renderAccess(){
@@ -323,16 +1143,15 @@
 
       if(publicVisible === true){
         workTag.textContent = "Public";
-        workIntro.textContent = "Scores, classements, podiums et suivi sportif du championnat.";
-        workTitle.textContent = "🚧 Résultats en attente";
-        workText.textContent = "Cette page affichera prochainement les scores, les classements par catégorie et les podiums.";
+        workIntro.textContent = "Classements, podiums et suivi sportif du championnat.";
+        workBadge.style.display = "none";
       }else{
         workTag.textContent = "Travail";
         workIntro.textContent = "Fichier de travail résultats visible par l’organisation.";
-        workTitle.textContent = "🛠️ Fichier de travail résultats";
-        workText.textContent = "La page est actuellement en maintenance pour le public, mais reste visible pour les administrateurs et JAT.";
+        workBadge.style.display = "inline-flex";
       }
 
+      renderData();
       return;
     }
 
@@ -340,24 +1159,38 @@
     workPanel.style.display = "none";
   }
 
+  function restartClassementListener(){
+    if(unsubClassement){
+      unsubClassement();
+      unsubClassement = null;
+    }
+
+    unsubClassement = onSnapshot(classementRef(), (snap) => {
+      currentClassementDoc = snap.exists()
+        ? (snap.data() || {})
+        : null;
+
+      renderAccess();
+    });
+  }
+
   zoneCatBtns.forEach(btn => {
     btn.addEventListener("click", () => {
       currentCategorie = btn.dataset.categorie;
-      syncZoneButtons();
+      restartClassementListener();
+      renderAccess();
     });
   });
 
   zoneEpreuveBtns.forEach(btn => {
     btn.addEventListener("click", () => {
       currentEpreuve = btn.dataset.epreuve;
-      syncZoneButtons();
+      restartClassementListener();
+      renderAccess();
     });
   });
 
-  syncZoneButtons();
-  renderAccess();
-
-  onSnapshot(visibilityRef(), (snap) => {
+  unsubVisibility = onSnapshot(visibilityRef(), (snap) => {
     const data = snap.exists() ? (snap.data() || {}) : {};
     publicVisible = data.publicVisible === true;
     visibilityLoaded = true;
@@ -369,23 +1202,56 @@
     renderAccess();
   });
 
+  unsubProg = onSnapshot(generalProgRef(), (snap) => {
+    currentProg = snap.exists()
+      ? (snap.data() || null)
+      : null;
+
+    renderAccess();
+  });
+
+  unsubResults = onSnapshot(resultsCol(), (snap) => {
+    resultsByMatch = new Map();
+
+    snap.forEach(d => {
+      resultsByMatch.set(d.id, d.data() || {});
+    });
+
+    renderAccess();
+  });
+
+  unsubEquipes = onSnapshot(equipesCol(), (snap) => {
+    equipesById = new Map();
+
+    snap.forEach(d => {
+      equipesById.set(d.id, {
+        id:d.id,
+        ...(d.data() || {})
+      });
+    });
+
+    renderAccess();
+  });
+
+  restartClassementListener();
+
   onAuthStateChanged(auth, async (user) => {
     currentRole = null;
 
-    if(!user){
-      renderAccess();
-      return;
-    }
-
-    try{
-      currentRole = await getRoleByUid(user.uid);
-    }catch(error){
-      console.error(error);
-      currentRole = null;
+    if(user){
+      try{
+        currentRole = await getRoleByUid(user.uid);
+      }catch(error){
+        console.error(error);
+        currentRole = null;
+      }
     }
 
     renderAccess();
   });
+
+  syncZoneButtons();
+  renderAccess();
 </script>
 
 </body>
