@@ -280,9 +280,18 @@
     }
 
     .mini-label{
-      font-size:11px;
-      font-weight:1000;
+      display:inline-flex;
+      align-items:center;
+      justify-content:flex-start;
+      width:max-content;
+      max-width:100%;
+      padding:4px 9px;
+      border-radius:999px;
+      background:#f4f8ff;
       color:var(--blue-dark);
+      border:1px solid rgba(7,91,154,.12);
+      font-size:10px;
+      font-weight:1000;
       white-space:nowrap;
       overflow:hidden;
       text-overflow:ellipsis;
@@ -365,7 +374,7 @@
     }
 
     .modal{
-      width:min(480px,100%);
+      width:min(520px,100%);
       border-radius:24px;
       background:#fff;
       box-shadow:0 30px 80px rgba(0,0,0,.28);
@@ -447,6 +456,11 @@
       border-color:#f1b2b2;
     }
 
+    .btn:disabled{
+      opacity:.55;
+      cursor:not-allowed;
+    }
+
     @media (max-width:759px){
       :root{
         --modebar-h:62px;
@@ -487,7 +501,7 @@
       }
 
       .mini-time{font-size:12px;}
-      .mini-label{font-size:10px;}
+      .mini-label{font-size:9px;}
       .mini-team{font-size:12px;}
       .gear-btn{width:28px;height:28px;}
     }
@@ -586,7 +600,7 @@
       <div>
         <h2 class="panel-title">🧭 Vue globale</h2>
         <p class="panel-text">
-          Clique sur ⚙️ pour modifier l’heure ou le terrain.
+          Clique sur ⚙️ pour modifier l’ordre, l’heure ou le terrain.
         </p>
       </div>
       <div class="panel-tag">Direct</div>
@@ -611,6 +625,11 @@
     <p class="modal-text" id="modalSub">—</p>
 
     <div class="field">
+      <label for="editOrder">Numéro d’ordre</label>
+      <select id="editOrder"></select>
+    </div>
+
+    <div class="field">
       <label for="editTime">Horaire</label>
       <input id="editTime" type="text" placeholder="Ex : 13h30" />
     </div>
@@ -631,7 +650,6 @@
 </div>
 
 <script type="module" src="../assets/js/jat-header.js"></script>
-
 <script type="module">
   import { auth, db } from "../assets/js/firebase.js";
   import { getRoleByUid } from "../assets/js/session.js";
@@ -657,6 +675,15 @@
     DD:"Double Dames"
   };
 
+  const ORDER_TIMES = {
+    "-100":"Info", "-99":"Info", "-98":"Info", "-97":"Info", "-96":"Info",
+    "-95":"Info", "-94":"Info", "-93":"Info",
+    1:"09h00", 2:"09h45", 3:"10h30", 4:"11h15", 5:"12h00",
+    6:"12h45", 7:"13h30", 8:"14h00", 9:"14h30", 10:"15h00",
+    11:"15h30", 12:"16h00", 13:"16h30", 14:"17h30",
+    15:"18h30", 16:"19h30", 17:"20h15", 18:"21h15"
+  };
+
   const accessDenied = document.getElementById("accessDenied");
   const pageContent = document.getElementById("pageContent");
   const panelSchedule = document.getElementById("panelSchedule");
@@ -671,6 +698,7 @@
 
   const editModal = document.getElementById("editModal");
   const modalSub = document.getElementById("modalSub");
+  const editOrder = document.getElementById("editOrder");
   const editTime = document.getElementById("editTime");
   const editCourt = document.getElementById("editCourt");
   const btnModalCancel = document.getElementById("btnModalCancel");
@@ -833,15 +861,12 @@
   }
 
   function labelShort(match){
-    const cat = match.categorie || "";
-    const ep = match.epreuve || "";
-    const label = match.label || match.id || "";
+    return match.label || match.id || "Match";
+  }
 
-    if(cat || ep){
-      return `${cat} ${ep} · ${label}`;
-    }
-
-    return label;
+  function orderTimeFor(order){
+    const n = Number(order);
+    return ORDER_TIMES[String(n)] || "À confirmer";
   }
 
   function renderWinnerCard(match){
@@ -889,7 +914,7 @@
 
   function orderTime(row){
     const m = row.A || row.B || row.fallback[0] || null;
-    return m?.time || "—";
+    return m?.time || orderTimeFor(row.order);
   }
 
   function renderMatchMini(match){
@@ -943,7 +968,7 @@
       ${row.fallback.map(m => `
         <div class="order-cell">
           <div class="order-num">#${esc(row.order)}</div>
-          <div class="order-time">${esc(m.time || "—")}</div>
+          <div class="order-time">${esc(m.time || orderTimeFor(row.order))}</div>
         </div>
         <div class="slot-cell" style="grid-column:2 / 4;">${renderMatchMini(m)}</div>
       `).join("")}
@@ -998,20 +1023,60 @@
     render();
   });
 
+  function buildOrderOptions(selectedOrder){
+    const orders = new Set();
+
+    allMatches()
+      .filter(m => m.type !== "winner")
+      .forEach(m => {
+        const n = Number(m.order);
+        if(Number.isFinite(n)) orders.add(n);
+      });
+
+    Object.keys(ORDER_TIMES).forEach(k => {
+      const n = Number(k);
+      if(Number.isFinite(n) && n > 0) orders.add(n);
+    });
+
+    const sorted = Array.from(orders).sort((a,b)=>a-b);
+
+    editOrder.innerHTML = sorted.map(order => {
+      const selected = Number(selectedOrder) === Number(order) ? "selected" : "";
+      return `<option value="${esc(order)}" ${selected}>#${esc(order)} — ${esc(orderTimeFor(order))}</option>`;
+    }).join("");
+  }
+
   function openEditModal(matchId){
     const match = matchById(matchId);
     if(!match) return;
 
     editMatchId = matchId;
+
     modalSub.textContent = `${match.id} — ${labelShort(match)}`;
-    editTime.value = match.time || "";
+    buildOrderOptions(match.order);
+
+    editTime.value = match.time || orderTimeFor(match.order);
     editCourt.value = match.court === "B" ? "B" : "A";
+
     editModal.style.display = "flex";
   }
 
   function closeEditModal(){
     editMatchId = null;
     editModal.style.display = "none";
+  }
+
+  function findSwapTarget(matches, edited, nextOrder){
+    return matches.find(m =>
+      m.id !== edited.id &&
+      m.type !== "winner" &&
+      Number(m.order) === Number(nextOrder) &&
+      String(m.court || "") === String(edited.court || "")
+    ) || matches.find(m =>
+      m.id !== edited.id &&
+      m.type !== "winner" &&
+      Number(m.order) === Number(nextOrder)
+    ) || null;
   }
 
   async function saveEdit(){
@@ -1025,10 +1090,33 @@
       return;
     }
 
+    const oldMatch = { ...matches[idx] };
+    const oldOrder = Number(oldMatch.order);
+    const nextOrder = Number(editOrder.value);
+    const nextCourt = editCourt.value === "B" ? "B" : "A";
+    const nextTime = (editTime.value || "").trim() || orderTimeFor(nextOrder);
+
+    if(Number.isFinite(nextOrder) && nextOrder !== oldOrder){
+      const swapTarget = findSwapTarget(matches, oldMatch, nextOrder);
+
+      if(swapTarget){
+        const swapIdx = matches.findIndex(m => m.id === swapTarget.id);
+
+        if(swapIdx >= 0){
+          matches[swapIdx] = {
+            ...matches[swapIdx],
+            order:oldOrder,
+            time:oldMatch.time || orderTimeFor(oldOrder)
+          };
+        }
+      }
+    }
+
     matches[idx] = {
       ...matches[idx],
-      time:(editTime.value || "").trim() || "À confirmer",
-      court:editCourt.value === "B" ? "B" : "A"
+      order:Number.isFinite(nextOrder) ? nextOrder : oldMatch.order,
+      time:nextTime,
+      court:nextCourt
     };
 
     btnModalSave.disabled = true;
