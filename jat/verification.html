@@ -363,7 +363,7 @@
       Zone active :
       <strong id="zoneLabel">U14 — Double Messieurs</strong>
       <br>
-      Les vérifications sont enregistrées en direct dans Firestore.
+      Les numéros de licence sont lus depuis les inscriptions privées.
     </div>
   </section>
 
@@ -421,9 +421,11 @@
   let currentCategorie = "U14";
   let currentEpreuve = "DM";
 
-  let equipes = [];
+  let inscriptionsById = new Map();
+  let equipesById = new Map();
   let verifsById = new Map();
 
+  let unsubInscriptions = null;
   let unsubEquipes = null;
   let unsubVerifs = null;
 
@@ -434,12 +436,21 @@
       .replaceAll(">","&gt;");
   }
 
+  function fmt(v){
+    const t = (v ?? "").toString().trim();
+    return t === "" ? "—" : t;
+  }
+
   function zoneKey(categorie = currentCategorie, epreuve = currentEpreuve){
     return `${categorie}_${epreuve}`.replace("+","plus");
   }
 
   function zoneText(){
     return `${currentCategorie} — ${EPREUVE_LABELS[currentEpreuve] || currentEpreuve}`;
+  }
+
+  function inscriptionsCol(){
+    return collection(db, "events", EVENT_ID, "inscriptions");
   }
 
   function equipesCol(){
@@ -454,7 +465,29 @@
     return doc(db, "events", EVENT_ID, "verifications", zoneKey(), "equipes", teamId);
   }
 
-  function normalizeTeam(d){
+  function normalizeInsc(d){
+    const x = d.data() || {};
+
+    return {
+      id:d.id,
+      createdAtMs:x.createdAt?.toMillis ? x.createdAt.toMillis() : 0,
+      categorie:String(x.categorie || "").trim(),
+      epreuve:String(x.epreuve || "").trim(),
+      teamName:x.teamName || "",
+
+      p1FirstName:x.joueur1?.firstName || x.p1FirstName || x.joueur1FirstName || "",
+      p1LastName:x.joueur1?.lastName || x.p1LastName || x.joueur1LastName || "",
+      p1Licence:x.joueur1?.licence || x.p1Licence || x.joueur1Licence || "",
+      p1Phone:x.joueur1?.phone || x.p1Phone || x.joueur1Phone || "",
+
+      p2FirstName:x.joueur2?.firstName || x.p2FirstName || x.joueur2FirstName || "",
+      p2LastName:x.joueur2?.lastName || x.p2LastName || x.joueur2LastName || "",
+      p2Licence:x.joueur2?.licence || x.p2Licence || x.joueur2Licence || "",
+      p2Phone:x.joueur2?.phone || x.p2Phone || x.joueur2Phone || ""
+    };
+  }
+
+  function normalizeEquipe(d){
     const x = d.data() || {};
 
     return {
@@ -479,12 +512,58 @@
     };
   }
 
-  function teamIsVisible(t){
-    if(t.categorie !== currentCategorie) return false;
-    if(t.epreuve !== currentEpreuve) return false;
-    if(t.stby === true) return false;
-    if(t.list === "wait") return false;
-    return true;
+  function mergedRows(){
+    const rows = [];
+
+    inscriptionsById.forEach((ins, id) => {
+      const eq = equipesById.get(id) || {};
+
+      const categorie = ins.categorie || eq.categorie || "";
+      const epreuve = ins.epreuve || eq.epreuve || "";
+
+      if(categorie !== currentCategorie) return;
+      if(epreuve !== currentEpreuve) return;
+      if(eq.stby === true) return;
+      if(eq.list === "wait") return;
+
+      rows.push({
+        id,
+        createdAtMs:ins.createdAtMs || eq.createdAtMs || 0,
+        categorie,
+        epreuve,
+        teamName:ins.teamName || eq.teamName || "",
+
+        joueur1FirstName:ins.p1FirstName || eq.joueur1FirstName || "",
+        joueur1LastName:ins.p1LastName || eq.joueur1LastName || "",
+        joueur1Licence:ins.p1Licence || eq.joueur1Licence || "",
+        joueur1Rank:eq.joueur1Rank ?? "",
+
+        joueur2FirstName:ins.p2FirstName || eq.joueur2FirstName || "",
+        joueur2LastName:ins.p2LastName || eq.joueur2LastName || "",
+        joueur2Licence:ins.p2Licence || eq.joueur2Licence || "",
+        joueur2Rank:eq.joueur2Rank ?? "",
+
+        list:eq.list || null,
+        stby:eq.stby === true
+      });
+    });
+
+    equipesById.forEach((eq, id) => {
+      if(inscriptionsById.has(id)) return;
+
+      if(eq.categorie !== currentCategorie) return;
+      if(eq.epreuve !== currentEpreuve) return;
+      if(eq.stby === true) return;
+      if(eq.list === "wait") return;
+
+      rows.push(eq);
+    });
+
+    return rows.sort((a,b) => {
+      const tn = safeTeamName(a).localeCompare(safeTeamName(b), "fr");
+      if(tn !== 0) return tn;
+      return (a.createdAtMs || 0) - (b.createdAtMs || 0);
+    });
   }
 
   function safeTeamName(t){
@@ -592,12 +671,12 @@
       {
         key:`${path}.licence`,
         label:"N° licence",
-        value:p.licence || "—"
+        value:fmt(p.licence)
       },
       {
         key:`${path}.rank`,
         label:"Classement",
-        value:p.rank || "—"
+        value:fmt(p.rank)
       }
     ];
 
@@ -660,13 +739,7 @@
   function render(){
     zoneLabel.textContent = zoneText();
 
-    const rows = equipes
-      .filter(teamIsVisible)
-      .sort((a,b) => {
-        const tn = safeTeamName(a).localeCompare(safeTeamName(b), "fr");
-        if(tn !== 0) return tn;
-        return (a.createdAtMs || 0) - (b.createdAtMs || 0);
-      });
+    const rows = mergedRows();
 
     const total = rows.length;
     const okCount = rows.filter(t => teamStatus(t) === "ok").length;
@@ -706,6 +779,11 @@
   }
 
   function stopListeners(){
+    if(unsubInscriptions){
+      unsubInscriptions();
+      unsubInscriptions = null;
+    }
+
     if(unsubEquipes){
       unsubEquipes();
       unsubEquipes = null;
@@ -720,18 +798,37 @@
   function startListeners(){
     stopListeners();
 
-    equipes = [];
+    inscriptionsById = new Map();
+    equipesById = new Map();
     verifsById = new Map();
 
     statusText.textContent = "Chargement…";
     cardsEl.innerHTML = "";
 
-    unsubEquipes = onSnapshot(query(equipesCol(), orderBy("createdAt", "asc")), (snap) => {
-      equipes = snap.docs.map(normalizeTeam);
+    unsubInscriptions = onSnapshot(query(inscriptionsCol(), orderBy("createdAt", "asc")), (snap) => {
+      inscriptionsById = new Map();
+
+      snap.forEach(d => {
+        inscriptionsById.set(d.id, normalizeInsc(d));
+      });
+
       render();
     }, (error) => {
       console.error(error);
-      statusText.textContent = "❌ Impossible de charger les équipes.";
+      statusText.textContent = "❌ Impossible de charger les inscriptions privées.";
+    });
+
+    unsubEquipes = onSnapshot(query(equipesCol(), orderBy("createdAt", "asc")), (snap) => {
+      equipesById = new Map();
+
+      snap.forEach(d => {
+        equipesById.set(d.id, normalizeEquipe(d));
+      });
+
+      render();
+    }, (error) => {
+      console.error(error);
+      statusText.textContent = "❌ Impossible de charger les équipes publiques.";
     });
 
     unsubVerifs = onSnapshot(verifCol(), (snap) => {
