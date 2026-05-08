@@ -269,7 +269,7 @@
     <div class="panel-head">
       <div>
         <h1 class="panel-title">📅 Programmation</h1>
-        <p class="panel-text">La génération se fait uniquement depuis la programmation générale aaa.</p>
+        <p class="panel-text">La génération se fait uniquement depuis la programmation générale.</p>
       </div>
       <div class="panel-tag">Admin</div>
     </div>
@@ -391,9 +391,11 @@
     13:"16h30",
     14:"17h30",
     15:"18h30",
-    16:"19h30",
-    17:"20h15",
-    18:"21h15"
+    16:"19h00",
+    17:"19h30",
+    18:"20h00",
+    19:"20h30",
+    20:"21h30"
   };
 
   const accessDenied = document.getElementById("accessDenied");
@@ -658,293 +660,103 @@
   }
 
   function buildGeneralMatchesFromData(map){
-  const matches = [];
+    const matches = [];
 
-  const girls = map.get("Seniors_DD");
-  const men = map.get("Seniors_DM");
-  const u18dm = map.get("U18_DM");
-  const u18dd = map.get("U18_DD");
-  const u14dm = map.get("U14_DM");
-  const u14dd = map.get("U14_DD");
-  const plus45dm = map.get("45plus_DM");
-  const plus45dd = map.get("45plus_DD");
+    const girls = map.get("Seniors_DD");
+    const men = map.get("Seniors_DM");
+    const u18dm = map.get("U18_DM");
+    const u18dd = map.get("U18_DD");
+    const u14dm = map.get("U14_DM");
+    const u14dd = map.get("U14_DD");
+    const plus45dm = map.get("45plus_DM");
+    const plus45dd = map.get("45plus_DD");
 
-  for(const data of map.values()){
-    addWinnerIfSingle(matches, data, -100 + matches.length);
+    for(const data of map.values()){
+      addWinnerIfSingle(matches, data, -100 + matches.length);
+    }
+
+    const gA = girls?.pools?.poolA || [];
+    const gB = girls?.pools?.poolB || [];
+
+    addMatch(matches, "GIRLS_A1", 1, "A", getTeam(gA,0,"Filles A1"), getTeam(gA,1,"Filles A2"), "Seniors DD · Poule A", {categorie:"Seniors", epreuve:"DD"});
+    addMatch(matches, "GIRLS_B1", 1, "B", getTeam(gB,0,"Filles B1"), getTeam(gB,1,"Filles B2"), "Seniors DD · Poule B", {categorie:"Seniors", epreuve:"DD"});
+
+    const u18 = (u18dm?.teams?.length ? u18dm : u18dd);
+    const u = u18?.teams || [];
+
+    addMatch(matches, "U18_1", 2, "A", getTeam(u,0,"U1"), getTeam(u,1,"U2"), "U18 · Poule unique", {categorie:u18?.categorie || "U18", epreuve:u18?.epreuve || "DM"});
+
+    addMatch(matches, "GIRLS_A2", 3, "A", getTeam(gA,0,"Filles A1"), getTeam(gA,2,"Filles A3"), "Seniors DD · Poule A", {categorie:"Seniors", epreuve:"DD"});
+    addMatch(matches, "GIRLS_B2", 3, "B", getTeam(gB,0,"Filles B1"), getTeam(gB,2,"Filles B3"), "Seniors DD · Poule B", {categorie:"Seniors", epreuve:"DD"});
+
+    addMatch(matches, "U18_2", 4, "A", getTeam(u,0,"U1"), getTeam(u,2,"U3"), "U18 · Poule unique", {categorie:u18?.categorie || "U18", epreuve:u18?.epreuve || "DM"});
+
+    addMatch(matches, "GIRLS_A3", 5, "A", getTeam(gA,1,"Filles A2"), getTeam(gA,2,"Filles A3"), "Seniors DD · Poule A", {categorie:"Seniors", epreuve:"DD"});
+    addMatch(matches, "GIRLS_B3", 5, "B", getTeam(gB,1,"Filles B2"), getTeam(gB,2,"Filles B3"), "Seniors DD · Poule B", {categorie:"Seniors", epreuve:"DD"});
+
+    addMatch(matches, "U18_3", 6, "A", getTeam(u,1,"U2"), getTeam(u,2,"U3"), "U18 · Poule unique", {categorie:u18?.categorie || "U18", epreuve:u18?.epreuve || "DM"});
+
+    const mA = men?.pools?.poolA || [];
+    const mB = men?.pools?.poolB || [];
+
+    addMatch(matches, "MEN_A1", 7, "A", getTeam(mA,0,"Hommes A1"), getTeam(mA,1,"Hommes A2"), "Seniors DM · Poule A", {categorie:"Seniors", epreuve:"DM"});
+    addMatch(matches, "MEN_A2", 7, "B", getTeam(mA,2,"Hommes A3"), getTeam(mA,3,"Hommes A4"), "Seniors DM · Poule A", {categorie:"Seniors", epreuve:"DM"});
+
+    addMatch(matches, "MEN_B1", 8, "A", getTeam(mB,0,"Hommes B1"), getTeam(mB,1,"Hommes B2"), "Seniors DM · Poule B", {categorie:"Seniors", epreuve:"DM"});
+
+    addMatch(matches, "MEN_A3", 9, "A", getTeam(mA,0,"Hommes A1"), getTeam(mA,2,"Hommes A3"), "Seniors DM · Poule A", {categorie:"Seniors", epreuve:"DM"});
+    addMatch(matches, "MEN_A4", 9, "B", getTeam(mA,1,"Hommes A2"), getTeam(mA,3,"Hommes A4"), "Seniors DM · Poule A", {categorie:"Seniors", epreuve:"DM"});
+
+    addMatch(matches, "MEN_B2", 10, "A", getTeam(mB,0,"Hommes B1"), getTeam(mB,2,"Hommes B3"), "Seniors DM · Poule B", {categorie:"Seniors", epreuve:"DM"});
+
+    addMatch(matches, "MEN_A5", 11, "A", getTeam(mA,0,"Hommes A1"), getTeam(mA,3,"Hommes A4"), "Seniors DM · Poule A", {categorie:"Seniors", epreuve:"DM"});
+    addMatch(matches, "MEN_A6", 11, "B", getTeam(mA,1,"Hommes A2"), getTeam(mA,2,"Hommes A3"), "Seniors DM · Poule A", {categorie:"Seniors", epreuve:"DM"});
+
+    addMatch(matches, "MEN_B3", 12, "A", getTeam(mB,1,"Hommes B2"), getTeam(mB,2,"Hommes B3"), "Seniors DM · Poule B", {categorie:"Seniors", epreuve:"DM"});
+
+    const u14 = (u14dm?.teams?.length ? u14dm : u14dd);
+
+    addMatch(matches, "U14_FINAL", 12, "B", getTeam(u14?.teams || [],0,"Finaliste U14 1"), getTeam(u14?.teams || [],1,"Finaliste U14 2"), "U14 · Finale", {categorie:u14?.categorie || "U14", epreuve:u14?.epreuve || "DM"});
+
+    addMatch(matches, "GIRLS_SF1", 13, "A", {teamName:"1re Poule A"}, {teamName:"2e Poule B"}, "Seniors DD · 1/2 finale", {categorie:"Seniors", epreuve:"DD"});
+    addMatch(matches, "GIRLS_SF2", 13, "B", {teamName:"1re Poule B"}, {teamName:"2e Poule A"}, "Seniors DD · 1/2 finale", {categorie:"Seniors", epreuve:"DD"});
+
+    addMatch(matches, "MEN_SF1", 14, "A", {teamName:"1er Poule A"}, {teamName:"2e Poule B"}, "Seniors DM · 1/2 finale", {categorie:"Seniors", epreuve:"DM"});
+    addMatch(matches, "MEN_SF2", 14, "B", {teamName:"1er Poule B"}, {teamName:"2e Poule A"}, "Seniors DM · 1/2 finale", {categorie:"Seniors", epreuve:"DM"});
+
+    /*
+      Poule seniors hommes places 5 à 7.
+      Les équipes sont :
+      - 3e Poule A
+      - 4e Poule A
+      - 3e Poule B
+
+      Matchs :
+      1) 4e Poule A vs 3e Poule B
+      2) 3e Poule A vs 3e Poule B
+      3) 3e Poule A vs 4e Poule A
+    */
+
+    addMatch(matches, "MEN_5_7_A", 15, "A", {teamName:"4e Poule A"}, {teamName:"3e Poule B"}, "Seniors DM · Poule 5-7", {categorie:"Seniors", epreuve:"DM", phase:"poule_5_7"});
+    addMatch(matches, "GIRLS_5_6", 15, "B", {teamName:"5e filles"}, {teamName:"6e filles"}, "Seniors DD · Place 5-6", {categorie:"Seniors", epreuve:"DD"});
+
+    addMatch(matches, "MEN_5_7_B", 16, "A", {teamName:"3e Poule A"}, {teamName:"3e Poule B"}, "Seniors DM · Poule 5-7", {categorie:"Seniors", epreuve:"DM", phase:"poule_5_7"});
+    addMatch(matches, "GIRLS_3_4", 16, "B", {teamName:"Perdante DF1"}, {teamName:"Perdante DF2"}, "Seniors DD · Place 3-4", {categorie:"Seniors", epreuve:"DD"});
+
+    addMatch(matches, "MEN_5_7_C", 17, "A", {teamName:"3e Poule A"}, {teamName:"4e Poule A"}, "Seniors DM · Poule 5-7", {categorie:"Seniors", epreuve:"DM", phase:"poule_5_7"});
+
+    addMatch(matches, "MEN_3_4", 18, "A", {teamName:"Perdant DF1"}, {teamName:"Perdant DF2"}, "Seniors DM · Place 3-4", {categorie:"Seniors", epreuve:"DM"});
+
+    const plus45 = (plus45dm?.teams?.length ? plus45dm : plus45dd);
+
+    addMatch(matches, "PLUS45_FINAL", 19, "A", getTeam(plus45?.teams || [],0,"Finaliste +45 ans 1"), getTeam(plus45?.teams || [],1,"Finaliste +45 ans 2"), "+45 ans · Finale", {categorie:plus45?.categorie || "45+", epreuve:plus45?.epreuve || "DM"});
+    addMatch(matches, "GIRLS_FINAL", 19, "B", {teamName:"Vainqueure DF1"}, {teamName:"Vainqueure DF2"}, "Seniors DD · Finale", {categorie:"Seniors", epreuve:"DD"});
+
+    addMatch(matches, "MEN_FINAL", 20, "A", {teamName:"Vainqueur DF1"}, {teamName:"Vainqueur DF2"}, "Seniors DM · Finale", {categorie:"Seniors", epreuve:"DM"});
+
+    return matches;
   }
 
-  /* =========================
-     SENIORS DAMES — POULES
-  ========================= */
-
-  const gA = girls?.pools?.poolA || [];
-  const gB = girls?.pools?.poolB || [];
-
-  addMatch(matches, "GIRLS_A1", 1, "A",
-    getTeam(gA,0,"Filles A1"),
-    getTeam(gA,1,"Filles A2"),
-    "Seniors DD · Poule A",
-    {categorie:"Seniors", epreuve:"DD"}
-  );
-
-  addMatch(matches, "GIRLS_B1", 1, "B",
-    getTeam(gB,0,"Filles B1"),
-    getTeam(gB,1,"Filles B2"),
-    "Seniors DD · Poule B",
-    {categorie:"Seniors", epreuve:"DD"}
-  );
-
-  /* =========================
-     U18
-  ========================= */
-
-  const u18 = (u18dm?.teams?.length ? u18dm : u18dd);
-  const u = u18?.teams || [];
-
-  addMatch(matches, "U18_1", 2, "A",
-    getTeam(u,0,"U1"),
-    getTeam(u,1,"U2"),
-    "U18 · Poule unique",
-    {categorie:u18?.categorie || "U18", epreuve:u18?.epreuve || "DM"}
-  );
-
-  /* =========================
-     DAMES SUITE
-  ========================= */
-
-  addMatch(matches, "GIRLS_A2", 3, "A",
-    getTeam(gA,0,"Filles A1"),
-    getTeam(gA,2,"Filles A3"),
-    "Seniors DD · Poule A",
-    {categorie:"Seniors", epreuve:"DD"}
-  );
-
-  addMatch(matches, "GIRLS_B2", 3, "B",
-    getTeam(gB,0,"Filles B1"),
-    getTeam(gB,2,"Filles B3"),
-    "Seniors DD · Poule B",
-    {categorie:"Seniors", epreuve:"DD"}
-  );
-
-  addMatch(matches, "U18_2", 4, "A",
-    getTeam(u,0,"U1"),
-    getTeam(u,2,"U3"),
-    "U18 · Poule unique",
-    {categorie:u18?.categorie || "U18", epreuve:u18?.epreuve || "DM"}
-  );
-
-  addMatch(matches, "GIRLS_A3", 5, "A",
-    getTeam(gA,1,"Filles A2"),
-    getTeam(gA,2,"Filles A3"),
-    "Seniors DD · Poule A",
-    {categorie:"Seniors", epreuve:"DD"}
-  );
-
-  addMatch(matches, "GIRLS_B3", 5, "B",
-    getTeam(gB,1,"Filles B2"),
-    getTeam(gB,2,"Filles B3"),
-    "Seniors DD · Poule B",
-    {categorie:"Seniors", epreuve:"DD"}
-  );
-
-  addMatch(matches, "U18_3", 6, "A",
-    getTeam(u,1,"U2"),
-    getTeam(u,2,"U3"),
-    "U18 · Poule unique",
-    {categorie:u18?.categorie || "U18", epreuve:u18?.epreuve || "DM"}
-  );
-
-  /* =========================
-     SENIORS HOMMES — POULES
-  ========================= */
-
-  const mA = men?.pools?.poolA || [];
-  const mB = men?.pools?.poolB || [];
-
-  addMatch(matches, "MEN_A1", 7, "A",
-    getTeam(mA,0,"Hommes A1"),
-    getTeam(mA,1,"Hommes A2"),
-    "Seniors DM · Poule A",
-    {categorie:"Seniors", epreuve:"DM"}
-  );
-
-  addMatch(matches, "MEN_A2", 7, "B",
-    getTeam(mA,2,"Hommes A3"),
-    getTeam(mA,3,"Hommes A4"),
-    "Seniors DM · Poule A",
-    {categorie:"Seniors", epreuve:"DM"}
-  );
-
-  addMatch(matches, "MEN_B1", 8, "A",
-    getTeam(mB,0,"Hommes B1"),
-    getTeam(mB,1,"Hommes B2"),
-    "Seniors DM · Poule B",
-    {categorie:"Seniors", epreuve:"DM"}
-  );
-
-  addMatch(matches, "MEN_A3", 9, "A",
-    getTeam(mA,0,"Hommes A1"),
-    getTeam(mA,2,"Hommes A3"),
-    "Seniors DM · Poule A",
-    {categorie:"Seniors", epreuve:"DM"}
-  );
-
-  addMatch(matches, "MEN_A4", 9, "B",
-    getTeam(mA,1,"Hommes A2"),
-    getTeam(mA,3,"Hommes A4"),
-    "Seniors DM · Poule A",
-    {categorie:"Seniors", epreuve:"DM"}
-  );
-
-  addMatch(matches, "MEN_B2", 10, "A",
-    getTeam(mB,0,"Hommes B1"),
-    getTeam(mB,2,"Hommes B3"),
-    "Seniors DM · Poule B",
-    {categorie:"Seniors", epreuve:"DM"}
-  );
-
-  addMatch(matches, "MEN_A5", 11, "A",
-    getTeam(mA,0,"Hommes A1"),
-    getTeam(mA,3,"Hommes A4"),
-    "Seniors DM · Poule A",
-    {categorie:"Seniors", epreuve:"DM"}
-  );
-
-  addMatch(matches, "MEN_A6", 11, "B",
-    getTeam(mA,1,"Hommes A2"),
-    getTeam(mA,2,"Hommes A3"),
-    "Seniors DM · Poule A",
-    {categorie:"Seniors", epreuve:"DM"}
-  );
-
-  addMatch(matches, "MEN_B3", 12, "A",
-    getTeam(mB,1,"Hommes B2"),
-    getTeam(mB,2,"Hommes B3"),
-    "Seniors DM · Poule B",
-    {categorie:"Seniors", epreuve:"DM"}
-  );
-
-  /* =========================
-     U14
-  ========================= */
-
-  const u14 = (u14dm?.teams?.length ? u14dm : u14dd);
-
-  addMatch(matches, "U14_FINAL", 12, "B",
-    getTeam(u14?.teams || [],0,"Finaliste U14 1"),
-    getTeam(u14?.teams || [],1,"Finaliste U14 2"),
-    "U14 · Finale",
-    {categorie:u14?.categorie || "U14", epreuve:u14?.epreuve || "DM"}
-  );
-
-  /* =========================
-     DEMI-FINALES
-  ========================= */
-
-  addMatch(matches, "GIRLS_SF1", 13, "A",
-    {teamName:"1re Poule A"},
-    {teamName:"2e Poule B"},
-    "Seniors DD · 1/2 finale",
-    {categorie:"Seniors", epreuve:"DD"}
-  );
-
-  addMatch(matches, "GIRLS_SF2", 13, "B",
-    {teamName:"1re Poule B"},
-    {teamName:"2e Poule A"},
-    "Seniors DD · 1/2 finale",
-    {categorie:"Seniors", epreuve:"DD"}
-  );
-
-  addMatch(matches, "MEN_SF1", 14, "A",
-    {teamName:"1er Poule A"},
-    {teamName:"2e Poule B"},
-    "Seniors DM · 1/2 finale",
-    {categorie:"Seniors", epreuve:"DM"}
-  );
-
-  addMatch(matches, "MEN_SF2", 14, "B",
-    {teamName:"1er Poule B"},
-    {teamName:"2e Poule A"},
-    "Seniors DM · 1/2 finale",
-    {categorie:"Seniors", epreuve:"DM"}
-  );
-
-  /* =========================
-     POULE 5-7 HOMMES
-     3 matchs successifs
-  ========================= */
-
-  addMatch(matches, "MEN_5_7_A", 15, "A",
-    {teamName:"3e Poule A"},
-    {teamName:"4e Poule A"},
-    "Seniors DM · Poule places 5-7",
-    {categorie:"Seniors", epreuve:"DM"}
-  );
-
-  addMatch(matches, "GIRLS_5_6", 15, "B",
-    {teamName:"5e filles"},
-    {teamName:"6e filles"},
-    "Seniors DD · Place 5-6",
-    {categorie:"Seniors", epreuve:"DD"}
-  );
-
-  addMatch(matches, "MEN_5_7_B", 16, "A",
-    {teamName:"Perdant match 1"},
-    {teamName:"3e Poule B"},
-    "Seniors DM · Poule places 5-7",
-    {categorie:"Seniors", epreuve:"DM"}
-  );
-
-  addMatch(matches, "GIRLS_3_4", 16, "B",
-    {teamName:"Perdante DF1"},
-    {teamName:"Perdante DF2"},
-    "Seniors DD · Place 3-4",
-    {categorie:"Seniors", epreuve:"DD"}
-  );
-
-  addMatch(matches, "MEN_5_7_C", 17, "A",
-    {teamName:"Vainqueur match 1"},
-    {teamName:"3e Poule B"},
-    "Seniors DM · Poule places 5-7",
-    {categorie:"Seniors", epreuve:"DM"}
-  );
-
-  addMatch(matches, "MEN_3_4", 18, "A",
-    {teamName:"Perdant DF1"},
-    {teamName:"Perdant DF2"},
-    "Seniors DM · Place 3-4",
-    {categorie:"Seniors", epreuve:"DM"}
-  );
-
-  /* =========================
-     FINALES
-  ========================= */
-
-  const plus45 = (plus45dm?.teams?.length ? plus45dm : plus45dd);
-
-  addMatch(matches, "PLUS45_FINAL", 19, "A",
-    getTeam(plus45?.teams || [],0,"Finaliste +45 ans 1"),
-    getTeam(plus45?.teams || [],1,"Finaliste +45 ans 2"),
-    "+45 ans · Finale",
-    {categorie:plus45?.categorie || "45+", epreuve:plus45?.epreuve || "DM"}
-  );
-
-  addMatch(matches, "GIRLS_FINAL", 19, "B",
-    {teamName:"Vainqueure DF1"},
-    {teamName:"Vainqueure DF2"},
-    "Seniors DD · Finale",
-    {categorie:"Seniors", epreuve:"DD"}
-  );
-
-  addMatch(matches, "MEN_FINAL", 20, "A",
-    {teamName:"Vainqueur DF1"},
-    {teamName:"Vainqueur DF2"},
-    "Seniors DM · Finale",
-    {categorie:"Seniors", epreuve:"DM"}
-  );
-
-  return matches;
-}
   async function generateGeneral(){
     const map = new Map();
 
