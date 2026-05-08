@@ -768,3 +768,416 @@ function resolveDynamicText(text, match){
 
   return null;
 }
+function displayTeam(text, sub, match){
+  const resolved = resolveDynamicText(text, match);
+
+  if(resolved){
+    return {
+      title:resolved.teamName || "Équipe",
+      sub:"",
+      placeholder:false
+    };
+  }
+
+  const raw = String(text || "").trim();
+
+  const isPlaceholder =
+    raw === "" ||
+    raw === "Équipe" ||
+    raw.includes("Poule") ||
+    raw.includes("Vainqueur") ||
+    raw.includes("Vainqueure") ||
+    raw.includes("Perdant") ||
+    raw.includes("Perdante") ||
+    raw.includes("Finaliste") ||
+    raw.includes("match 1") ||
+    raw.includes("filles") ||
+    raw.includes("hommes");
+
+  return {
+    title:raw || "Équipe",
+    sub:sub || "",
+    placeholder:isPlaceholder
+  };
+}
+
+function renderPoolRanking(match){
+  const poolKey = poolKeyFromMatch(match);
+
+  if(!poolKey) return "";
+
+  const poolMatches = getPoolMatches(poolKey);
+
+  if(!poolMatches.length) return "";
+
+  const ranking = buildPoolRanking(poolKey);
+
+  return `
+    <div class="pool-ranking-box">
+      <h3 class="pool-ranking-title">
+        📊 Classement actuel — ${esc(match.label)}
+      </h3>
+
+      <table class="pool-ranking-table">
+        <thead>
+          <tr>
+            <th>#</th>
+            <th>Équipe</th>
+            <th>Pts</th>
+            <th>Sets</th>
+            <th>Jeux</th>
+          </tr>
+        </thead>
+
+        <tbody>
+          ${ranking.map((r, idx)=>{
+            const setDiff = r.setsWon - r.setsLost;
+            const gameDiff = r.gamesWon - r.gamesLost;
+
+            return `
+              <tr>
+                <td>${idx + 1}</td>
+                <td>${esc(r.teamName)}</td>
+                <td>${r.points}</td>
+                <td>${setDiff > 0 ? "+" : ""}${setDiff}</td>
+                <td>${gameDiff > 0 ? "+" : ""}${gameDiff}</td>
+              </tr>
+            `;
+          }).join("")}
+        </tbody>
+      </table>
+    </div>
+  `;
+}
+
+function render(){
+  const matches = visibleMatches();
+
+  matches.sort((a,b)=>{
+    if(Number(a.order) !== Number(b.order)){
+      return Number(a.order) - Number(b.order);
+    }
+
+    return String(a.court || "").localeCompare(String(b.court || ""));
+  });
+
+  statusText.textContent = currentProg
+    ? `${matches.length} élément(s) affiché(s)`
+    : "Programmation générale introuvable.";
+
+  if(!currentProg){
+    adminList.innerHTML = `<p class="muted">Génère d’abord la programmation générale.</p>`;
+    return;
+  }
+
+  adminList.innerHTML = `
+    <div class="match-list">
+      ${matches.map(match => {
+
+        const stored = getResult(match.id) || {};
+        const winnerSide = computeWinnerSideFromScore(stored);
+
+        const teamA = displayTeam(match.teamA, match.subA, match);
+        const teamB = displayTeam(match.teamB, match.subB, match);
+
+        const cls =
+          match.court === "A"
+            ? "courtA"
+            : match.court === "B"
+              ? "courtB"
+              : "";
+
+        const isWinnerOnly = match.type === "winner";
+
+        return `
+          <div class="match-card ${esc(cls)}" data-mid="${esc(match.id)}">
+
+            <div class="match-head">
+              <div class="m-slot">#${esc(match.order || "—")}</div>
+              <div class="m-time">${esc(match.time || "—")}</div>
+              <div class="m-court">${esc(courtLabel(match.court))}</div>
+
+              <div class="pill">
+                <span class="dot ${winnerSide ? "green" : "orange"}"></span>
+                ${esc(match.label || match.id)}
+              </div>
+            </div>
+
+            ${isWinnerOnly ? `
+              <div style="margin-top:12px;">
+                <div class="team-title ${teamA.placeholder ? "team-placeholder" : ""}">
+                  ${esc(teamA.title)}
+                </div>
+
+                ${teamA.sub
+                  ? `<div class="team-sub">${esc(teamA.sub)}</div>`
+                  : ""}
+              </div>
+            ` : `
+              <div class="score-grid">
+
+                <div class="hdr"></div>
+                <div class="hdr">S1</div>
+                <div class="hdr">S2</div>
+                <div class="hdr">S3</div>
+
+                <div class="team">
+                  <div class="team-title ${teamA.placeholder ? "team-placeholder" : ""}">
+                    ${esc(teamA.title)}
+                  </div>
+
+                  ${teamA.sub
+                    ? `<div class="team-sub">${esc(teamA.sub)}</div>`
+                    : ""}
+                </div>
+
+                <input class="sc" data-k="s1A" value="${esc(stored.s1A ?? "")}">
+                <input class="sc" data-k="s2A" value="${esc(stored.s2A ?? "")}">
+                <input class="sc" data-k="s3A" value="${esc(stored.s3A ?? "")}">
+
+                <div class="team">
+                  <div class="team-title ${teamB.placeholder ? "team-placeholder" : ""}">
+                    ${esc(teamB.title)}
+                  </div>
+
+                  ${teamB.sub
+                    ? `<div class="team-sub">${esc(teamB.sub)}</div>`
+                    : ""}
+                </div>
+
+                <input class="sc" data-k="s1B" value="${esc(stored.s1B ?? "")}">
+                <input class="sc" data-k="s2B" value="${esc(stored.s2B ?? "")}">
+                <input class="sc" data-k="s3B" value="${esc(stored.s3B ?? "")}">
+
+              </div>
+
+              <div class="actions">
+                <div class="mini">
+                  ${winnerSide
+                    ? `✅ Vainqueur : équipe ${winnerSide}`
+                    : "⏳ Résultat incomplet"}
+                </div>
+
+                <button class="btn primary" data-save="${esc(match.id)}">
+                  💾 Enregistrer
+                </button>
+              </div>
+
+              ${renderPoolRanking(match)}
+            `}
+          </div>
+        `;
+      }).join("")}
+    </div>
+  `;
+}
+
+adminList.addEventListener("click", async (e)=>{
+
+  const btn = e.target.closest("[data-save]");
+  if(!btn) return;
+
+  const mid = btn.dataset.save;
+  const card = btn.closest(".match-card");
+
+  const get = (k)=>{
+    const el = card.querySelector(`[data-k="${k}"]`);
+    return (el?.value || "").trim();
+  };
+
+  const payload = {
+    s1A:get("s1A"),
+    s2A:get("s2A"),
+    s3A:get("s3A"),
+    s1B:get("s1B"),
+    s2B:get("s2B"),
+    s3B:get("s3B"),
+    updatedAt:serverTimestamp(),
+    updatedBy:auth.currentUser?.uid || null
+  };
+
+  payload.winnerSide = computeWinnerSideFromScore(payload);
+
+  await setDoc(
+    doc(resultsCollection(), mid),
+    payload,
+    { merge:true }
+  );
+});
+
+async function setPublicVisible(value){
+  await setDoc(visibilityRef(), {
+    publicVisible:value === true,
+    updatedAt:serverTimestamp(),
+    updatedBy:auth.currentUser?.uid || null
+  }, { merge:true });
+}
+
+btnPublicHide.onclick = async ()=>{
+  await setPublicVisible(false);
+};
+
+btnPublicShow.onclick = async ()=>{
+  await setPublicVisible(true);
+};
+
+btnGeneral.onclick = ()=>{
+  generalMode = true;
+  updateZone();
+};
+
+btnFiltered.onclick = ()=>{
+  generalMode = false;
+  updateZone();
+};
+
+function updateZone(){
+  zoneLabel.textContent = zoneText();
+
+  btnGeneral.classList.toggle("primary", generalMode);
+  btnFiltered.classList.toggle("primary", !generalMode);
+
+  render();
+}
+
+function stopListeners(){
+
+  if(unsubProg){
+    unsubProg();
+    unsubProg = null;
+  }
+
+  if(unsubResults){
+    unsubResults();
+    unsubResults = null;
+  }
+
+  if(unsubVisibility){
+    unsubVisibility();
+    unsubVisibility = null;
+  }
+}
+
+function startListeners(){
+
+  stopListeners();
+
+  unsubProg = onSnapshot(generalProgRef(), (snap)=>{
+
+    currentProg = snap.exists()
+      ? (snap.data() || null)
+      : null;
+
+    render();
+  });
+
+  unsubResults = onSnapshot(resultsCollection(), (snap)=>{
+
+    resultsMap = new Map();
+
+    snap.forEach(d=>{
+      resultsMap.set(d.id, d.data() || {});
+    });
+
+    render();
+  });
+
+  unsubVisibility = onSnapshot(visibilityRef(), (snap)=>{
+
+    const data = snap.exists()
+      ? (snap.data() || {})
+      : {};
+
+    const visible = data.publicVisible === true;
+
+    visibilityText.innerHTML = visible
+      ? "Statut actuel : <strong>visible publiquement ✅</strong>"
+      : "Statut actuel : <strong>maintenance / masqué 🔒</strong>";
+
+    btnPublicShow.classList.toggle("is-active", visible);
+    btnPublicHide.classList.toggle("is-active", !visible);
+  });
+}
+
+function showDenied(){
+  accessDenied.style.display = "block";
+  pageContent.style.display = "none";
+  panelVisibility.style.display = "none";
+  panelResults.style.display = "none";
+  stopListeners();
+}
+
+function showAdmin(){
+
+  accessDenied.style.display = "none";
+  pageContent.style.display = "block";
+  panelVisibility.style.display = "block";
+  panelResults.style.display = "block";
+
+  try{
+    const savedCat = localStorage.getItem("champ_admin_categorie");
+    const savedEpreuve = localStorage.getItem("champ_admin_epreuve");
+
+    if(CATEGORIES.includes(savedCat)){
+      currentCategorie = savedCat;
+    }
+
+    if(EPREUVES.includes(savedEpreuve)){
+      currentEpreuve = savedEpreuve;
+    }
+  }catch(error){}
+
+  updateZone();
+  startListeners();
+}
+
+document.addEventListener("adminZoneChange", (e)=>{
+
+  const d = e.detail || {};
+
+  if(CATEGORIES.includes(d.categorie)){
+    currentCategorie = d.categorie;
+  }
+
+  if(EPREUVES.includes(d.epreuve)){
+    currentEpreuve = d.epreuve;
+  }
+
+  try{
+    localStorage.setItem("champ_admin_categorie", currentCategorie);
+    localStorage.setItem("champ_admin_epreuve", currentEpreuve);
+  }catch(error){}
+
+  if(!generalMode){
+    updateZone();
+  }
+});
+
+onAuthStateChanged(auth, async (user)=>{
+
+  if(!user){
+    showDenied();
+    return;
+  }
+
+  try{
+
+    const role = await getRoleByUid(user.uid);
+
+    if(role !== "admin"){
+      showDenied();
+      return;
+    }
+
+    showAdmin();
+
+  }catch(error){
+    console.error(error);
+    showDenied();
+  }
+});
+
+</script>
+
+</body>
+</html>
