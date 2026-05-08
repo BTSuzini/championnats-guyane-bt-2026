@@ -84,9 +84,11 @@
 
     .grid{
       display:grid;
-      grid-template-columns:1fr;
       gap:10px;
     }
+
+    .grid.two{grid-template-columns:1fr 1fr;}
+    .grid.three{grid-template-columns:repeat(3,1fr);}
 
     .btn{
       appearance:none;
@@ -109,7 +111,6 @@
       background:linear-gradient(180deg,var(--blue),var(--blue-dark));
       color:#fff;
       border-color:var(--blue);
-      box-shadow:0 10px 22px rgba(7,91,154,.22);
     }
 
     .btn.clay{
@@ -124,8 +125,9 @@
       border-color:#f1b2b2;
     }
 
-    .btn:disabled{
-      opacity:.55;
+    .btn:disabled,
+    .btnx:disabled{
+      opacity:.5;
       cursor:not-allowed;
     }
 
@@ -148,14 +150,14 @@
 
     .match-list{
       display:grid;
-      gap:12px;
+      gap:14px;
       margin-top:12px;
     }
 
     .match-card{
       border-radius:18px;
       border:1px solid rgba(16,24,40,.08);
-      padding:13px;
+      padding:14px;
       background:#fff;
       box-shadow:0 8px 18px rgba(16,24,40,.06);
     }
@@ -170,17 +172,22 @@
       border-color:rgba(255,0,60,.20);
     }
 
+    .match-card.winner{
+      background:#f3fff6;
+      border-color:#d9f2df;
+    }
+
     .match-head{
       display:flex;
       align-items:center;
-      gap:8px;
+      gap:10px;
       min-width:0;
     }
 
     .m-slot{
       font-size:12px;
       font-weight:1000;
-      color:#667085;
+      opacity:.7;
       white-space:nowrap;
     }
 
@@ -191,15 +198,14 @@
     }
 
     .m-court{
-      min-width:0;
       flex:1;
+      min-width:0;
       font-size:13px;
-      font-weight:900;
       font-style:italic;
       color:#475467;
+      white-space:nowrap;
       overflow:hidden;
       text-overflow:ellipsis;
-      white-space:nowrap;
     }
 
     .actions{
@@ -216,20 +222,9 @@
       background:#fff;
       cursor:pointer;
       font-weight:1000;
-      color:#111;
     }
 
-    .btnx:disabled{
-      opacity:.45;
-      cursor:not-allowed;
-    }
-
-    .team-row{
-      margin-top:10px;
-      display:grid;
-      grid-template-columns:1fr;
-      gap:4px;
-    }
+    .team-row{margin-top:10px;}
 
     .team-name{
       font-size:16px;
@@ -238,34 +233,42 @@
     }
 
     .team-sub{
+      margin-top:3px;
       font-size:13px;
       color:#475467;
       font-weight:800;
     }
 
     .vs-line{
-      margin:9px 0 5px;
+      margin:10px 0 8px;
       text-align:center;
-      font-weight:1000;
-      letter-spacing:2px;
-      opacity:.55;
       font-size:12px;
+      font-weight:1000;
+      opacity:.55;
+      letter-spacing:2px;
     }
 
-    @media (min-width:760px){
-      .panel{padding:22px;}
-      .grid.two{grid-template-columns:1fr 1fr;}
-      .grid.three{grid-template-columns:repeat(3,1fr);}
+    .general-toggle{
+      display:flex;
+      gap:10px;
+      flex-wrap:wrap;
+      margin-top:16px;
     }
 
     @media (max-width:759px){
-      main{padding-top:calc(var(--admin-total-top, 150px) + 20px);}
+      .grid.two,
+      .grid.three{grid-template-columns:1fr;}
+
       .panel-title{font-size:24px;}
+
+      main{
+        padding-top:calc(var(--admin-total-top, 150px) + 20px);
+      }
     }
   </style>
 </head>
 
-<body>
+<body data-zone-selector="select">
 
 <div id="adminHeader"></div>
 
@@ -280,15 +283,18 @@
     <div class="panel-head">
       <div>
         <h1 class="panel-title">📅 Programmation</h1>
-        <p class="panel-text">
-          Génère, ajuste et contrôle la visibilité publique de la programmation.
-        </p>
+        <p class="panel-text">Génère depuis les tirages validés, ajuste horaires et terrains.</p>
       </div>
       <div class="panel-tag">Admin</div>
     </div>
 
     <div class="status-box">
-      Zone sélectionnée : <strong id="zoneLabel">Chargement…</strong>
+      Vue actuelle : <strong id="zoneLabel">Chargement…</strong>
+    </div>
+
+    <div class="general-toggle">
+      <button class="btn primary" id="btnGeneral">🌐 Programmation générale</button>
+      <button class="btn" id="btnFiltered">🎾 Vue catégorie / épreuve</button>
     </div>
   </section>
 
@@ -302,13 +308,8 @@
     </div>
 
     <div class="grid two">
-      <button class="btn" id="btnPublicHide">🔒 Mettre en maintenance</button>
-      <button class="btn" id="btnPublicShow">✅ Rendre visible</button>
-    </div>
-
-    <div class="status-box">
-      Si la programmation est masquée, le public verra une page de maintenance.
-      Les admins et JAT pourront tout de même voir le fichier de travail sur la page publique.
+      <button class="btn" id="btnPublicHide">🔒 Maintenance</button>
+      <button class="btn primary" id="btnPublicShow">✅ Visible</button>
     </div>
   </section>
 
@@ -322,21 +323,22 @@
     </div>
 
     <div class="grid three">
-      <button class="btn primary" id="btnGenerate">🧩 Générer depuis les équipes</button>
-      <button class="btn danger" id="btnResetProg">🧨 RAZ programmation</button>
+      <button class="btn clay" id="btnGenerate">🧩 Générer depuis tirage validé</button>
+      <button class="btn primary" id="btnGenerateAll">🌐 Générer programmation générale</button>
+      <button class="btn danger" id="btnResetProg">🧨 Réinitialiser</button>
       <a class="btn" id="btnOpenPublic" href="../public/programmation.html?adminPreview=1">👀 Aperçu public</a>
     </div>
 
     <div class="status-box">
-      La génération actuelle crée des matchs simples à partir de la liste principale de la catégorie/épreuve sélectionnée.
-      Elle pourra ensuite être remplacée par une génération depuis le tirage validé.
+      La programmation est générée depuis les documents validés dans
+      <strong>events/championnats-2026/tirages</strong>.
     </div>
   </section>
 
   <section class="section panel" id="panelSchedule" style="display:none;">
     <div class="panel-head">
       <div>
-        <h2 class="panel-title">🗓️ Ordre chronologique</h2>
+        <h2 class="panel-title">🗓️ Chronologie</h2>
         <p class="panel-text" id="schedStatus">—</p>
       </div>
       <div class="panel-tag">Direct</div>
@@ -345,7 +347,7 @@
     <div id="adminList"></div>
 
     <p class="muted" style="margin-top:12px;">
-      ↑ ↓ échangent les créneaux. Le bouton terrain alterne entre Manon et Lisa.
+      🕒 permet de modifier l’horaire. 🐝/🌶️ change le terrain. ↑ ↓ changent l’ordre.
     </p>
   </section>
 
@@ -373,9 +375,12 @@
 
   const EVENT_ID = "championnats-2026";
 
+  const CATEGORIES = ["U14", "U18", "Seniors", "45+"];
+  const EPREUVES = ["DM", "DD"];
+
   const EPREUVE_LABELS = {
-    DM: "Double Messieurs",
-    DD: "Double Dames"
+    DM:"Double Messieurs",
+    DD:"Double Dames"
   };
 
   const accessDenied = document.getElementById("accessDenied");
@@ -393,11 +398,15 @@
   const btnPublicHide = document.getElementById("btnPublicHide");
   const btnPublicShow = document.getElementById("btnPublicShow");
   const btnGenerate = document.getElementById("btnGenerate");
+  const btnGenerateAll = document.getElementById("btnGenerateAll");
   const btnResetProg = document.getElementById("btnResetProg");
   const btnOpenPublic = document.getElementById("btnOpenPublic");
+  const btnGeneral = document.getElementById("btnGeneral");
+  const btnFiltered = document.getElementById("btnFiltered");
 
   let currentCategorie = "U14";
   let currentEpreuve = "DM";
+  let generalMode = true;
   let currentProg = null;
   let unsubProg = null;
   let unsubVisibility = null;
@@ -409,95 +418,589 @@
       .replaceAll(">","&gt;");
   }
 
-  function zoneKey(){
-    return `${currentCategorie}_${currentEpreuve}`.replace("+", "plus");
+  function zoneKey(categorie = currentCategorie, epreuve = currentEpreuve){
+    return `${categorie}_${epreuve}`.replace("+","plus");
   }
 
   function zoneText(){
+    if(generalMode) return "Programmation générale";
     return `${currentCategorie} — ${EPREUVE_LABELS[currentEpreuve]}`;
   }
 
-  function progRef(){
-    return doc(db, "events", EVENT_ID, "programmations", zoneKey());
+  function progRef(key = null){
+    return doc(db, "events", EVENT_ID, "programmations", key || (generalMode ? "general" : zoneKey()));
+  }
+
+  function drawRef(key){
+    return doc(db, "events", EVENT_ID, "tirages", key);
   }
 
   function visibilityRef(){
     return doc(db, "events", EVENT_ID, "config", "programmation");
   }
 
-  function equipesCol(){
-    return collection(db, "events", EVENT_ID, "equipes");
-  }
-
-  function defaultCourts(){
-    return {
-      A: "court Manon",
-      B: "court Lisa"
-    };
-  }
-
-  function defaultSlots(count){
-    const base = [
-      ["08:30","A"], ["08:30","B"],
-      ["09:15","A"], ["09:15","B"],
-      ["10:00","A"], ["10:00","B"],
-      ["10:45","A"], ["10:45","B"],
-      ["11:30","A"], ["11:30","B"],
-      ["12:15","A"], ["12:15","B"],
-      ["13:00","A"], ["13:00","B"],
-      ["13:45","A"], ["13:45","B"],
-      ["14:30","A"], ["14:30","B"],
-      ["15:15","A"], ["15:15","B"],
-      ["16:00","A"], ["16:00","B"]
-    ];
-
-    return base.slice(0, Math.max(1, count)).map((x, i) => ({
-      slot:i + 1,
-      time:x[0],
-      court:x[1]
-    }));
-  }
-
-  function teamParts(t){
-    if(!t) return { title:"—", sub:"" };
-
-    return {
-      title:t.teamName || "Équipe",
-      sub:`${t.joueur1FirstName || "?"} / ${t.joueur2FirstName || "?"}`
-    };
-  }
-
-  function courtLabel(courtKey){
-    if(courtKey === "A") return "🐝 court Manon";
-    if(courtKey === "B") return "🌶️ court Lisa";
+  function courtLabel(court){
+    if(court === "A") return "🐝 court Manon";
+    if(court === "B") return "🌶️ court Lisa";
     return "🎾 terrain";
   }
 
-  function syncFromAdminHeader(event){
-    const detail = event?.detail || {};
+  function teamTitle(t){
+    return t?.teamName || t?.title || "Équipe";
+  }
 
-    if(["U14","U18","Seniors","45+"].includes(detail.categorie)){
-      currentCategorie = detail.categorie;
+  function teamSub(t){
+    const a = t?.joueur1FirstName || t?.p1FirstName || "";
+    const b = t?.joueur2FirstName || t?.p2FirstName || "";
+    return [a,b].filter(Boolean).join(" / ");
+  }
+
+  function parseToken(token){
+    const s = String(token || "");
+    if(s.startsWith("A:")) return { pool:"A", id:s.slice(2) };
+    if(s.startsWith("B:")) return { pool:"B", id:s.slice(2) };
+    return { pool:null, id:s };
+  }
+
+  function teamFromListById(list, id){
+    return list.find(t => t.id === id) || null;
+  }
+
+  function buildPoolsFromDraw(draw){
+    if(draw.mode === "auto"){
+      const teams = Array.isArray(draw.teams) ? draw.teams : [];
+
+      if(teams.length <= 1){
+        return {
+          mode:"single",
+          poolA:teams,
+          poolB:[],
+          teams
+        };
+      }
+
+      if(teams.length === 2){
+        return {
+          mode:"match",
+          poolA:[teams[0]],
+          poolB:[teams[1]],
+          teams
+        };
+      }
+
+      return {
+        mode:"pool3",
+        poolA:teams.slice(0, 3),
+        poolB:[],
+        teams:teams.slice(0, 3)
+      };
     }
 
-    if(["DM","DD"].includes(detail.epreuve)){
-      currentEpreuve = detail.epreuve;
+    const seed1 = draw.seed1 || null;
+    const seed2 = draw.seed2 || null;
+
+    const all = [
+      seed1,
+      seed2,
+      ...(Array.isArray(draw.teams) ? draw.teams : [])
+    ].filter(Boolean);
+
+    const poolA = seed1 ? [seed1] : [];
+    const poolB = seed2 ? [seed2] : [];
+
+    const byId = new Map(all.map(t => [t.id, t]));
+
+    const order = Array.isArray(draw.order) ? draw.order : [];
+    const revealed = Number(draw.revealed || order.length || 0);
+
+    order.slice(0, revealed).forEach(tok => {
+      const p = parseToken(tok);
+      const team = byId.get(p.id);
+      if(!team) return;
+
+      if(p.pool === "A") poolA.push(team);
+      if(p.pool === "B") poolB.push(team);
+    });
+
+    return {
+      mode:"draw",
+      poolA,
+      poolB,
+      teams:[...poolA, ...poolB]
+    };
+  }
+
+  function makeMatch(id, slot, time, court, teamA, teamB, label, meta = {}){
+    return {
+      id,
+      slot,
+      time,
+      court,
+      teamA:teamTitle(teamA),
+      teamB:teamTitle(teamB),
+      subA:teamSub(teamA),
+      subB:teamSub(teamB),
+      label,
+      ...meta
+    };
+  }
+
+  function buildZoneMatches(categorie, epreuve, draw, offset = 0){
+    const zLabel = `${categorie} — ${EPREUVE_LABELS[epreuve]}`;
+    const pools = buildPoolsFromDraw(draw);
+    const matches = [];
+
+    let n = 1;
+
+    function id(){
+      return `${zoneKey(categorie, epreuve)}_M${n++}`;
     }
 
-    updateZoneDisplay();
+    function add(slot, time, court, a, b, label, meta = {}){
+      matches.push(makeMatch(id(), offset + slot, time, court, a, b, `${zLabel} · ${label}`, {
+        categorie,
+        epreuve,
+        ...meta
+      }));
+    }
+
+    if(pools.mode === "single"){
+      const t = pools.teams[0] || null;
+
+      matches.push({
+        id:id(),
+        slot:offset + 1,
+        time:"À confirmer",
+        court:"AUTO",
+        teamA:t ? teamTitle(t) : "Aucune équipe",
+        teamB:"Vainqueur",
+        subA:t ? teamSub(t) : "",
+        subB:"",
+        label:`${zLabel} · Une seule équipe inscrite — vainqueur`,
+        type:"winner",
+        categorie,
+        epreuve
+      });
+
+      return matches;
+    }
+
+    if(pools.mode === "match"){
+      add(1, "À confirmer", "A", pools.poolA[0], pools.poolB[0], "Finale directe");
+      return matches;
+    }
+
+    if(pools.mode === "pool3"){
+      const p = pools.poolA;
+      add(1, "À confirmer", "A", p[0], p[1], "Poule unique");
+      add(2, "À confirmer", "A", p[0], p[2], "Poule unique");
+      add(3, "À confirmer", "A", p[1], p[2], "Poule unique");
+      return matches;
+    }
+
+    const A = pools.poolA;
+    const B = pools.poolB;
+
+    if(A.length >= 3){
+      add(1, "À confirmer", "A", A[0], A[1], "Poule A");
+      add(2, "À confirmer", "A", A[2], A[0], "Poule A");
+      add(3, "À confirmer", "A", A[1], A[2], "Poule A");
+    }
+
+    if(A.length === 4){
+      add(4, "À confirmer", "A", A[3], A[0], "Poule A");
+      add(5, "À confirmer", "A", A[1], A[3], "Poule A");
+      add(6, "À confirmer", "A", A[2], A[3], "Poule A");
+    }
+
+    if(B.length >= 3){
+      add(1, "À confirmer", "B", B[0], B[1], "Poule B");
+      add(2, "À confirmer", "B", B[2], B[0], "Poule B");
+      add(3, "À confirmer", "B", B[1], B[2], "Poule B");
+    }
+
+    add(20, "À confirmer", "A", {teamName:"1er Poule A"}, {teamName:"2e Poule B"}, "Demi-finale");
+    add(20, "À confirmer", "B", {teamName:"1er Poule B"}, {teamName:"2e Poule A"}, "Demi-finale");
+    add(21, "À confirmer", "B", {teamName:"Perdant DF1"}, {teamName:"Perdant DF2"}, "Petite finale");
+    add(22, "À confirmer", "A", {teamName:"Vainqueur DF1"}, {teamName:"Vainqueur DF2"}, "Finale");
+
+    return matches;
+  }
+
+  async function generateZone(categorie, epreuve){
+    const key = zoneKey(categorie, epreuve);
+    const snap = await getDoc(drawRef(key));
+
+    if(!snap.exists()){
+      throw new Error(`Tirage introuvable pour ${categorie} ${epreuve}.`);
+    }
+
+    const draw = snap.data() || {};
+
+    if(draw.status !== "validated"){
+      throw new Error(`Le tirage ${categorie} ${epreuve} doit être validé.`);
+    }
+
+    const matches = buildZoneMatches(categorie, epreuve, draw, 0);
+
+    await setDoc(progRef(key), {
+      eventId:EVENT_ID,
+      key,
+      categorie,
+      epreuve,
+      source:{
+        type:"tirage",
+        drawDoc:`events/${EVENT_ID}/tirages/${key}`,
+        drawValidatedAt:draw.validatedAt || null
+      },
+      matches,
+      updatedAt:serverTimestamp(),
+      updatedBy:auth.currentUser?.uid || null
+    }, { merge:true });
+
+    return matches;
+  }
+
+  async function generateGeneral(){
+    const all = [];
+    let offset = 0;
+
+    for(const categorie of CATEGORIES){
+      for(const epreuve of EPREUVES){
+        const key = zoneKey(categorie, epreuve);
+        const snap = await getDoc(drawRef(key));
+
+        if(!snap.exists()) continue;
+
+        const draw = snap.data() || {};
+        if(draw.status !== "validated") continue;
+
+        const matches = buildZoneMatches(categorie, epreuve, draw, offset);
+        all.push(...matches);
+        offset += 30;
+      }
+    }
+
+    if(!all.length){
+      throw new Error("Aucun tirage validé trouvé.");
+    }
+
+    all.sort((a,b) => {
+      if(a.slot !== b.slot) return a.slot - b.slot;
+      return String(a.court).localeCompare(String(b.court));
+    });
+
+    await setDoc(progRef("general"), {
+      eventId:EVENT_ID,
+      key:"general",
+      source:{
+        type:"tirages_valides",
+        generatedAt:new Date().toISOString()
+      },
+      matches:all,
+      updatedAt:serverTimestamp(),
+      updatedBy:auth.currentUser?.uid || null
+    }, { merge:true });
+
+    return all;
+  }
+
+  async function generateCurrent(){
+    if(generalMode){
+      return generateGeneral();
+    }
+
+    return generateZone(currentCategorie, currentEpreuve);
+  }
+
+  async function resetProgrammation(){
+    await deleteDoc(progRef());
+  }
+
+  function renderCard(match){
+    const cls =
+      match.type === "winner"
+        ? "winner"
+        : match.court === "A"
+          ? "courtA"
+          : match.court === "B"
+            ? "courtB"
+            : "";
+
+    return `
+      <div class="match-card ${esc(cls)}">
+        <div class="match-head">
+          <div class="m-slot">#${esc(match.slot)}</div>
+          <div class="m-time">${esc(match.time)}</div>
+          <div class="m-court">${esc(courtLabel(match.court))}</div>
+
+          <div class="actions">
+            <button class="btnx" data-act="time" data-id="${esc(match.id)}">🕒</button>
+            <button class="btnx" data-act="court" data-id="${esc(match.id)}">${match.court === "A" ? "🐝" : "🌶️"}</button>
+            <button class="btnx" data-act="up" data-slot="${esc(match.slot)}">↑</button>
+            <button class="btnx" data-act="down" data-slot="${esc(match.slot)}">↓</button>
+          </div>
+        </div>
+
+        <div class="team-row">
+          <div class="team-name">${esc(match.teamA)}</div>
+          ${match.subA ? `<div class="team-sub">${esc(match.subA)}</div>` : ""}
+        </div>
+
+        ${match.type === "winner" ? "" : `
+          <div class="vs-line">VS</div>
+          <div class="team-row">
+            <div class="team-name">${esc(match.teamB)}</div>
+            ${match.subB ? `<div class="team-sub">${esc(match.subB)}</div>` : ""}
+          </div>
+        `}
+
+        <div class="team-sub" style="margin-top:10px;">${esc(match.label || "")}</div>
+      </div>
+    `;
+  }
+
+  function renderList(){
+    if(!currentProg){
+      adminList.innerHTML = `<p class="muted" style="margin:0;">Aucune programmation.</p>`;
+      schedStatus.textContent = "—";
+      return;
+    }
+
+    const matches = Array.isArray(currentProg.matches) ? [...currentProg.matches] : [];
+
+    matches.sort((a,b) => {
+      if(Number(a.slot) !== Number(b.slot)) return Number(a.slot) - Number(b.slot);
+      return String(a.court).localeCompare(String(b.court));
+    });
+
+    adminList.innerHTML = matches.length
+      ? `<div class="match-list">${matches.map(renderCard).join("")}</div>`
+      : `<p class="muted" style="margin:0;">Aucun match.</p>`;
+
+    schedStatus.textContent = `✅ ${matches.length} élément(s)`;
+  }
+
+  async function patchMatches(matches){
+    await updateDoc(progRef(), {
+      matches,
+      updatedAt:serverTimestamp(),
+      updatedBy:auth.currentUser?.uid || null
+    });
+  }
+
+  async function editTime(id){
+    if(!currentProg) return;
+
+    const matches = [...(currentProg.matches || [])];
+    const m = matches.find(x => x.id === id);
+    if(!m) return;
+
+    const next = prompt("Nouvel horaire :", m.time || "");
+    if(next === null) return;
+
+    m.time = next.trim() || "À confirmer";
+    await patchMatches(matches);
+  }
+
+  async function toggleCourt(id){
+    if(!currentProg) return;
+
+    const matches = [...(currentProg.matches || [])];
+    const m = matches.find(x => x.id === id);
+    if(!m) return;
+
+    if(m.court === "A") m.court = "B";
+    else if(m.court === "B") m.court = "A";
+    else m.court = "A";
+
+    await patchMatches(matches);
+  }
+
+  async function swapSlot(slot, dir){
+    if(!currentProg) return;
+
+    const matches = [...(currentProg.matches || [])];
+    const target = dir === "up" ? Number(slot) - 1 : Number(slot) + 1;
+
+    matches.forEach(m => {
+      if(Number(m.slot) === Number(slot)) m.slot = target;
+      else if(Number(m.slot) === Number(target)) m.slot = Number(slot);
+    });
+
+    await patchMatches(matches);
+  }
+
+  function startListeners(){
+    if(unsubProg){
+      unsubProg();
+      unsubProg = null;
+    }
+
+    buildStatus.textContent = "Chargement…";
+    schedStatus.textContent = "Chargement…";
+    adminList.innerHTML = "";
+
+    unsubProg = onSnapshot(progRef(), (snap) => {
+      currentProg = snap.exists() ? (snap.data() || null) : null;
+
+      buildStatus.textContent = currentProg
+        ? "✅ Programmation présente."
+        : "ℹ️ Aucune programmation enregistrée.";
+
+      renderList();
+    }, (error) => {
+      console.error(error);
+      buildStatus.textContent = "❌ Erreur Firestore.";
+    });
+
+    if(!unsubVisibility){
+      unsubVisibility = onSnapshot(visibilityRef(), (snap) => {
+        const data = snap.exists() ? (snap.data() || {}) : {};
+        const visible = data.publicVisible === true;
+
+        visibilityText.innerHTML = visible
+          ? "Statut actuel : <strong>visible publiquement ✅</strong>"
+          : "Statut actuel : <strong>maintenance 🔒</strong>";
+
+        btnPublicShow.classList.toggle("is-active", visible);
+        btnPublicHide.classList.toggle("is-active", !visible);
+      });
+    }
+  }
+
+  function updateZone(){
+    zoneLabel.textContent = zoneText();
+
+    btnGeneral.classList.toggle("primary", generalMode);
+    btnFiltered.classList.toggle("primary", !generalMode);
+
+    btnGenerate.textContent = generalMode
+      ? "🧩 Générer depuis tous les tirages validés"
+      : "🧩 Générer depuis le tirage validé";
+
+    btnOpenPublic.href = generalMode
+      ? "../public/programmation.html?general=1&adminPreview=1"
+      : `../public/programmation.html?categorie=${encodeURIComponent(currentCategorie)}&epreuve=${encodeURIComponent(currentEpreuve)}&adminPreview=1`;
+
     startListeners();
   }
 
-  function updateZoneDisplay(){
-    zoneLabel.textContent = zoneText();
+  async function setPublicVisible(value){
+    await setDoc(visibilityRef(), {
+      publicVisible:value === true,
+      maintenance:value !== true,
+      updatedAt:serverTimestamp(),
+      updatedBy:auth.currentUser?.uid || null
+    }, { merge:true });
+  }
 
-    btnOpenPublic.href =
-      `../public/programmation.html?categorie=${encodeURIComponent(currentCategorie)}&epreuve=${encodeURIComponent(currentEpreuve)}&adminPreview=1`;
+  btnGenerate.onclick = async () => {
+    btnGenerate.disabled = true;
+    buildStatus.textContent = "Génération…";
+
+    try{
+      const matches = await generateCurrent();
+      buildStatus.textContent = `✅ Programmation générée (${matches.length} élément(s)).`;
+    }catch(error){
+      console.error(error);
+      buildStatus.textContent = "❌ " + (error?.message || "Erreur génération.");
+      alert("Erreur ❌\n\n" + (error?.message || "Impossible."));
+    }finally{
+      btnGenerate.disabled = false;
+    }
+  };
+
+  btnGenerateAll.onclick = async () => {
+    generalMode = true;
+    updateZone();
+
+    btnGenerateAll.disabled = true;
+    buildStatus.textContent = "Génération générale…";
+
+    try{
+      const matches = await generateGeneral();
+      buildStatus.textContent = `✅ Programmation générale générée (${matches.length} élément(s)).`;
+    }catch(error){
+      console.error(error);
+      buildStatus.textContent = "❌ " + (error?.message || "Erreur génération générale.");
+      alert("Erreur ❌\n\n" + (error?.message || "Impossible."));
+    }finally{
+      btnGenerateAll.disabled = false;
+    }
+  };
+
+  btnResetProg.onclick = async () => {
+    const ok = confirm(`Réinitialiser ${zoneText()} ?`);
+    if(!ok) return;
+
+    try{
+      await resetProgrammation();
+    }catch(error){
+      console.error(error);
+      alert("Erreur suppression.");
+    }
+  };
+
+  btnPublicHide.onclick = async () => {
+    await setPublicVisible(false);
+  };
+
+  btnPublicShow.onclick = async () => {
+    await setPublicVisible(true);
+  };
+
+  btnGeneral.onclick = () => {
+    generalMode = true;
+    updateZone();
+  };
+
+  btnFiltered.onclick = () => {
+    generalMode = false;
+    updateZone();
+  };
+
+  adminList.addEventListener("click", async (event) => {
+    const btn = event.target.closest("button[data-act]");
+    if(!btn) return;
+
+    const act = btn.dataset.act;
+
+    try{
+      if(act === "time") await editTime(btn.dataset.id);
+      if(act === "court") await toggleCourt(btn.dataset.id);
+      if(act === "up") await swapSlot(Number(btn.dataset.slot), "up");
+      if(act === "down") await swapSlot(Number(btn.dataset.slot), "down");
+    }catch(error){
+      console.error(error);
+      alert("Erreur ❌");
+    }
+  });
+
+  document.addEventListener("adminZoneChange", (event) => {
+    const d = event.detail || {};
+
+    if(CATEGORIES.includes(d.categorie)) currentCategorie = d.categorie;
+    if(EPREUVES.includes(d.epreuve)) currentEpreuve = d.epreuve;
 
     try{
       localStorage.setItem("champ_admin_categorie", currentCategorie);
       localStorage.setItem("champ_admin_epreuve", currentEpreuve);
     }catch(error){}
+
+    if(!generalMode) updateZone();
+  });
+
+  function stopListeners(){
+    if(unsubProg){
+      unsubProg();
+      unsubProg = null;
+    }
+
+    if(unsubVisibility){
+      unsubVisibility();
+      unsubVisibility = null;
+    }
   }
 
   function showDenied(){
@@ -515,425 +1018,19 @@
     panelVisibility.style.display = "block";
     panelBuild.style.display = "block";
     panelSchedule.style.display = "block";
-    updateZoneDisplay();
-    startListeners();
-  }
-
-  function stopListeners(){
-    if(unsubProg){
-      unsubProg();
-      unsubProg = null;
-    }
-
-    if(unsubVisibility){
-      unsubVisibility();
-      unsubVisibility = null;
-    }
-  }
-
-  function startListeners(){
-    if(pageContent.style.display === "none") return;
-
-    if(unsubProg){
-      unsubProg();
-      unsubProg = null;
-    }
-
-    buildStatus.textContent = "Chargement…";
-    schedStatus.textContent = "Chargement…";
-    adminList.innerHTML = "";
-
-    unsubProg = onSnapshot(progRef(), (snap) => {
-      currentProg = snap.exists() ? (snap.data() || {}) : null;
-
-      if(!currentProg){
-        buildStatus.textContent = "ℹ️ Aucune programmation enregistrée pour cette zone.";
-        schedStatus.textContent = "—";
-        adminList.innerHTML = `<p class="muted" style="margin:0;">Aucune programmation à afficher.</p>`;
-        return;
-      }
-
-      buildStatus.textContent = "✅ Programmation présente.";
-      renderAdminList();
-    }, (error) => {
-      console.error(error);
-      buildStatus.textContent = "❌ Impossible de charger la programmation.";
-      schedStatus.textContent = "❌ Erreur Firestore.";
-    });
-
-    if(!unsubVisibility){
-      unsubVisibility = onSnapshot(visibilityRef(), (snap) => {
-        const data = snap.exists() ? (snap.data() || {}) : {};
-        const visible = data.publicVisible === true;
-
-        visibilityText.innerHTML = visible
-          ? "Statut actuel : <strong>visible publiquement ✅</strong>"
-          : "Statut actuel : <strong>maintenance / masquée 🔒</strong>";
-
-        btnPublicShow.classList.toggle("is-active", visible);
-        btnPublicHide.classList.toggle("is-active", !visible);
-      }, (error) => {
-        console.error(error);
-        visibilityText.textContent = "❌ Impossible de lire la visibilité publique.";
-      });
-    }
-  }
-
-  async function setPublicVisible(value){
-    await setDoc(visibilityRef(), {
-      publicVisible:value === true,
-      maintenance:value !== true,
-      updatedAt:serverTimestamp(),
-      updatedBy:auth.currentUser?.uid || null
-    }, { merge:true });
-  }
-
-  async function fetchTeams(){
-    const snap = await getDocs(query(equipesCol(), orderBy("createdAt", "asc")));
-
-    const rows = [];
-    snap.forEach(d => {
-      const x = d.data() || {};
-
-      if(String(x.categorie || "").trim() !== currentCategorie) return;
-      if(String(x.epreuve || "").trim() !== currentEpreuve) return;
-      if(x.stby === true) return;
-      if(x.list === "wait") return;
-
-      rows.push({
-        id:d.id,
-        teamName:x.teamName || "",
-        joueur1FirstName:x.joueur1FirstName || "",
-        joueur2FirstName:x.joueur2FirstName || "",
-        createdAtMs:x.createdAt?.toMillis ? x.createdAt.toMillis() : 0
-      });
-    });
-
-    rows.sort((a,b) => (a.createdAtMs || 0) - (b.createdAtMs || 0));
-    return rows;
-  }
-
-  async function generateProgrammation(){
-    const teams = await fetchTeams();
-
-    if(teams.length < 2){
-      throw new Error("Il faut au moins 2 équipes en liste principale pour générer une programmation.");
-    }
-
-    const matches = {};
-    const schedule = {};
-    const matchCount = Math.floor(teams.length / 2);
-    const slots = defaultSlots(matchCount);
-
-    for(let i = 0; i < matchCount; i++){
-      const mid = `M${i + 1}`;
-      const slotObj = slots[i];
-
-      matches[mid] = {
-        id:mid,
-        n:i + 1,
-        round:"Match",
-        A:{ type:"team", team:teams[i * 2] },
-        B:{ type:"team", team:teams[i * 2 + 1] }
-      };
-
-      schedule[mid] = {
-        slot:slotObj.slot,
-        court:slotObj.court
-      };
-    }
-
-    await setDoc(progRef(), {
-      eventId:EVENT_ID,
-      categorie:currentCategorie,
-      epreuve:currentEpreuve,
-      key:zoneKey(),
-      createdAt:serverTimestamp(),
-      updatedAt:serverTimestamp(),
-      updatedBy:auth.currentUser?.uid || null,
-      courts:defaultCourts(),
-      slots,
-      matches,
-      schedule,
-      source:{
-        type:"equipes",
-        note:"Génération simple depuis les équipes en liste principale."
-      }
-    }, { merge:true });
-  }
-
-  async function resetProgrammation(){
-    await deleteDoc(progRef());
-  }
-
-  function normalizeEntry(entry, slotObj){
-    if(typeof entry === "number"){
-      return {
-        slot:Number(entry),
-        court:slotObj?.court || "A"
-      };
-    }
-
-    return {
-      slot:Number(entry?.slot || slotObj?.slot || 1),
-      court:entry?.court || slotObj?.court || "A"
-    };
-  }
-
-  function renderAdminCard({ slot, time, courtKey, mid, teamA, teamB }){
-    return `
-      <div class="match-card ${esc(courtKey === "A" ? "courtA" : "courtB")}">
-        <div class="match-head">
-          <div class="m-slot">#${esc(slot)} · ${esc(mid)}</div>
-          <div class="m-time">${esc(time)}</div>
-          <div class="m-court">${esc(courtLabel(courtKey))}</div>
-
-          <div class="actions">
-            <button class="btnx" data-act="court" data-mid="${esc(mid)}" title="Changer de terrain">
-              ${courtKey === "A" ? "🐝" : "🌶️"}
-            </button>
-            <button class="btnx" data-act="up" data-slot="${esc(slot)}" ${slot <= 1 ? "disabled" : ""}>↑</button>
-            <button class="btnx" data-act="down" data-slot="${esc(slot)}" ${slot >= (currentProg?.slots?.length || 0) ? "disabled" : ""}>↓</button>
-          </div>
-        </div>
-
-        <div class="team-row">
-          <div class="team-name">${esc(teamA.title)}</div>
-          ${teamA.sub ? `<div class="team-sub">${esc(teamA.sub)}</div>` : ""}
-        </div>
-
-        <div class="vs-line">VS</div>
-
-        <div class="team-row">
-          <div class="team-name">${esc(teamB.title)}</div>
-          ${teamB.sub ? `<div class="team-sub">${esc(teamB.sub)}</div>` : ""}
-        </div>
-      </div>
-    `;
-  }
-
-  function renderAdminList(){
-    if(!currentProg){
-      adminList.innerHTML = "";
-      return;
-    }
-
-    const matches = currentProg.matches || {};
-    const slots = Array.isArray(currentProg.slots) ? currentProg.slots : [];
-    const schedule = currentProg.schedule || {};
-
-    const slotToMatch = new Map();
-
-    for(const [mid, entry] of Object.entries(schedule)){
-      const slotNum = typeof entry === "number" ? Number(entry) : Number(entry?.slot);
-      if(!slotToMatch.has(slotNum)){
-        slotToMatch.set(slotNum, mid);
-      }
-    }
-
-    const cards = [];
-
-    for(const slotObj of slots){
-      const mid = slotToMatch.get(Number(slotObj.slot));
-      const match = mid ? matches[mid] : null;
-      if(!match) continue;
-
-      const entry = normalizeEntry(schedule[mid], slotObj);
-      const teamA = teamParts(match.A?.team || null);
-      const teamB = teamParts(match.B?.team || null);
-
-      cards.push(renderAdminCard({
-        slot:slotObj.slot,
-        time:slotObj.time,
-        courtKey:entry.court,
-        mid,
-        teamA,
-        teamB
-      }));
-    }
-
-    adminList.innerHTML = cards.length
-      ? `<div class="match-list">${cards.join("")}</div>`
-      : `<p class="muted" style="margin:0;">Aucun match dans cette programmation.</p>`;
-
-    schedStatus.textContent = `✅ ${cards.length} match(s) affiché(s) — ${zoneText()}`;
-  }
-
-  async function swapSlots(slotA, slotB){
-    const snap = await getDoc(progRef());
-    if(!snap.exists()) throw new Error("Programmation introuvable.");
-
-    const prog = snap.data() || {};
-    const slots = Array.isArray(prog.slots) ? prog.slots : [];
-    const schedule = prog.schedule || {};
-
-    let mA = null;
-    let mB = null;
-
-    for(const [mid, entry] of Object.entries(schedule)){
-      const slotNum = typeof entry === "number" ? Number(entry) : Number(entry?.slot);
-      if(slotNum === Number(slotA) && !mA) mA = mid;
-      if(slotNum === Number(slotB) && !mB) mB = mid;
-    }
-
-    const newSchedule = { ...schedule };
-
-    function move(mid, nextSlot){
-      if(!mid) return;
-
-      const oldEntry = schedule[mid];
-      const oldSlot = typeof oldEntry === "number" ? Number(oldEntry) : Number(oldEntry?.slot);
-      const oldSlotObj = slots.find(x => Number(x.slot) === oldSlot) || null;
-      const norm = normalizeEntry(oldEntry, oldSlotObj);
-
-      newSchedule[mid] = {
-        slot:Number(nextSlot),
-        court:norm.court
-      };
-    }
-
-    move(mA, slotB);
-    move(mB, slotA);
-
-    await updateDoc(progRef(), {
-      schedule:newSchedule,
-      updatedAt:serverTimestamp(),
-      updatedBy:auth.currentUser?.uid || null
-    });
-  }
-
-  async function toggleCourt(mid){
-    const snap = await getDoc(progRef());
-    if(!snap.exists()) throw new Error("Programmation introuvable.");
-
-    const prog = snap.data() || {};
-    const slots = Array.isArray(prog.slots) ? prog.slots : [];
-    const schedule = prog.schedule || {};
-    const oldEntry = schedule[mid];
-
-    const oldSlot = typeof oldEntry === "number" ? Number(oldEntry) : Number(oldEntry?.slot);
-    const slotObj = slots.find(x => Number(x.slot) === oldSlot) || null;
-    const norm = normalizeEntry(oldEntry, slotObj);
-
-    const nextCourt = norm.court === "A" ? "B" : "A";
-
-    await updateDoc(progRef(), {
-      [`schedule.${mid}`]:{
-        slot:norm.slot,
-        court:nextCourt
-      },
-      updatedAt:serverTimestamp(),
-      updatedBy:auth.currentUser?.uid || null
-    });
-  }
-
-  btnPublicHide.onclick = async () => {
-    try{
-      await setPublicVisible(false);
-    }catch(error){
-      console.error(error);
-      alert("Erreur : impossible de masquer la programmation.");
-    }
-  };
-
-  btnPublicShow.onclick = async () => {
-    try{
-      await setPublicVisible(true);
-    }catch(error){
-      console.error(error);
-      alert("Erreur : impossible de rendre la programmation visible.");
-    }
-  };
-
-  btnGenerate.onclick = async () => {
-    const ok = confirm(`Générer la programmation pour ${zoneText()} ?\n\nCela remplacera la programmation existante de cette zone.`);
-    if(!ok) return;
-
-    btnGenerate.disabled = true;
-    buildStatus.textContent = "Génération…";
 
     try{
-      await generateProgrammation();
-      buildStatus.textContent = "✅ Programmation générée.";
-    }catch(error){
-      console.error(error);
-      buildStatus.textContent = "❌ " + (error?.message || "Impossible de générer.");
-      alert("Erreur ❌\n\n" + (error?.message || "Impossible de générer."));
-    }finally{
-      btnGenerate.disabled = false;
-    }
-  };
+      const savedCat = localStorage.getItem("champ_admin_categorie");
+      const savedEpreuve = localStorage.getItem("champ_admin_epreuve");
 
-  btnResetProg.onclick = async () => {
-    const ok = confirm(`Réinitialiser la programmation pour ${zoneText()} ?\n\n⚠️ Action irréversible.`);
-    if(!ok) return;
+      if(CATEGORIES.includes(savedCat)) currentCategorie = savedCat;
+      if(EPREUVES.includes(savedEpreuve)) currentEpreuve = savedEpreuve;
+    }catch(error){}
 
-    btnResetProg.disabled = true;
-    buildStatus.textContent = "Réinitialisation…";
-
-    try{
-      await resetProgrammation();
-      buildStatus.textContent = "✅ Programmation supprimée.";
-    }catch(error){
-      console.error(error);
-      buildStatus.textContent = "❌ " + (error?.message || "Impossible de supprimer.");
-      alert("Erreur ❌");
-    }finally{
-      btnResetProg.disabled = false;
-    }
-  };
-
-  adminList.addEventListener("click", async (event) => {
-    const btn = event.target.closest("button[data-act]");
-    if(!btn) return;
-
-    if(!currentProg){
-      alert("Aucune programmation.");
-      return;
-    }
-
-    const act = btn.dataset.act;
-
-    try{
-      schedStatus.textContent = "Traitement…";
-
-      if(act === "up" || act === "down"){
-        const slot = Number(btn.dataset.slot);
-        const maxSlot = Number(currentProg?.slots?.length || 0);
-
-        if(act === "up" && slot > 1){
-          await swapSlots(slot, slot - 1);
-        }
-
-        if(act === "down" && slot < maxSlot){
-          await swapSlots(slot, slot + 1);
-        }
-      }
-
-      if(act === "court"){
-        const mid = btn.dataset.mid;
-        if(mid) await toggleCourt(mid);
-      }
-
-      schedStatus.textContent = "✅ OK";
-    }catch(error){
-      console.error(error);
-      schedStatus.textContent = "❌ Erreur.";
-      alert("Erreur ❌");
-    }
-  });
-
-  document.addEventListener("adminZoneChange", syncFromAdminHeader);
+    updateZone();
+  }
 
   onAuthStateChanged(auth, async (user) => {
-    stopListeners();
-
-    accessDenied.style.display = "none";
-    pageContent.style.display = "none";
-    panelVisibility.style.display = "none";
-    panelBuild.style.display = "none";
-    panelSchedule.style.display = "none";
-
     if(!user){
       showDenied();
       return;
@@ -947,16 +1044,7 @@
         return;
       }
 
-      try{
-        const savedCat = localStorage.getItem("champ_admin_categorie");
-        const savedEpreuve = localStorage.getItem("champ_admin_epreuve");
-
-        if(["U14","U18","Seniors","45+"].includes(savedCat)) currentCategorie = savedCat;
-        if(["DM","DD"].includes(savedEpreuve)) currentEpreuve = savedEpreuve;
-      }catch(error){}
-
       showAdmin();
-
     }catch(error){
       console.error(error);
       showDenied();
