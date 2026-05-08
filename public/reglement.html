@@ -17,6 +17,11 @@
 
     *{box-sizing:border-box;}
 
+    html,body{
+      max-width:100%;
+      overflow-x:hidden;
+    }
+
     body{
       margin:0;
       font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;
@@ -79,8 +84,44 @@
       letter-spacing:.06em;
     }
 
-    .placeholder{
-      margin-top:12px;
+    .controls{
+      display:grid;
+      grid-template-columns:1fr;
+      gap:10px;
+      margin-top:14px;
+    }
+
+    .toggle-line{
+      display:flex;
+      gap:10px;
+      flex-wrap:wrap;
+    }
+
+    .toggle-btn{
+      appearance:none;
+      border:1px solid rgba(7,91,154,.14);
+      background:#fff;
+      border-radius:999px;
+      min-height:42px;
+      padding:10px 15px;
+      font-size:14px;
+      font-weight:1000;
+      cursor:pointer;
+      color:#1c2430;
+      text-align:center;
+      box-shadow:0 6px 14px rgba(16,24,40,.05);
+      white-space:nowrap;
+    }
+
+    .toggle-btn[aria-selected="true"]{
+      background:linear-gradient(180deg,var(--blue),var(--blue-dark));
+      color:#fff;
+      border-color:var(--blue);
+      box-shadow:0 10px 22px rgba(7,91,154,.22);
+    }
+
+    .intro-box{
+      margin-top:14px;
       padding:15px 16px;
       border-radius:18px;
       background:linear-gradient(135deg,rgba(39,188,237,.12),rgba(198,90,30,.08));
@@ -90,52 +131,92 @@
       line-height:1.5;
     }
 
-    .placeholder strong{
-      color:var(--blue-dark);
+    .intro-box strong{color:var(--blue-dark);}
+
+    .content{
+      margin-top:16px;
+      display:grid;
+      gap:14px;
     }
 
-    .quick-grid{
+    .rule-card{
+      border-radius:18px;
+      padding:15px 16px;
+      background:#fff;
+      border:1px solid rgba(16,24,40,.08);
+      box-shadow:0 8px 18px rgba(16,24,40,.05);
+    }
+
+    .rule-card h2{
+      margin:0 0 8px;
+      color:var(--blue-dark);
+      font-size:20px;
+      line-height:1.15;
+      letter-spacing:-.02em;
+    }
+
+    .rule-card p{
+      margin:8px 0 0;
+      color:#344054;
+      font-size:14px;
+      line-height:1.55;
+    }
+
+    .rule-card ul{
+      margin:8px 0 0;
+      padding-left:20px;
+      color:#344054;
+      font-size:14px;
+      line-height:1.55;
+    }
+
+    .summary-grid{
       display:grid;
       grid-template-columns:1fr;
       gap:10px;
-      margin-top:12px;
+      margin-top:16px;
     }
 
-    .quick-card{
+    .summary-card{
       border-radius:16px;
-      padding:12px 14px;
+      padding:13px 14px;
       background:#fff;
       border:1px solid rgba(16,24,40,.08);
       box-shadow:0 6px 14px rgba(16,24,40,.04);
     }
 
-    .quick-card strong{
+    .summary-card strong{
       display:block;
       color:var(--blue-dark);
-      margin-bottom:4px;
+      margin-bottom:5px;
       font-weight:1000;
     }
 
-    .quick-card span{
+    .summary-card span{
       color:var(--muted);
       font-size:13px;
-      line-height:1.35;
+      line-height:1.4;
     }
 
+    .hidden{display:none !important;}
+
     @media (min-width:760px){
-      :root{--zone-h:104px;}
       .panel{padding:22px;}
-      .quick-grid{grid-template-columns:repeat(3,1fr);}
+      .controls{
+        grid-template-columns:1fr 1fr;
+        align-items:center;
+      }
+      .summary-grid{grid-template-columns:repeat(3,1fr);}
     }
 
     @media (max-width:759px){
-      :root{--zone-h:104px;}
-
       main{
         padding-top:calc(var(--public-total-top, 150px) + var(--zone-h) + 28px);
       }
 
       .panel-title{font-size:24px;}
+      .panel-head{flex-direction:column;}
+      .toggle-btn{flex:1;}
     }
   </style>
 </head>
@@ -166,41 +247,482 @@
     <div class="panel">
       <div class="panel-head">
         <div>
-          <h1 class="panel-title">📘 Règlement</h1>
-          <p class="panel-text">
+          <h1 class="panel-title" data-i18n="title">📘 Règlement</h1>
+          <p class="panel-text" data-i18n="subtitle">
             Formats, règles sportives et conditions de participation.
           </p>
         </div>
-        <div class="panel-tag">À venir</div>
+        <div class="panel-tag" data-i18n="tag">Officiel</div>
       </div>
 
-      <div class="placeholder">
-        <strong>📘 Règlement en cours de publication</strong><br>
-        Cette page précisera les formats de compétition, les catégories, les règles applicables et les conditions de participation.
-      </div>
-
-      <div class="quick-grid">
-        <div class="quick-card">
-          <strong>🎾 Formats</strong>
-          <span>Les formats de matchs et tableaux seront indiqués après validation sportive.</span>
+      <div class="controls">
+        <div class="toggle-line" aria-label="Choix de la langue">
+          <button class="toggle-btn" id="btnFr" type="button" aria-selected="true">🇫🇷 Français</button>
+          <button class="toggle-btn" id="btnPt" type="button" aria-selected="false">🇧🇷 Português</button>
         </div>
 
-        <div class="quick-card">
+        <div class="toggle-line" aria-label="Choix du niveau de détail">
+          <button class="toggle-btn" id="btnFull" type="button" aria-selected="true">📘 Règlement complet</button>
+          <button class="toggle-btn" id="btnSummary" type="button" aria-selected="false">⚡ Résumé</button>
+        </div>
+      </div>
+
+      <div class="intro-box" id="introBox"></div>
+
+      <div id="summaryFr" class="summary-grid hidden">
+        <div class="summary-card">
+          <strong>🎾 Compétition</strong>
+          <span>Championnats de Guyane de Beach Tennis par paires 2026, organisés le 9 mai 2026 à l’Arena TC Suzini.</span>
+        </div>
+        <div class="summary-card">
           <strong>📌 Catégories</strong>
-          <span>U14, U18, Seniors et 45+, avec épreuves DM et DD.</span>
+          <span>13/14 ans, 15/18 ans, Seniors et Seniors Plus +45 ans, en double messieurs et double dames selon les inscriptions.</span>
         </div>
-
-        <div class="quick-card">
+        <div class="summary-card">
           <strong>✅ Participation</strong>
-          <span>Les conditions d’inscription et de participation seront précisées ici.</span>
+          <span>Licence FFT Beach Tennis ou Multi-Raquettes 2026 obligatoire. Une seule catégorie autorisée par joueur.</span>
+        </div>
+        <div class="summary-card">
+          <strong>💳 Inscriptions</strong>
+          <span>10 € par joueur, soit 20 € par équipe. Inscriptions par équipe complète, dans la limite de 16 équipes par épreuve.</span>
+        </div>
+        <div class="summary-card">
+          <strong>🏆 Formats</strong>
+          <span>Formules possibles : poules, tableaux, multi-chances ou formule mixte. Demi-finales et finales au format 4 ; autres matchs au format 3 sauf précision.</span>
+        </div>
+        <div class="summary-card">
+          <strong>⏱️ Convocation</strong>
+          <span>Échauffement à partir de 08h30, début des rencontres à 09h00. Présence requise 30 minutes avant le premier match.</span>
+        </div>
+        <div class="summary-card">
+          <strong>📊 Poules</strong>
+          <span>Victoire : 2 points, défaite : 1 point, forfait ou disqualification : 0 point. Départage aux sets, puis aux jeux, puis critères entre équipes concernées.</span>
+        </div>
+        <div class="summary-card">
+          <strong>⚖️ Juge-arbitre</strong>
+          <span>Les juges-arbitres assurent le bon déroulement sportif, valident les résultats et peuvent adapter les formats en cas de contrainte.</span>
+        </div>
+        <div class="summary-card">
+          <strong>🤝 Discipline</strong>
+          <span>Fair-play obligatoire. Tout comportement antisportif peut entraîner avertissement, pénalité ou disqualification.</span>
         </div>
       </div>
+
+      <div id="summaryPt" class="summary-grid hidden">
+        <div class="summary-card">
+          <strong>🎾 Competição</strong>
+          <span>Campeonatos da Guiana de Beach Tennis em duplas 2026, realizados em 9 de maio de 2026 na Arena TC Suzini.</span>
+        </div>
+        <div class="summary-card">
+          <strong>📌 Categorias</strong>
+          <span>13/14 anos, 15/18 anos, Adulto e Adulto +45 anos, em duplas masculinas e femininas conforme as inscrições.</span>
+        </div>
+        <div class="summary-card">
+          <strong>✅ Participação</strong>
+          <span>Licença FFT Beach Tennis ou Multi-Raquetes 2026 obrigatória. Cada jogador pode participar de apenas uma categoria.</span>
+        </div>
+        <div class="summary-card">
+          <strong>💳 Inscrições</strong>
+          <span>10 € por jogador, ou 20 € por dupla. Inscrição somente por equipe completa, com limite de 16 equipes por prova.</span>
+        </div>
+        <div class="summary-card">
+          <strong>🏆 Formatos</strong>
+          <span>Possíveis formatos: grupos, chaves, multi-chances ou fórmula mista. Semifinais e finais no formato 4; demais jogos no formato 3, salvo exceções.</span>
+        </div>
+        <div class="summary-card">
+          <strong>⏱️ Convocação</strong>
+          <span>Aquecimento a partir das 08h30 e início dos jogos às 09h00. Presença exigida 30 minutos antes do primeiro jogo.</span>
+        </div>
+        <div class="summary-card">
+          <strong>📊 Grupos</strong>
+          <span>Vitória: 2 pontos, derrota: 1 ponto, WO ou desclassificação: 0 ponto. Critérios de desempate: sets, games e confronto entre as equipes envolvidas.</span>
+        </div>
+        <div class="summary-card">
+          <strong>⚖️ Árbitro-geral</strong>
+          <span>Os árbitros-gerais garantem o bom andamento esportivo, validam os resultados e podem adaptar formatos em caso de necessidade.</span>
+        </div>
+        <div class="summary-card">
+          <strong>🤝 Disciplina</strong>
+          <span>Fair-play obrigatório. Condutas antidesportivas podem gerar advertência, penalidade ou desclassificação.</span>
+        </div>
+      </div>
+            <div id="fullFr" class="content">
+
+        <div class="rule-card">
+          <h2>1. Organisation</h2>
+          <p>
+            Les Championnats de Guyane de Beach Tennis par paires 2026 sont organisés par la Ligue de Tennis de Guyane et le Tennis Club Suzini.
+            Ils se déroulent le samedi 9 mai 2026 à l’Arena TC Suzini.
+          </p>
+        </div>
+
+        <div class="rule-card">
+          <h2>2. Épreuves</h2>
+          <ul>
+            <li>Double Messieurs (DM)</li>
+            <li>Double Dames (DD)</li>
+            <li>Catégories : 13/14 ans, 15/18 ans, Seniors et Seniors Plus +45 ans</li>
+            <li>Les épreuves sont organisées sous réserve d’un nombre suffisant d’inscriptions</li>
+          </ul>
+        </div>
+
+        <div class="rule-card">
+          <h2>3. Conditions de participation</h2>
+          <ul>
+            <li>Licence FFT Beach Tennis ou Multi-Raquettes 2026 obligatoire</li>
+            <li>Certificat médical conforme aux règles FFT si nécessaire</li>
+            <li>Chaque joueur ne peut participer qu’à une seule catégorie</li>
+            <li>Les joueurs doivent être à jour administrativement avant le début de la compétition</li>
+          </ul>
+        </div>
+
+        <div class="rule-card">
+          <h2>4. Inscriptions</h2>
+          <ul>
+            <li>Inscription par équipe complète</li>
+            <li>Montant : 10 € par joueur, soit 20 € par équipe</li>
+            <li>Nombre maximum : 16 équipes par épreuve</li>
+            <li>Les inscriptions sont validées après paiement</li>
+            <li>Le juge-arbitre peut refuser une inscription incomplète ou hors délai</li>
+          </ul>
+        </div>
+
+        <div class="rule-card">
+          <h2>5. Formats sportifs</h2>
+          <p>
+            Les formats peuvent être adaptés selon le nombre d’équipes engagées et les contraintes d’organisation.
+          </p>
+
+          <ul>
+            <li>Poules</li>
+            <li>Tableaux à élimination directe</li>
+            <li>Tableaux multi-chances</li>
+            <li>Formules mixtes</li>
+          </ul>
+
+          <p>
+            Sauf indication contraire :
+          </p>
+
+          <ul>
+            <li>Les demi-finales et finales se jouent au format 4</li>
+            <li>Les autres rencontres se jouent au format 3</li>
+          </ul>
+        </div>
+
+        <div class="rule-card">
+          <h2>6. Convocation et programmation</h2>
+          <ul>
+            <li>Ouverture des terrains et échauffement à partir de 08h30</li>
+            <li>Début prévisionnel des rencontres à 09h00</li>
+            <li>Les joueurs doivent être présents 30 minutes avant leur premier match</li>
+            <li>Les horaires publiés sont indicatifs et peuvent être modifiés</li>
+            <li>Les joueurs doivent consulter régulièrement la programmation officielle</li>
+          </ul>
+        </div>
+
+        <div class="rule-card">
+          <h2>7. Classements en poules</h2>
+
+          <p>Le classement est établi selon les critères suivants :</p>
+
+          <ul>
+            <li>Victoire : 2 points</li>
+            <li>Défaite : 1 point</li>
+            <li>Forfait ou disqualification : 0 point</li>
+          </ul>
+
+          <p>En cas d’égalité :</p>
+
+          <ul>
+            <li>Résultat entre les équipes concernées</li>
+            <li>Différence de sets</li>
+            <li>Différence de jeux</li>
+            <li>Nombre total de jeux gagnés</li>
+            <li>Tirage au sort si nécessaire</li>
+          </ul>
+        </div>
+
+        <div class="rule-card">
+          <h2>8. Arbitrage et juge-arbitrage</h2>
+
+          <p>
+            Les juges-arbitres sont responsables du bon déroulement sportif de la compétition.
+          </p>
+
+          <ul>
+            <li>Validation des tableaux et programmations</li>
+            <li>Application du règlement sportif FFT</li>
+            <li>Gestion des litiges et incidents</li>
+            <li>Adaptation éventuelle des formats ou horaires</li>
+          </ul>
+        </div>
+
+        <div class="rule-card">
+          <h2>9. Discipline et comportement</h2>
+
+          <ul>
+            <li>Respect des adversaires, arbitres et organisateurs obligatoire</li>
+            <li>Fair-play et comportement sportif exigés</li>
+            <li>Tout comportement antisportif peut entraîner pénalité ou disqualification</li>
+            <li>Les décisions du juge-arbitre sont sans appel</li>
+          </ul>
+        </div>
+
+        <div class="rule-card">
+          <h2>10. Responsabilité</h2>
+
+          <p>
+            Les organisateurs déclinent toute responsabilité en cas de perte, vol, accident ou incident survenu durant la compétition.
+          </p>
+        </div>
+
+        <div class="rule-card">
+          <h2>11. Droit à l’image</h2>
+
+          <p>
+            Les participants autorisent l’utilisation de leur image dans le cadre de la communication liée aux Championnats de Guyane de Beach Tennis 2026.
+          </p>
+        </div>
+
+      </div>
+
+      <div id="fullPt" class="content hidden">
+
+        <div class="rule-card">
+          <h2>1. Organização</h2>
+          <p>
+            Os Campeonatos da Guiana de Beach Tennis em duplas 2026 são organizados pela Liga de Tênis da Guiana e pelo Tennis Club Suzini.
+            A competição será realizada no sábado, 9 de maio de 2026, na Arena TC Suzini.
+          </p>
+        </div>
+
+        <div class="rule-card">
+          <h2>2. Provas</h2>
+          <ul>
+            <li>Duplas Masculinas (DM)</li>
+            <li>Duplas Femininas (DD)</li>
+            <li>Categorias: 13/14 anos, 15/18 anos, Adulto e Adulto +45 anos</li>
+            <li>As provas serão realizadas conforme o número mínimo de inscrições</li>
+          </ul>
+        </div>
+
+        <div class="rule-card">
+          <h2>3. Condições de participação</h2>
+          <ul>
+            <li>Licença FFT Beach Tennis ou Multi-Raquetes 2026 obrigatória</li>
+            <li>Atestado médico conforme as regras da FFT, se necessário</li>
+            <li>Cada jogador pode participar de apenas uma categoria</li>
+            <li>Todos os jogadores devem estar regularizados antes do início da competição</li>
+          </ul>
+        </div>
+
+        <div class="rule-card">
+          <h2>4. Inscrições</h2>
+          <ul>
+            <li>Inscrição obrigatoriamente em dupla completa</li>
+            <li>Valor: 10 € por jogador, ou 20 € por dupla</li>
+            <li>Máximo de 16 equipes por prova</li>
+            <li>As inscrições só serão validadas após o pagamento</li>
+            <li>O árbitro-geral pode recusar inscrições incompletas ou fora do prazo</li>
+          </ul>
+        </div>
+
+        <div class="rule-card">
+          <h2>5. Formatos esportivos</h2>
+
+          <p>
+            Os formatos podem ser adaptados conforme o número de equipes inscritas e as necessidades de organização.
+          </p>
+
+          <ul>
+            <li>Fase de grupos</li>
+            <li>Chaves eliminatórias</li>
+            <li>Quadros multi-chances</li>
+            <li>Fórmulas mistas</li>
+          </ul>
+
+          <p>Salvo indicação contrária:</p>
+
+          <ul>
+            <li>Semifinais e finais serão disputadas no formato 4</li>
+            <li>Os demais jogos serão disputados no formato 3</li>
+          </ul>
+        </div>
+                <div class="rule-card">
+          <h2>6. Convocação e programação</h2>
+
+          <ul>
+            <li>Abertura das quadras e aquecimento a partir das 08h30</li>
+            <li>Início previsto dos jogos às 09h00</li>
+            <li>Os jogadores devem estar presentes 30 minutos antes do primeiro jogo</li>
+            <li>Os horários publicados são apenas indicativos e podem ser alterados</li>
+            <li>Os jogadores devem consultar regularmente a programação oficial</li>
+          </ul>
+        </div>
+
+        <div class="rule-card">
+          <h2>7. Classificação nos grupos</h2>
+
+          <p>A classificação será definida pelos seguintes critérios:</p>
+
+          <ul>
+            <li>Vitória: 2 pontos</li>
+            <li>Derrota: 1 ponto</li>
+            <li>WO ou desclassificação: 0 ponto</li>
+          </ul>
+
+          <p>Em caso de empate:</p>
+
+          <ul>
+            <li>Confronto direto entre as equipes envolvidas</li>
+            <li>Saldo de sets</li>
+            <li>Saldo de games</li>
+            <li>Total de games vencidos</li>
+            <li>Sorteio, se necessário</li>
+          </ul>
+        </div>
+
+        <div class="rule-card">
+          <h2>8. Arbitragem e árbitro-geral</h2>
+
+          <p>
+            Os árbitros-gerais são responsáveis pelo bom andamento esportivo da competição.
+          </p>
+
+          <ul>
+            <li>Validação das chaves e programações</li>
+            <li>Aplicação do regulamento esportivo FFT</li>
+            <li>Gestão de conflitos e incidentes</li>
+            <li>Possível adaptação de formatos e horários</li>
+          </ul>
+        </div>
+
+        <div class="rule-card">
+          <h2>9. Disciplina e comportamento</h2>
+
+          <ul>
+            <li>Respeito aos adversários, árbitros e organizadores é obrigatório</li>
+            <li>Fair-play e espírito esportivo são exigidos</li>
+            <li>Comportamentos antidesportivos podem resultar em penalidades ou desclassificação</li>
+            <li>As decisões do árbitro-geral são definitivas</li>
+          </ul>
+        </div>
+
+        <div class="rule-card">
+          <h2>10. Responsabilidade</h2>
+
+          <p>
+            Os organizadores não se responsabilizam por perdas, furtos, acidentes ou incidentes ocorridos durante a competição.
+          </p>
+        </div>
+
+        <div class="rule-card">
+          <h2>11. Direito de imagem</h2>
+
+          <p>
+            Os participantes autorizam o uso de sua imagem para comunicação relacionada aos Campeonatos da Guiana de Beach Tennis 2026.
+          </p>
+        </div>
+
+      </div>
+
     </div>
   </section>
 
 </main>
 
 <script type="module" src="../assets/js/public-header.js"></script>
+
+<script>
+  const btnFr = document.getElementById("btnFr");
+  const btnPt = document.getElementById("btnPt");
+
+  const btnFull = document.getElementById("btnFull");
+  const btnSummary = document.getElementById("btnSummary");
+
+  const fullFr = document.getElementById("fullFr");
+  const fullPt = document.getElementById("fullPt");
+
+  const summaryFr = document.getElementById("summaryFr");
+  const summaryPt = document.getElementById("summaryPt");
+
+  const introBox = document.getElementById("introBox");
+
+  let lang = "fr";
+  let mode = "full";
+
+  function refresh(){
+    btnFr.setAttribute("aria-selected", lang === "fr");
+    btnPt.setAttribute("aria-selected", lang === "pt");
+
+    btnFull.setAttribute("aria-selected", mode === "full");
+    btnSummary.setAttribute("aria-selected", mode === "summary");
+
+    fullFr.classList.add("hidden");
+    fullPt.classList.add("hidden");
+    summaryFr.classList.add("hidden");
+    summaryPt.classList.add("hidden");
+
+    if(lang === "fr" && mode === "full"){
+      fullFr.classList.remove("hidden");
+
+      introBox.innerHTML = `
+        <strong>📘 Version officielle française</strong><br>
+        Ce règlement précise les conditions de participation, les formats sportifs et les règles applicables durant les Championnats de Guyane de Beach Tennis 2026.
+      `;
+    }
+
+    if(lang === "fr" && mode === "summary"){
+      summaryFr.classList.remove("hidden");
+
+      introBox.innerHTML = `
+        <strong>⚡ Résumé rapide</strong><br>
+        Retrouvez ici les principales informations utiles concernant les catégories, inscriptions, formats et règles sportives.
+      `;
+    }
+
+    if(lang === "pt" && mode === "full"){
+      fullPt.classList.remove("hidden");
+
+      introBox.innerHTML = `
+        <strong>📘 Versão oficial em português</strong><br>
+        Este regulamento define as condições de participação, formatos esportivos e regras aplicáveis aos Campeonatos da Guiana de Beach Tennis 2026.
+      `;
+    }
+
+    if(lang === "pt" && mode === "summary"){
+      summaryPt.classList.remove("hidden");
+
+      introBox.innerHTML = `
+        <strong>⚡ Resumo rápido</strong><br>
+        Aqui você encontra as principais informações sobre categorias, inscrições, formatos e regras esportivas.
+      `;
+    }
+  }
+
+  btnFr.onclick = () => {
+    lang = "fr";
+    refresh();
+  };
+
+  btnPt.onclick = () => {
+    lang = "pt";
+    refresh();
+  };
+
+  btnFull.onclick = () => {
+    mode = "full";
+    refresh();
+  };
+
+  btnSummary.onclick = () => {
+    mode = "summary";
+    refresh();
+  };
+
+  refresh();
+</script>
 
 </body>
 </html>
