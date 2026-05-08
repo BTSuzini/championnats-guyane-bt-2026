@@ -194,6 +194,168 @@
       border-color:var(--blue);
     }
 
+    .schedule-wrap{
+      margin-top:12px;
+      border-radius:20px;
+      overflow:visible;
+    }
+
+    .schedule-grid{
+      display:grid;
+      grid-template-columns:72px minmax(0,1fr) minmax(0,1fr);
+      gap:8px;
+      align-items:stretch;
+    }
+
+    .schedule-head{
+      position:sticky;
+      top:calc(var(--public-total-top, 158px) + var(--zone-h) + var(--modebar-h));
+      z-index:30;
+      padding:8px 0;
+      background:linear-gradient(180deg,rgba(244,252,255,.98),rgba(244,252,255,.92));
+      backdrop-filter:blur(10px);
+    }
+
+    .head-cell{
+      min-height:42px;
+      border-radius:16px;
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      text-align:center;
+      font-size:13px;
+      font-weight:1000;
+      padding:8px;
+      color:#fff;
+      box-shadow:0 8px 18px rgba(16,24,40,.08);
+    }
+
+    .head-order{background:linear-gradient(180deg,#344054,#111827);}
+    .head-a{background:linear-gradient(180deg,#d99b00,#9a6b00);}
+    .head-b{background:linear-gradient(180deg,#d7425f,#9b1733);}
+
+    .order-cell{
+      border-radius:16px;
+      background:#fff;
+      border:1px solid rgba(16,24,40,.08);
+      box-shadow:0 6px 14px rgba(16,24,40,.04);
+      display:flex;
+      flex-direction:column;
+      align-items:center;
+      justify-content:center;
+      min-height:104px;
+      padding:8px 6px;
+      text-align:center;
+    }
+
+    .order-num{
+      font-size:18px;
+      font-weight:1000;
+      line-height:1;
+      color:var(--blue-dark);
+    }
+
+    .order-time{
+      margin-top:5px;
+      font-size:12px;
+      font-weight:900;
+      color:#667085;
+    }
+
+    .slot-cell{
+      min-height:104px;
+      min-width:0;
+    }
+
+    .match-mini{
+      height:100%;
+      min-height:104px;
+      min-width:0;
+      overflow:hidden;
+      border-radius:16px;
+      border:1px solid rgba(16,24,40,.08);
+      background:#fff;
+      box-shadow:0 6px 14px rgba(16,24,40,.05);
+      padding:9px 10px;
+      display:grid;
+      grid-template-rows:auto auto 1fr 1fr;
+      gap:4px;
+    }
+
+    .match-mini.courtA{
+      background:#fff8dd;
+      border-color:rgba(255,196,0,.35);
+    }
+
+    .match-mini.courtB{
+      background:#ffeef2;
+      border-color:rgba(255,0,60,.20);
+    }
+
+    .mini-top{
+      display:flex;
+      align-items:center;
+      justify-content:flex-start;
+      gap:8px;
+      min-width:0;
+    }
+
+    .mini-time{
+      font-size:13px;
+      font-weight:1000;
+      white-space:nowrap;
+      color:#111827;
+    }
+
+    .mini-label{
+      display:inline-flex;
+      align-items:center;
+      justify-content:flex-start;
+      width:max-content;
+      max-width:100%;
+      min-width:0;
+      padding:4px 9px;
+      border-radius:999px;
+      background:#f4f8ff;
+      color:var(--blue-dark);
+      border:1px solid rgba(7,91,154,.12);
+      font-size:10px;
+      font-weight:1000;
+      white-space:nowrap;
+      overflow:hidden;
+      text-overflow:ellipsis;
+      text-transform:uppercase;
+      letter-spacing:.02em;
+    }
+
+    .mini-team{
+      font-size:13px;
+      font-weight:1000;
+      line-height:1.14;
+      white-space:nowrap;
+      overflow:hidden;
+      text-overflow:ellipsis;
+      align-self:center;
+      color:#17212b;
+    }
+
+    .mini-team.placeholder{
+      color:#667085;
+      font-style:italic;
+    }
+
+    .mini-team.winner{
+      color:#15803d;
+    }
+
+    .empty-cell{
+      height:100%;
+      min-height:104px;
+      border-radius:16px;
+      border:1px dashed rgba(16,24,40,.12);
+      background:rgba(255,255,255,.40);
+    }
+
     .match-list{
       display:grid;
       gap:12px;
@@ -426,7 +588,7 @@
     }
 
     @media (min-width:760px){
-      .tabs{grid-template-columns:repeat(3,1fr);}
+      .tabs{grid-template-columns:repeat(4,1fr);}
       .pool-grid{grid-template-columns:1fr 1fr;}
     }
 
@@ -442,6 +604,34 @@
 
       .panel-title{font-size:24px;}
 
+      .schedule-grid{
+        grid-template-columns:48px minmax(0,1fr) minmax(0,1fr);
+        gap:5px;
+      }
+
+      .head-cell{
+        min-height:38px;
+        font-size:11px;
+        padding:6px 4px;
+      }
+
+      .order-cell{
+        min-height:96px;
+      }
+
+      .order-num{font-size:15px;}
+      .order-time{font-size:10px;}
+
+      .match-mini{
+        min-height:96px;
+        padding:7px 6px;
+        gap:2px;
+      }
+
+      .mini-time{font-size:12px;}
+      .mini-label{font-size:9px;padding:3px 6px;}
+      .mini-team{font-size:11px;line-height:1.12;}
+
       .team-row{
         grid-template-columns:1fr 28px 28px 32px;
       }
@@ -452,7 +642,6 @@
     }
   </style>
 </head>
-
 <body>
 
 <div id="publicHeader"></div>
@@ -483,11 +672,10 @@
 <main class="container">
 
   <section class="section panel">
-
     <div class="panel-head">
       <div>
         <h1 class="panel-title">📅 Programmation</h1>
-        <p class="panel-text" id="pageIntro">Planning des matchs, horaires, terrains et scores.</p>
+        <p class="panel-text" id="pageIntro">Planning des matchs, horaires, terrains et résultats.</p>
       </div>
 
       <div class="panel-tag" id="pageTag">Direct</div>
@@ -507,16 +695,30 @@
 
       <div class="tabs">
         <button class="tab-btn" id="tabChrono" type="button" aria-selected="true">🕒 Chrono</button>
+        <button class="tab-btn" id="tabResultats" type="button" aria-selected="false">🏁 Résultats</button>
         <button class="tab-btn" id="tabPoules" type="button" aria-selected="false">🏖️ Poules</button>
         <button class="tab-btn" id="tabFinal" type="button" aria-selected="false">🏆 Tableau final</button>
       </div>
     </div>
-
   </section>
 
   <section class="section panel" id="panelChrono">
     <h2 class="panel-title">🕒 Chronologie</h2>
-    <div id="chronoList"></div>
+
+    <div class="schedule-wrap">
+      <div class="schedule-grid schedule-head">
+        <div class="head-cell head-order">Ordre</div>
+        <div class="head-cell head-a">🐝 Manon Queen Bee</div>
+        <div class="head-cell head-b">🌶️ Lisa de Los Pimentos</div>
+      </div>
+
+      <div id="chronoGrid" class="schedule-grid"></div>
+    </div>
+  </section>
+
+  <section class="section panel" id="panelResultats" style="display:none;">
+    <h2 class="panel-title">🏁 Résultats</h2>
+    <div id="resultatsList"></div>
   </section>
 
   <section class="section panel" id="panelPoules" style="display:none;">
@@ -590,7 +792,8 @@
       </div>
     </div>
   </section>
-  </main>
+
+</main>
 
 <script type="module" src="../assets/js/public-header.js"></script>
 
@@ -614,6 +817,15 @@
     DD:"Double Dames"
   };
 
+  const ORDER_TIMES = {
+    "-100":"Info", "-99":"Info", "-98":"Info", "-97":"Info", "-96":"Info",
+    "-95":"Info", "-94":"Info", "-93":"Info",
+    1:"09h00", 2:"09h45", 3:"10h30", 4:"11h15", 5:"12h00",
+    6:"12h45", 7:"13h30", 8:"14h00", 9:"14h30", 10:"15h00",
+    11:"15h30", 12:"16h00", 13:"16h30", 14:"17h30",
+    15:"18h30", 16:"19h30", 17:"20h15", 18:"21h15"
+  };
+
   const btnModeAll = document.getElementById("btnModeAll");
   const btnModeCategory = document.getElementById("btnModeCategory");
 
@@ -627,18 +839,20 @@
   const statusText = document.getElementById("statusText");
 
   const tabChrono = document.getElementById("tabChrono");
+  const tabResultats = document.getElementById("tabResultats");
   const tabPoules = document.getElementById("tabPoules");
   const tabFinal = document.getElementById("tabFinal");
 
   const panelChrono = document.getElementById("panelChrono");
+  const panelResultats = document.getElementById("panelResultats");
   const panelPoules = document.getElementById("panelPoules");
   const panelFinal = document.getElementById("panelFinal");
 
-  const chronoList = document.getElementById("chronoList");
+  const chronoGrid = document.getElementById("chronoGrid");
+  const resultatsList = document.getElementById("resultatsList");
 
   const poolAStandings = document.getElementById("poolAStandings");
   const poolBStandings = document.getElementById("poolBStandings");
-
   const poolAMatches = document.getElementById("poolAMatches");
   const poolBMatches = document.getElementById("poolBMatches");
 
@@ -657,17 +871,13 @@
   };
 
   let mode = "all";
-
   let currentCategorie = "Seniors";
   let currentEpreuve = "DM";
-
   let currentTab = "chrono";
 
   let currentRole = null;
   let publicVisible = false;
-
   let currentProg = null;
-
   let resultsByMatch = new Map();
 
   let unsubVisibility = null;
@@ -682,171 +892,97 @@
   }
 
   function visibilityRef(){
-    return doc(
-      db,
-      "events",
-      EVENT_ID,
-      "config",
-      "programmation"
-    );
+    return doc(db, "events", EVENT_ID, "config", "programmation");
   }
 
   function generalProgRef(){
-    return doc(
-      db,
-      "events",
-      EVENT_ID,
-      "programmations",
-      "general"
-    );
+    return doc(db, "events", EVENT_ID, "programmations", "general");
   }
 
   function resultsCol(){
-    return collection(
-      db,
-      "events",
-      EVENT_ID,
-      "resultats",
-      "general",
-      "matches"
-    );
+    return collection(db, "events", EVENT_ID, "resultats", "general", "matches");
   }
 
   function canSeeWork(){
-    return publicVisible === true
-      || currentRole === "admin"
-      || currentRole === "jat";
+    return publicVisible === true || currentRole === "admin" || currentRole === "jat";
   }
 
   function zoneText(){
-
-    if(mode === "all"){
-      return "Toutes catégories";
-    }
-
+    if(mode === "all") return "Toutes catégories";
     return `${currentCategorie} — ${EPREUVE_LABELS[currentEpreuve]}`;
   }
 
   function syncHeaderButtons(){
-
     zoneCatBtns.forEach(btn => {
-
-      const active =
-        btn.dataset.categorie === currentCategorie;
+      const active = btn.dataset.categorie === currentCategorie;
 
       btn.setAttribute(
         "aria-selected",
-        mode === "category" && active
-          ? "true"
-          : "false"
+        mode === "category" && active ? "true" : "false"
       );
 
-      btn.classList.toggle(
-        "all-active",
-        mode === "all"
-      );
+      btn.classList.toggle("all-active", mode === "all");
     });
 
     zoneEpreuveBtns.forEach(btn => {
-
-      const active =
-        btn.dataset.epreuve === currentEpreuve;
+      const active = btn.dataset.epreuve === currentEpreuve;
 
       btn.setAttribute(
         "aria-selected",
-        mode === "category" && active
-          ? "true"
-          : "false"
+        mode === "category" && active ? "true" : "false"
       );
 
-      btn.classList.toggle(
-        "all-active",
-        mode === "all"
-      );
+      btn.classList.toggle("all-active", mode === "all");
     });
   }
 
   function allMatches(){
-
-    return Array.isArray(currentProg?.matches)
-      ? [...currentProg.matches]
-      : [];
+    return Array.isArray(currentProg?.matches) ? [...currentProg.matches] : [];
   }
 
   function visibleMatches(){
-
     return allMatches()
       .filter(m => {
-
-        if(mode === "all"){
-          return true;
-        }
+        if(mode === "all") return true;
 
         return String(m.categorie || "") === currentCategorie
           && String(m.epreuve || "") === currentEpreuve;
       })
       .sort((a,b)=>{
-
-        if(Number(a.order) !== Number(b.order)){
-          return Number(a.order) - Number(b.order);
-        }
-
-        return String(a.court || "")
-          .localeCompare(String(b.court || ""));
+        if(Number(a.order) !== Number(b.order)) return Number(a.order) - Number(b.order);
+        return String(a.court || "").localeCompare(String(b.court || ""));
       });
   }
 
   function normalMatches(){
-
-    return visibleMatches()
-      .filter(m => m.type !== "winner");
+    return visibleMatches().filter(m => m.type !== "winner");
   }
 
   function winnerOnlyCards(){
-
-    return visibleMatches()
-      .filter(m => m.type === "winner");
+    return visibleMatches().filter(m => m.type === "winner");
   }
 
   function getResult(mid){
-
     return resultsByMatch.get(mid) || null;
   }
 
   function fmtScore(v){
-
-    if(v === null || v === undefined || v === ""){
-      return "—";
-    }
-
+    if(v === null || v === undefined || v === "") return "—";
     return String(v);
   }
 
   function toNum(v){
+    if(v === null || v === undefined || v === "") return null;
 
-    if(v === null || v === undefined || v === ""){
-      return null;
-    }
+    const n = Number(String(v).replace(",", ".").trim());
 
-    const n = Number(
-      String(v).replace(",", ".").trim()
-    );
-
-    return Number.isFinite(n)
-      ? n
-      : null;
+    return Number.isFinite(n) ? n : null;
   }
 
   function winnerSide(res){
+    if(!res) return null;
 
-    if(!res){
-      return null;
-    }
-
-    if(
-      res.winnerSide === "A"
-      || res.winnerSide === "B"
-    ){
+    if(res.winnerSide === "A" || res.winnerSide === "B"){
       return res.winnerSide;
     }
 
@@ -858,23 +994,13 @@
       ["s2A","s2B"],
       ["s3A","s3B"]
     ].forEach(([ka,kb])=>{
-
       const na = toNum(res[ka]);
       const nb = toNum(res[kb]);
 
-      if(
-        na === null
-        || nb === null
-        || na === nb
-      ){
-        return;
-      }
+      if(na === null || nb === null || na === nb) return;
 
-      if(na > nb){
-        a++;
-      }else{
-        b++;
-      }
+      if(na > nb) a++;
+      else b++;
     });
 
     if(a > b) return "A";
@@ -884,91 +1010,49 @@
   }
 
   function courtLabel(court){
-
-    if(court === "A"){
-      return "🐝 Manon Queen Bee";
-    }
-
-    if(court === "B"){
-      return "🌶️ Lisa de Los Pimentos";
-    }
-
-    if(court === "AUTO"){
-      return "🏆 Vainqueur";
-    }
-
+    if(court === "A") return "🐝 Manon Queen Bee";
+    if(court === "B") return "🌶️ Lisa de Los Pimentos";
+    if(court === "AUTO") return "🏆 Vainqueur";
     return "🎾 terrain";
   }
 
   function matchById(id){
-
-    return allMatches()
-      .find(m => m.id === id);
+    return allMatches().find(m => m.id === id);
   }
 
   function resolveDynamicName(match, side, guard = new Set()){
+    if(!match) return "—";
 
-    if(!match){
-      return "—";
-    }
-
-    const raw =
-      side === "A"
-        ? match.teamA
-        : match.teamB;
-
-    const ref =
-      side === "A"
-        ? match.A
-        : match.B;
+    const raw = side === "A" ? match.teamA : match.teamB;
+    const ref = side === "A" ? match.A : match.B;
 
     if(ref?.type === "team"){
-
-      return ref.team?.teamName
-        || raw
-        || "Équipe";
+      return ref.team?.teamName || raw || "Équipe";
     }
 
     if(ref?.type === "winner" || ref?.type === "loser"){
-
       const sourceId = ref.matchId;
 
-      if(!sourceId || guard.has(sourceId)){
-        return raw || "Équipe";
-      }
+      if(!sourceId || guard.has(sourceId)) return raw || "Équipe";
 
       guard.add(sourceId);
 
       const source = matchById(sourceId);
-
       const res = getResult(sourceId);
-
       const w = winnerSide(res);
 
-      if(
-        !source
-        || (w !== "A" && w !== "B")
-      ){
-
+      if(!source || (w !== "A" && w !== "B")){
         return ref.type === "winner"
           ? `Vainqueur ${sourceId}`
           : `Perdant ${sourceId}`;
       }
 
-      const wantedSide =
-        ref.type === "winner"
-          ? w
-          : (w === "A" ? "B" : "A");
+      const wantedSide = ref.type === "winner" ? w : (w === "A" ? "B" : "A");
 
-      return resolveDynamicName(
-        source,
-        wantedSide,
-        guard
-      );
+      return resolveDynamicName(source, wantedSide, guard);
     }
 
     if(ref?.type === "poolRank"){
-
       return `${ref.rank}${Number(ref.rank) === 1 ? "er" : "e"} poule ${ref.pool}`;
     }
 
@@ -976,29 +1060,122 @@
   }
 
   function teamName(match, side){
-
     return resolveDynamicName(match, side);
   }
 
-  function renderWinnerCard(match){
+  function matchWinnerTeamName(match){
+    const w = winnerSide(getResult(match.id));
+    if(w !== "A" && w !== "B") return null;
+    return teamName(match, w);
+  }
 
+  function labelShort(match){
+    return match.label || match.id || "Match";
+  }
+
+  function orderTimeFor(order){
+    const n = Number(order);
+    return ORDER_TIMES[String(n)] || "À confirmer";
+  }
+
+  function renderWinnerCard(match){
     return `
       <div class="winner-card">
-
-        <strong>
-          🏆 ${esc(match.teamA || "Vainqueur")}
-        </strong>
-
-        <span>
-          ${esc(match.label || "Catégorie avec une seule équipe")}
-        </span>
-
+        <strong>🏆 ${esc(match.teamA || "Vainqueur")}</strong>
+        <span>${esc(match.label || "Catégorie avec une seule équipe")}</span>
       </div>
     `;
   }
 
-  function renderMatchCard(match){
+  function groupByOrder(){
+    const rows = normalMatches();
+    const map = new Map();
 
+    rows.forEach(match => {
+      const order = Number(match.order || 9999);
+      const key = Number.isFinite(order) ? order : 9999;
+
+      if(!map.has(key)){
+        map.set(key, { order:key, A:null, B:null, fallback:[] });
+      }
+
+      const row = map.get(key);
+
+      if(match.court === "A" && !row.A){
+        row.A = match;
+      }else if(match.court === "B" && !row.B){
+        row.B = match;
+      }else{
+        row.fallback.push(match);
+      }
+    });
+
+    return Array.from(map.values()).sort((a,b) => a.order - b.order);
+  }
+
+  function orderTime(row){
+    const m = row.A || row.B || row.fallback[0] || null;
+    return m?.time || orderTimeFor(row.order);
+  }
+
+  function renderMatchMini(match){
+    if(!match){
+      return `<div class="empty-cell"></div>`;
+    }
+
+    const winner = matchWinnerTeamName(match);
+    const teamA = teamName(match, "A");
+    const teamB = teamName(match, "B");
+
+    const cls = match.court === "A" ? "courtA" : match.court === "B" ? "courtB" : "";
+
+    return `
+      <div class="match-mini ${esc(cls)}" data-mid="${esc(match.id)}">
+        <div class="mini-top">
+          <div class="mini-time">${esc(match.time || "—")}</div>
+        </div>
+
+        <div class="mini-label">${esc(labelShort(match))}</div>
+
+        <div class="mini-team ${winner === teamA ? "winner" : ""} ${teamA.startsWith("Vainqueur") || teamA.startsWith("Perdant") ? "placeholder" : ""}">
+          ${esc(teamA)}
+        </div>
+
+        <div class="mini-team ${winner === teamB ? "winner" : ""} ${teamB.startsWith("Vainqueur") || teamB.startsWith("Perdant") ? "placeholder" : ""}">
+          ${esc(teamB)}
+        </div>
+      </div>
+    `;
+  }
+
+  function renderChrono(){
+    const rows = groupByOrder();
+
+    if(!rows.length){
+      chronoGrid.innerHTML = `<p class="muted" style="grid-column:1 / -1;margin:0;">Aucun match à afficher.</p>`;
+      return;
+    }
+
+    chronoGrid.innerHTML = rows.map(row => `
+      <div class="order-cell">
+        <div class="order-num">#${esc(row.order)}</div>
+        <div class="order-time">${esc(orderTime(row))}</div>
+      </div>
+
+      <div class="slot-cell">${renderMatchMini(row.A)}</div>
+      <div class="slot-cell">${renderMatchMini(row.B)}</div>
+
+      ${row.fallback.map(m => `
+        <div class="order-cell">
+          <div class="order-num">#${esc(row.order)}</div>
+          <div class="order-time">${esc(m.time || orderTimeFor(row.order))}</div>
+        </div>
+        <div class="slot-cell" style="grid-column:2 / 4;">${renderMatchMini(m)}</div>
+      `).join("")}
+    `).join("");
+  }
+
+  function renderMatchCard(match){
     const res = getResult(match.id);
 
     const cls =
@@ -1010,197 +1187,88 @@
 
     return `
       <div class="match-card ${esc(cls)}">
-
         <div class="match-head">
-
-          <div class="m-slot">
-            #${esc(match.order || "—")}
-          </div>
-
-          <div class="m-time">
-            ${esc(match.time || "—")}
-          </div>
-
-          <div class="m-court">
-            ${esc(courtLabel(match.court))}
-          </div>
-
-          <div class="m-label">
-            ${esc(match.label || match.id)}
-          </div>
-
+          <div class="m-slot">#${esc(match.order || "—")}</div>
+          <div class="m-time">${esc(match.time || "—")}</div>
+          <div class="m-court">${esc(courtLabel(match.court))}</div>
+          <div class="m-label">${esc(match.label || match.id)}</div>
         </div>
 
         <div class="team-row">
-
-          <div class="team-name">
-            ${esc(teamName(match, "A"))}
-          </div>
-
-          <div class="score-cell">
-            ${esc(fmtScore(res?.s1A))}
-          </div>
-
-          <div class="score-cell">
-            ${esc(fmtScore(res?.s2A))}
-          </div>
-
-          <div class="score-cell">
-            ${esc(fmtScore(res?.s3A))}
-          </div>
-
+          <div class="team-name">${esc(teamName(match, "A"))}</div>
+          <div class="score-cell">${esc(fmtScore(res?.s1A))}</div>
+          <div class="score-cell">${esc(fmtScore(res?.s2A))}</div>
+          <div class="score-cell">${esc(fmtScore(res?.s3A))}</div>
         </div>
 
-        <div class="vs-line">
-          VS
-        </div>
+        <div class="vs-line">VS</div>
 
         <div class="team-row">
-
-          <div class="team-name">
-            ${esc(teamName(match, "B"))}
-          </div>
-
-          <div class="score-cell">
-            ${esc(fmtScore(res?.s1B))}
-          </div>
-
-          <div class="score-cell">
-            ${esc(fmtScore(res?.s2B))}
-          </div>
-
-          <div class="score-cell">
-            ${esc(fmtScore(res?.s3B))}
-          </div>
-
+          <div class="team-name">${esc(teamName(match, "B"))}</div>
+          <div class="score-cell">${esc(fmtScore(res?.s1B))}</div>
+          <div class="score-cell">${esc(fmtScore(res?.s2B))}</div>
+          <div class="score-cell">${esc(fmtScore(res?.s3B))}</div>
         </div>
-
       </div>
     `;
   }
 
-  function renderChrono(){
-
+  function renderResultats(){
     const winners = winnerOnlyCards();
     const matches = normalMatches();
 
     const winnersHtml = winners.length
-      ? `
-        <div class="match-list">
-          ${winners.map(renderWinnerCard).join("")}
-        </div>
-      `
+      ? `<div class="match-list">${winners.map(renderWinnerCard).join("")}</div>`
       : "";
 
     const matchesHtml = matches.length
-      ? `
-        <div class="match-list">
-          ${matches.map(renderMatchCard).join("")}
-        </div>
-      `
-      : `
-        <p class="muted">
-          Aucun match à afficher.
-        </p>
-      `;
+      ? `<div class="match-list">${matches.map(renderMatchCard).join("")}</div>`
+      : `<p class="muted">Aucun résultat à afficher.</p>`;
 
-    chronoList.innerHTML =
-      winnersHtml + matchesHtml;
+    resultatsList.innerHTML = winnersHtml + matchesHtml;
   }
 
   function hasPoules(){
+    if(mode !== "category") return false;
 
-    if(mode !== "category"){
-      return false;
-    }
-
-    if(currentCategorie === "Seniors" && currentEpreuve === "DM"){
-      return true;
-    }
-
-    if(currentCategorie === "Seniors" && currentEpreuve === "DD"){
-      return true;
-    }
-
-    if(currentCategorie === "U18" && currentEpreuve === "DM"){
-      return true;
-    }
+    if(currentCategorie === "Seniors" && currentEpreuve === "DM") return true;
+    if(currentCategorie === "Seniors" && currentEpreuve === "DD") return true;
+    if(currentCategorie === "U18" && currentEpreuve === "DM") return true;
 
     return false;
   }
 
   function hasFinalBracket(){
-
     return mode === "category"
       && currentCategorie === "Seniors"
-      && (
-        currentEpreuve === "DM"
-        || currentEpreuve === "DD"
-      );
+      && (currentEpreuve === "DM" || currentEpreuve === "DD");
   }
 
   function setActiveTab(tab){
-
     currentTab = tab;
 
-    tabChrono.setAttribute(
-      "aria-selected",
-      tab === "chrono" ? "true" : "false"
-    );
+    tabChrono.setAttribute("aria-selected", tab === "chrono" ? "true" : "false");
+    tabResultats.setAttribute("aria-selected", tab === "resultats" ? "true" : "false");
+    tabPoules.setAttribute("aria-selected", tab === "poules" ? "true" : "false");
+    tabFinal.setAttribute("aria-selected", tab === "final" ? "true" : "false");
 
-    tabPoules.setAttribute(
-      "aria-selected",
-      tab === "poules" ? "true" : "false"
-    );
+    panelChrono.style.display = canSeeWork() && tab === "chrono" ? "block" : "none";
+    panelResultats.style.display = canSeeWork() && tab === "resultats" ? "block" : "none";
+    panelPoules.style.display = canSeeWork() && tab === "poules" ? "block" : "none";
+    panelFinal.style.display = canSeeWork() && tab === "final" ? "block" : "none";
 
-    tabFinal.setAttribute(
-      "aria-selected",
-      tab === "final" ? "true" : "false"
-    );
-
-    panelChrono.style.display =
-      canSeeWork() && tab === "chrono"
-        ? "block"
-        : "none";
-
-    panelPoules.style.display =
-      canSeeWork() && tab === "poules"
-        ? "block"
-        : "none";
-
-    panelFinal.style.display =
-      canSeeWork() && tab === "final"
-        ? "block"
-        : "none";
-
-    if(tab === "chrono"){
-      renderChrono();
-    }
+    if(tab === "chrono") renderChrono();
+    if(tab === "resultats") renderResultats();
   }
 
   function syncControls(){
-
-    btnModeAll.classList.toggle(
-      "active",
-      mode === "all"
-    );
-
-    btnModeCategory.classList.toggle(
-      "active",
-      mode === "category"
-    );
+    btnModeAll.classList.toggle("active", mode === "all");
+    btnModeCategory.classList.toggle("active", mode === "category");
 
     syncHeaderButtons();
 
-    tabPoules.style.display =
-      hasPoules()
-        ? "block"
-        : "none";
-
-    tabFinal.style.display =
-      hasFinalBracket()
-        ? "block"
-        : "none";
+    tabPoules.style.display = hasPoules() ? "block" : "none";
+    tabFinal.style.display = hasFinalBracket() ? "block" : "none";
 
     if(mode === "all"){
       currentTab = "chrono";
@@ -1218,150 +1286,85 @@
   }
 
   function render(){
-
     syncControls();
 
     if(!canSeeWork()){
+      pageIntro.textContent = "La programmation est en cours de préparation.";
+      pageTag.textContent = "Maintenance";
 
-      pageIntro.textContent =
-        "La programmation est en cours de préparation.";
+      maintenanceBox.style.display = "block";
+      workBox.style.display = "none";
 
-      pageTag.textContent =
-        "Maintenance";
-
-      maintenanceBox.style.display =
-        "block";
-
-      workBox.style.display =
-        "none";
-
-      panelChrono.style.display =
-        "none";
-
-      panelPoules.style.display =
-        "none";
-
-      panelFinal.style.display =
-        "none";
+      panelChrono.style.display = "none";
+      panelResultats.style.display = "none";
+      panelPoules.style.display = "none";
+      panelFinal.style.display = "none";
 
       return;
     }
 
-    pageIntro.textContent =
-      publicVisible
-        ? "Planning des matchs, horaires, terrains et scores."
-        : "Aperçu réservé aux admins et JAT.";
+    pageIntro.textContent = publicVisible
+      ? "Planning des matchs, horaires, terrains et résultats."
+      : "Aperçu réservé aux admins et JAT.";
 
-    pageTag.textContent =
-      publicVisible
-        ? "Direct"
-        : "Travail";
+    pageTag.textContent = publicVisible ? "Direct" : "Travail";
+    workBadge.style.display = publicVisible ? "none" : "inline-flex";
 
-    workBadge.style.display =
-      publicVisible
-        ? "none"
-        : "inline-flex";
+    maintenanceBox.style.display = "none";
+    workBox.style.display = "block";
 
-    maintenanceBox.style.display =
-      "none";
-
-    workBox.style.display =
-      "block";
-
-    if(!currentProg){
-
-      statusText.textContent =
-        "Aucune programmation générale enregistrée.";
-
-    }else{
-
-      statusText.textContent =
-        mode === "all"
-          ? `✅ ${normalMatches().length} match(s) dans la chronologie générale.`
-          : `✅ ${normalMatches().length} match(s) pour cette catégorie / épreuve.`;
-    }
+    statusText.textContent = currentProg
+      ? (
+          mode === "all"
+            ? `✅ ${normalMatches().length} match(s) dans la chronologie générale.`
+            : `✅ ${normalMatches().length} match(s) pour cette catégorie / épreuve.`
+        )
+      : "Aucune programmation générale enregistrée.";
 
     setActiveTab(currentTab);
   }
 
   function setMode(next){
-
-    mode =
-      next === "category"
-        ? "category"
-        : "all";
-
+    mode = next === "category" ? "category" : "all";
     render();
   }
 
   function changeZone(categorie, epreuve){
-
-    currentCategorie =
-      categorie || currentCategorie;
-
-    currentEpreuve =
-      epreuve || currentEpreuve;
-
+    currentCategorie = categorie || currentCategorie;
+    currentEpreuve = epreuve || currentEpreuve;
     mode = "category";
-
     render();
   }
 
   btnModeAll.onclick = () => setMode("all");
-
   btnModeCategory.onclick = () => setMode("category");
 
   zoneCatBtns.forEach(btn => {
-
-    btn.onclick = () =>
-      changeZone(
-        btn.dataset.categorie,
-        currentEpreuve
-      );
+    btn.onclick = () => changeZone(btn.dataset.categorie, currentEpreuve);
   });
 
   zoneEpreuveBtns.forEach(btn => {
-
-    btn.onclick = () =>
-      changeZone(
-        currentCategorie,
-        btn.dataset.epreuve
-      );
+    btn.onclick = () => changeZone(currentCategorie, btn.dataset.epreuve);
   });
 
-  tabChrono.onclick = () =>
-    setActiveTab("chrono");
-
-  tabPoules.onclick = () =>
-    setActiveTab("poules");
-
-  tabFinal.onclick = () =>
-    setActiveTab("final");
+  tabChrono.onclick = () => setActiveTab("chrono");
+  tabResultats.onclick = () => setActiveTab("resultats");
+  tabPoules.onclick = () => setActiveTab("poules");
+  tabFinal.onclick = () => setActiveTab("final");
 
   function startVisibilityListener(){
-
     if(unsubVisibility){
       unsubVisibility();
     }
 
-    unsubVisibility = onSnapshot(
-      visibilityRef(),
-      (snap)=>{
-
-        const data = snap.exists()
-          ? (snap.data() || {})
-          : {};
-
-        publicVisible =
-          data.publicVisible === true;
-
-        render();
-      }
-    );
+    unsubVisibility = onSnapshot(visibilityRef(), (snap)=>{
+      const data = snap.exists() ? (snap.data() || {}) : {};
+      publicVisible = data.publicVisible === true;
+      render();
+    });
   }
 
   function startDataListeners(){
-
     if(unsubProg){
       unsubProg();
     }
@@ -1370,50 +1373,29 @@
       unsubResults();
     }
 
-    unsubProg = onSnapshot(
-      generalProgRef(),
-      (snap)=>{
+    unsubProg = onSnapshot(generalProgRef(), (snap)=>{
+      currentProg = snap.exists() ? (snap.data() || null) : null;
+      render();
+    });
 
-        currentProg = snap.exists()
-          ? (snap.data() || null)
-          : null;
+    unsubResults = onSnapshot(resultsCol(), (snap)=>{
+      resultsByMatch = new Map();
 
-        render();
-      }
-    );
+      snap.forEach(d => {
+        resultsByMatch.set(d.id, d.data() || {});
+      });
 
-    unsubResults = onSnapshot(
-      resultsCol(),
-      (snap)=>{
-
-        resultsByMatch = new Map();
-
-        snap.forEach(d => {
-
-          resultsByMatch.set(
-            d.id,
-            d.data() || {}
-          );
-        });
-
-        render();
-      }
-    );
+      render();
+    });
   }
 
   onAuthStateChanged(auth, async (user)=>{
-
     currentRole = null;
 
     if(user){
-
       try{
-
-        currentRole =
-          await getRoleByUid(user.uid);
-
+        currentRole = await getRoleByUid(user.uid);
       }catch(error){
-
         currentRole = null;
       }
     }
@@ -1423,7 +1405,6 @@
 
   startVisibilityListener();
   startDataListeners();
-
 </script>
 
 </body>
