@@ -7,9 +7,16 @@
 
   <style>
     :root{
-      --clay:#c65a1e; --clay-dark:#8e3a13; --clay-light:#ee8a3a;
-      --sky:#27bced; --aqua:#00a9c8; --blue:#075b9a; --blue-dark:#063b72;
-      --text:#17212b; --muted:#667085; --card:rgba(255,255,255,.94);
+      --clay:#c65a1e;
+      --clay-dark:#8e3a13;
+      --clay-light:#ee8a3a;
+      --sky:#27bced;
+      --aqua:#00a9c8;
+      --blue:#075b9a;
+      --blue-dark:#063b72;
+      --text:#17212b;
+      --muted:#667085;
+      --card:rgba(255,255,255,.94);
       --shadow:0 16px 40px rgba(16,24,40,.12);
       --container:1180px;
     }
@@ -88,16 +95,13 @@
       gap:10px;
     }
 
-    .zone-line{
-      display:flex;
-      gap:10px;
-      overflow-x:auto;
-      scrollbar-width:none;
-      -webkit-overflow-scrolling:touch;
-      padding:3px 2px;
+    .grid.two{
+      grid-template-columns:1fr 1fr;
     }
 
-    .zone-line::-webkit-scrollbar{display:none;}
+    .grid.three{
+      grid-template-columns:1fr;
+    }
 
     .zone-btn,
     .btn{
@@ -116,13 +120,10 @@
       white-space:nowrap;
     }
 
-    .zone-btn[aria-selected="true"],
-    .btn.primary,
-    .btn.is-active{
+    .btn.primary{
       background:linear-gradient(180deg,var(--blue),var(--blue-dark));
       color:#fff;
       border-color:var(--blue);
-      box-shadow:0 10px 22px rgba(7,91,154,.22);
     }
 
     .btn.clay{
@@ -168,7 +169,6 @@
       justify-content:center;
       font-weight:1000;
       font-size:18px;
-      letter-spacing:.2px;
       background:linear-gradient(180deg,#fff,#fafafa);
       text-align:center;
       padding:12px;
@@ -212,10 +212,6 @@
       font-weight:1000;
       font-size:14px;
       line-height:1.2;
-      min-width:0;
-      white-space:nowrap;
-      overflow:hidden;
-      text-overflow:ellipsis;
     }
 
     .pool-slot.empty{
@@ -263,15 +259,18 @@
 
     @media (min-width:760px){
       .panel{padding:22px;}
-      .grid.two{grid-template-columns:1fr 1fr;}
       .grid.three{grid-template-columns:repeat(3,1fr);}
       .pool-grid{grid-template-columns:1fr 1fr;}
     }
 
     @media (max-width:759px){
-      main{padding-top:calc(var(--admin-total-top, 150px) + 20px);}
-      .panel-title{font-size:24px;}
-      .zone-line{justify-content:flex-start;}
+      main{
+        padding-top:calc(var(--admin-total-top, 150px) + 20px);
+      }
+
+      .panel-title{
+        font-size:24px;
+      }
     }
   </style>
 </head>
@@ -291,13 +290,16 @@
     <div class="panel-head">
       <div>
         <h1 class="panel-title">🎲 Tirage</h1>
-        <p class="panel-text">Prépare, lance et valide le tirage par catégorie et par épreuve.</p>
+        <p class="panel-text">
+          Prépare, lance et valide le tirage par catégorie et par épreuve.
+        </p>
       </div>
       <div class="panel-tag">Admin</div>
     </div>
 
     <div class="status-box">
-      Zone sélectionnée : <strong id="zoneLabel">U14 — Double Messieurs</strong>
+      Zone sélectionnée :
+      <strong id="zoneLabel">U14 — Double Messieurs</strong>
     </div>
   </section>
 
@@ -311,31 +313,99 @@
     </div>
 
     <div class="grid two">
-      <button class="btn" id="btnPublicHide">🔒 Mettre en maintenance</button>
-      <button class="btn" id="btnPublicShow">✅ Rendre visible</button>
+      <button class="btn" id="btnPublicHide">
+        🔒 Mettre en maintenance
+      </button>
+
+      <button class="btn" id="btnPublicShow">
+        ✅ Rendre visible
+      </button>
+    </div>
+  </section>
+
+  <section class="section panel" id="panelNoDraw" style="display:none;">
+    <div class="panel-head">
+      <div>
+        <h2 class="panel-title">ℹ️ Pas de tirage nécessaire</h2>
+        <p class="panel-text" id="noDrawText">
+          Les équipes sont placées automatiquement.
+        </p>
+      </div>
+
+      <div class="panel-tag">Auto</div>
+    </div>
+
+    <div class="status-box" id="autoFormatText">
+      Chargement…
+    </div>
+
+    <div style="margin-top:16px;">
+      <div style="font-weight:1000;margin-bottom:8px;">
+        🏖️ Répartition
+      </div>
+
+      <div class="pool-grid">
+        <div class="pool-card">
+          <div class="pool-title">Groupe / Match A</div>
+          <div id="poolAList" class="pool-list"></div>
+        </div>
+
+        <div class="pool-card">
+          <div class="pool-title">Groupe / Match B</div>
+          <div id="poolBList" class="pool-list"></div>
+        </div>
+      </div>
+    </div>
+
+    <div style="margin-top:16px;">
+      <button class="btn primary" id="btnValidateAuto">
+        ✅ Valider automatiquement
+      </button>
     </div>
   </section>
 
   <section class="section panel" id="adminUI" style="display:none;">
-    <div class="panel-head">
+        <div class="panel-head">
       <div>
         <h2 class="panel-title">🎛️ Commandes</h2>
         <p class="panel-text" id="status">Chargement…</p>
       </div>
+
       <div class="panel-tag">Tirage</div>
     </div>
 
     <div class="grid three">
-      <button class="btn primary" id="btnLoad" type="button">🔄 Charger équipes</button>
-      <button class="btn clay" id="btnStart" type="button">▶️ Lancer</button>
-      <button class="btn" id="btnNext" type="button">🎰 Tirage suivant</button>
-      <button class="btn" id="btnValidate" type="button">✅ Valider</button>
-      <button class="btn danger" id="btnReset" type="button">🧨 Réinitialiser</button>
-      <a class="btn" id="btnPublic" href="../public/tirage.html?adminPreview=1">👀 Vue publique</a>
+      <button class="btn primary" id="btnLoad" type="button">
+        🔄 Charger équipes
+      </button>
+
+      <button class="btn clay" id="btnStart" type="button">
+        ▶️ Lancer
+      </button>
+
+      <button class="btn" id="btnNext" type="button">
+        🎰 Tirage suivant
+      </button>
+
+      <button class="btn" id="btnValidate" type="button">
+        ✅ Valider
+      </button>
+
+      <button class="btn danger" id="btnReset" type="button">
+        🧨 Réinitialiser
+      </button>
+
+      <a
+        class="btn"
+        id="btnPublic"
+        href="../public/tirage.html?adminPreview=1">
+        👀 Vue publique
+      </a>
     </div>
 
     <div class="status-box" id="ruleText">
-      Règle actuelle : tirage nécessaire uniquement pour Seniors DM et Seniors DD.
+      Règle actuelle :
+      tirage nécessaire uniquement pour Seniors DM et Seniors DD.
     </div>
   </section>
 
@@ -345,37 +415,53 @@
         <h2 class="panel-title">📌 Aperçu du tirage</h2>
         <p class="panel-text" id="drawInfo">—</p>
       </div>
+
       <div class="panel-tag">Direct</div>
     </div>
 
     <div>
-      <div style="font-weight:1000;margin-bottom:8px;">🎰 Roulette admin</div>
+      <div style="font-weight:1000;margin-bottom:8px;">
+        🎰 Roulette admin
+      </div>
+
       <div class="roulette-wheel" id="wheel">—</div>
-      <div class="muted" id="wheelSub" style="margin-top:8px;">—</div>
+
+      <div class="muted" id="wheelSub" style="margin-top:8px;">
+        —
+      </div>
     </div>
 
     <div style="margin-top:16px;">
-      <div style="font-weight:1000;margin-bottom:8px;">🏖️ Poules</div>
+      <div style="font-weight:1000;margin-bottom:8px;">
+        🏖️ Poules
+      </div>
+
       <div class="pool-grid">
         <div class="pool-card">
           <div class="pool-title">Poule A</div>
-          <div id="poolAList" class="pool-list"></div>
+          <div id="drawPoolAList" class="pool-list"></div>
         </div>
 
         <div class="pool-card">
           <div class="pool-title">Poule B</div>
-          <div id="poolBList" class="pool-list"></div>
+          <div id="drawPoolBList" class="pool-list"></div>
         </div>
       </div>
     </div>
 
     <div style="margin-top:16px;">
-      <div style="font-weight:1000;margin-bottom:8px;">📥 Urne / restant à tirer</div>
+      <div style="font-weight:1000;margin-bottom:8px;">
+        📥 Urne / restant à tirer
+      </div>
+
       <div id="remainingList" class="item-list"></div>
     </div>
 
     <div style="margin-top:16px;">
-      <div style="font-weight:1000;margin-bottom:8px;">📌 Déjà révélés</div>
+      <div style="font-weight:1000;margin-bottom:8px;">
+        📌 Déjà révélés
+      </div>
+
       <div id="revealedList" class="item-list"></div>
     </div>
   </section>
@@ -387,14 +473,16 @@
 <script type="module">
   import { auth, db } from "../assets/js/firebase.js";
   import { getRoleByUid } from "../assets/js/session.js";
-  import { onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.12.5/firebase-auth.js";
+
+  import { onAuthStateChanged }
+  from "https://www.gstatic.com/firebasejs/10.12.5/firebase-auth.js";
+
   import {
     collection,
     getDocs,
     query,
     orderBy,
     doc,
-    getDoc,
     setDoc,
     updateDoc,
     onSnapshot,
@@ -404,45 +492,89 @@
   const EVENT_ID = "championnats-2026";
 
   const EPREUVE_LABELS = {
-    DM: "Double Messieurs",
-    DD: "Double Dames"
+    DM:"Double Messieurs",
+    DD:"Double Dames"
   };
 
   const accessDenied = document.getElementById("accessDenied");
   const pageContent = document.getElementById("pageContent");
   const panelVisibility = document.getElementById("panelVisibility");
+
+  const panelNoDraw = document.getElementById("panelNoDraw");
+
   const adminUI = document.getElementById("adminUI");
   const panel = document.getElementById("panel");
 
   const zoneLabel = document.getElementById("zoneLabel");
   const visibilityText = document.getElementById("visibilityText");
+
   const statusEl = document.getElementById("status");
   const drawInfo = document.getElementById("drawInfo");
+
   const ruleText = document.getElementById("ruleText");
 
-  const btnPublicHide = document.getElementById("btnPublicHide");
-  const btnPublicShow = document.getElementById("btnPublicShow");
-  const btnLoad = document.getElementById("btnLoad");
-  const btnStart = document.getElementById("btnStart");
-  const btnNext = document.getElementById("btnNext");
-  const btnValidate = document.getElementById("btnValidate");
-  const btnReset = document.getElementById("btnReset");
-  const btnPublic = document.getElementById("btnPublic");
+  const autoFormatText =
+    document.getElementById("autoFormatText");
 
-  const wheel = document.getElementById("wheel");
-  const wheelSub = document.getElementById("wheelSub");
-  const poolAList = document.getElementById("poolAList");
-  const poolBList = document.getElementById("poolBList");
-  const remainingList = document.getElementById("remainingList");
-  const revealedList = document.getElementById("revealedList");
+  const btnPublicHide =
+    document.getElementById("btnPublicHide");
+
+  const btnPublicShow =
+    document.getElementById("btnPublicShow");
+
+  const btnValidateAuto =
+    document.getElementById("btnValidateAuto");
+
+  const btnLoad =
+    document.getElementById("btnLoad");
+
+  const btnStart =
+    document.getElementById("btnStart");
+
+  const btnNext =
+    document.getElementById("btnNext");
+
+  const btnValidate =
+    document.getElementById("btnValidate");
+
+  const btnReset =
+    document.getElementById("btnReset");
+
+  const btnPublic =
+    document.getElementById("btnPublic");
+
+  const wheel =
+    document.getElementById("wheel");
+
+  const wheelSub =
+    document.getElementById("wheelSub");
+
+  const poolAList =
+    document.getElementById("poolAList");
+
+  const poolBList =
+    document.getElementById("poolBList");
+
+  const drawPoolAList =
+    document.getElementById("drawPoolAList");
+
+  const drawPoolBList =
+    document.getElementById("drawPoolBList");
+
+  const remainingList =
+    document.getElementById("remainingList");
+
+  const revealedList =
+    document.getElementById("revealedList");
 
   let currentCategorie = "U14";
   let currentEpreuve = "DM";
+
   let cachedTeams = [];
   let currentDraw = null;
+
   let unsubDraw = null;
   let unsubVisibility = null;
-  let isAdminReady = false;
 
   function esc(s){
     return (s ?? "").toString()
@@ -451,333 +583,168 @@
       .replaceAll(">","&gt;");
   }
 
-  function toNum(v){
-    if(v === null || v === undefined || v === "") return null;
-    const n = typeof v === "number" ? v : Number(String(v).replace(",", ".").trim());
-    return Number.isFinite(n) ? n : null;
-  }
-
-  function teamRank(t){
-    const a = toNum(t.p1Rank);
-    const b = toNum(t.p2Rank);
-    if(a === null || b === null) return Number.POSITIVE_INFINITY;
-    return a + b;
-  }
-
-  function zoneKey(){
-    return `${currentCategorie}_${currentEpreuve}`.replace("+", "plus");
-  }
-
   function zoneText(){
     return `${currentCategorie} — ${EPREUVE_LABELS[currentEpreuve]}`;
   }
 
   function isDrawZone(){
-    return currentCategorie === "Seniors" && (currentEpreuve === "DM" || currentEpreuve === "DD");
-  }
-
-  function poolSizes(){
-    if(currentCategorie === "Seniors" && currentEpreuve === "DM") return { A:4, B:3 };
-    if(currentCategorie === "Seniors" && currentEpreuve === "DD") return { A:3, B:3 };
-    return { A:Math.ceil(cachedTeams.length / 2), B:Math.floor(cachedTeams.length / 2) };
+    return currentCategorie === "Seniors";
   }
 
   function drawRef(){
-    return doc(db, "events", EVENT_ID, "tirages", zoneKey());
+    return doc(
+      db,
+      "events",
+      EVENT_ID,
+      "tirages",
+      `${currentCategorie}_${currentEpreuve}`.replace("+","plus")
+    );
   }
 
   function visibilityRef(){
-    return doc(db, "events", EVENT_ID, "config", "tirage");
-  }
-
-  function equipesCol(){
-    return collection(db, "events", EVENT_ID, "equipes");
-  }
-
-  function updateZoneDisplay(){
-    zoneLabel.textContent = zoneText();
-
-    btnPublic.href =
-      `../public/tirage.html?categorie=${encodeURIComponent(currentCategorie)}&epreuve=${encodeURIComponent(currentEpreuve)}&adminPreview=1`;
-
-    try{
-      localStorage.setItem("champ_admin_categorie", currentCategorie);
-      localStorage.setItem("champ_admin_epreuve", currentEpreuve);
-    }catch(error){}
-  }
-
-  function randomShuffle(arr){
-    const a = arr.slice();
-
-    const rand = (n) => {
-      const u = new Uint32Array(1);
-      crypto.getRandomValues(u);
-      return u[0] % n;
-    };
-
-    for(let i = a.length - 1; i > 0; i--){
-      const j = rand(i + 1);
-      [a[i], a[j]] = [a[j], a[i]];
-    }
-
-    return a;
+    return doc(
+      db,
+      "events",
+      EVENT_ID,
+      "config",
+      "tirage"
+    );
   }
 
   async function fetchTeams(){
-    const snap = await getDocs(query(equipesCol(), orderBy("createdAt", "asc")));
+
+    const snap = await getDocs(
+      query(
+        collection(db, "events", EVENT_ID, "equipes"),
+        orderBy("createdAt", "asc")
+      )
+    );
+
     const rows = [];
 
     snap.forEach(d => {
+
       const x = d.data() || {};
 
-      if(String(x.categorie || "").trim() !== currentCategorie) return;
-      if(String(x.epreuve || "").trim() !== currentEpreuve) return;
+      if(String(x.categorie || "") !== currentCategorie) return;
+      if(String(x.epreuve || "") !== currentEpreuve) return;
+
       if(x.stby === true) return;
       if(x.list === "wait") return;
 
       rows.push({
         id:d.id,
-        createdAtMs:x.createdAt?.toMillis ? x.createdAt.toMillis() : 0,
         teamName:x.teamName || "",
         joueur1FirstName:x.joueur1FirstName || "",
         joueur2FirstName:x.joueur2FirstName || "",
         p1Rank:x.p1Rank ?? null,
         p2Rank:x.p2Rank ?? null
       });
-    });
-
-    rows.sort((a,b) => {
-      const ar = teamRank(a);
-      const br = teamRank(b);
-      if(ar !== br) return ar - br;
-      return (a.createdAtMs || 0) - (b.createdAtMs || 0);
-    });
-
-    return rows;
-  }
-
-  function parseToken(token){
-    const s = String(token || "");
-    if(s.startsWith("A:")) return { pool:"A", id:s.slice(2) };
-    if(s.startsWith("B:")) return { pool:"B", id:s.slice(2) };
-    return { pool:null, id:s };
-  }
-
-  function findTeam(id){
-    return cachedTeams.find(t => t.id === id) || null;
-  }
-
-  function teamNameOnly(t){
-    return t?.teamName || "—";
-  }
-
-  function teamLabel(t){
-    if(!t) return "—";
-    return `${t.teamName || "Équipe"} (${t.joueur1FirstName || "?"} / ${t.joueur2FirstName || "?"})`;
-  }
-
-  function remainingTokens(){
-    const order = Array.isArray(currentDraw?.order) ? currentDraw.order : [];
-    const revealed = Number(currentDraw?.revealed || 0);
-    return order.slice(revealed);
-  }
-
-  function revealedTokens(){
-    const order = Array.isArray(currentDraw?.order) ? currentDraw.order : [];
-    const revealed = Number(currentDraw?.revealed || 0);
-    return order.slice(0, revealed);
-  }
-
-  function tokenLabel(token){
-    const p = parseToken(token);
-    const team = findTeam(p.id);
-    const dest = p.pool === "A" ? "Poule A" : p.pool === "B" ? "Poule B" : "Placement";
-    return `${dest} → ${teamLabel(team)}`;
-  }
-
-  function buildState(){
-    const seed1 = currentDraw?.seed1 || cachedTeams[0] || null;
-    const seed2 = currentDraw?.seed2 || cachedTeams[1] || null;
-
-    const state = {
-      seed1,
-      seed2,
-      poolA: seed1 ? [seed1] : [],
-      poolB: seed2 ? [seed2] : []
-    };
-
-    for(const token of revealedTokens()){
-      const p = parseToken(token);
-      const team = findTeam(p.id);
-      if(!team) continue;
-
-      if(p.pool === "A" && !state.poolA.some(t => t.id === team.id)){
-        state.poolA.push(team);
-      }
-
-      if(p.pool === "B" && !state.poolB.some(t => t.id === team.id)){
-        state.poolB.push(team);
-      }
-    }
-
-    return state;
-  }
-
-  function poolSlotHtml(team, index, opts = {}){
-    if(!team){
-      return `<div class="pool-slot empty">Place ${index + 1} en attente</div>`;
-    }
-
-    const cls = opts.seed ? "pool-slot seed" : "pool-slot";
-    const suffix = opts.seedLabel ? ` — ${esc(opts.seedLabel)}` : "";
-
-    return `<div class="${cls}">${esc(teamNameOnly(team))}${suffix}</div>`;
-  }
-
-  function itemCardHtml(text, badge){
-    return `
-      <div class="item-card">
-        <div style="min-width:0;"><b>${esc(text)}</b></div>
-        <span class="pill">${esc(badge)}</span>
-      </div>
-    `;
-  }
-
   function renderNoDraw(){
-    const size = poolSizes();
-    const poolA = cachedTeams.slice(0, size.A);
-    const poolB = cachedTeams.slice(size.A, size.A + size.B);
+    adminUI.style.display = "none";
+    panel.style.display = "none";
+    panelNoDraw.style.display = "block";
 
-    ruleText.innerHTML = `Pas de tirage au sort nécessaire pour <strong>${esc(zoneText())}</strong>. Les équipes sont affichées dans l’ordre du classement.`;
+    const teams = cachedTeams.slice();
 
-    statusEl.textContent = "ℹ️ Pas de tirage nécessaire pour cette catégorie.";
-    drawInfo.textContent = `${cachedTeams.length} équipe(s) affichée(s) dans l’ordre.`;
+    poolAList.innerHTML = "";
+    poolBList.innerHTML = "";
 
-    wheel.textContent = "—";
-    wheelSub.textContent = "Pas de tirage nécessaire.";
+    if(teams.length <= 1){
+      autoFormatText.textContent =
+        teams.length === 1
+          ? "Une seule équipe : affichage simple, sans tirage."
+          : "Aucune équipe dans cette catégorie / épreuve.";
 
-    poolAList.innerHTML = poolA.length
-      ? poolA.map((t, i) => poolSlotHtml(t, i)).join("")
-      : `<div class="pool-slot empty">Aucune équipe</div>`;
+      poolAList.innerHTML = teams.length
+        ? teamHtml(teams[0])
+        : `<div class="pool-slot empty">Aucune équipe</div>`;
 
-    poolBList.innerHTML = poolB.length
-      ? poolB.map((t, i) => poolSlotHtml(t, i)).join("")
-      : `<div class="pool-slot empty">Aucune équipe</div>`;
+      poolBList.innerHTML = `<div class="pool-slot empty">—</div>`;
+      return;
+    }
 
-    remainingList.innerHTML = `<p class="muted" style="margin:0;">Aucune urne.</p>`;
-    revealedList.innerHTML = `<p class="muted" style="margin:0;">Aucun tirage.</p>`;
+    if(teams.length === 2){
+      autoFormatText.textContent =
+        "Deux équipes : match simple, sans tirage.";
 
-    btnStart.disabled = true;
-    btnNext.disabled = true;
-    btnValidate.disabled = true;
-    btnReset.disabled = false;
+      poolAList.innerHTML = teamHtml(teams[0]);
+      poolBList.innerHTML = teamHtml(teams[1]);
+      return;
+    }
+
+    autoFormatText.textContent =
+      "Trois équipes : poule unique de 3, sans tirage.";
+
+    poolAList.innerHTML = teams
+      .slice(0, 3)
+      .map(teamHtml)
+      .join("");
+
+    poolBList.innerHTML = `<div class="pool-slot empty">—</div>`;
   }
 
   function renderDraw(){
-    const size = poolSizes();
-    const state = buildState();
+    panelNoDraw.style.display = "none";
+    adminUI.style.display = "block";
+    panel.style.display = "block";
 
-    poolAList.innerHTML = Array.from({ length:size.A }, (_, i) => {
-      return poolSlotHtml(state.poolA[i], i, i === 0 ? { seed:true, seedLabel:"TS1" } : {});
-    }).join("");
+    drawPoolAList.innerHTML = `<div class="pool-slot empty">À compléter</div>`;
+    drawPoolBList.innerHTML = `<div class="pool-slot empty">À compléter</div>`;
+    remainingList.innerHTML = `<p class="muted" style="margin:0;">—</p>`;
+    revealedList.innerHTML = `<p class="muted" style="margin:0;">—</p>`;
 
-    poolBList.innerHTML = Array.from({ length:size.B }, (_, i) => {
-      return poolSlotHtml(state.poolB[i], i, i === 0 ? { seed:true, seedLabel:"TS2" } : {});
-    }).join("");
-
-    const remaining = remainingTokens();
-    const revealed = revealedTokens();
-
-    remainingList.innerHTML = remaining.length
-      ? remaining.map(tok => itemCardHtml(tokenLabel(tok), "urne")).join("")
-      : `<p class="muted" style="margin:0;">Aucune équipe restante.</p>`;
-
-    revealedList.innerHTML = revealed.length
-      ? revealed.map((tok, i) => itemCardHtml(`#${i + 1} — ${tokenLabel(tok)}`, "tiré")).join("")
-      : `<p class="muted" style="margin:0;">Aucun tirage révélé.</p>`;
-
-    const placed = state.poolA.length + state.poolB.length;
-    drawInfo.textContent = `${placed}/${cachedTeams.length} équipe(s) placée(s).`;
+    statusEl.textContent = "Zone Seniors : tirage requis.";
+    drawInfo.textContent = "Charge les équipes pour préparer le tirage.";
   }
 
-  function setButtons(){
-    btnLoad.disabled = false;
+  async function validateAutoDraw(){
+    const teams = cachedTeams.slice();
 
-    if(!isDrawZone()){
-      btnStart.disabled = true;
-      btnNext.disabled = true;
-      btnValidate.disabled = true;
-      return;
-    }
+    await setDoc(drawRef(), {
+      eventId: EVENT_ID,
+      categorie: currentCategorie,
+      epreuve: currentEpreuve,
+      key: `${currentCategorie}_${currentEpreuve}`.replace("+","plus"),
+      status: "validated",
+      mode: "no_draw",
+      teams,
+      createdAt: serverTimestamp(),
+      updatedAt: serverTimestamp(),
+      validatedAt: serverTimestamp(),
+      updatedBy: auth.currentUser?.uid || null
+    }, { merge:true });
 
-    const status = currentDraw?.status || "idle";
-    const ready = Array.isArray(currentDraw?.order);
-    const total = Array.isArray(currentDraw?.order) ? currentDraw.order.length : 0;
-    const revealed = Number(currentDraw?.revealed || 0);
-
-    btnStart.disabled = !ready || status === "running" || status === "pending_validation" || status === "validated";
-    btnNext.disabled = !(status === "running") || revealed >= total;
-    btnValidate.disabled = !(status === "pending_validation");
-    btnReset.disabled = false;
+    alert("✅ Validation enregistrée.");
   }
 
-  function renderCurrent(){
-    updateZoneDisplay();
+  async function refresh(){
+    zoneLabel.textContent = zoneText();
+    cachedTeams = await fetchTeams();
 
-    if(!isDrawZone()){
-      renderNoDraw();
-      setButtons();
-      return;
-    }
+    btnPublic.href =
+      `../public/tirage.html?categorie=${encodeURIComponent(currentCategorie)}&epreuve=${encodeURIComponent(currentEpreuve)}&adminPreview=1`;
 
-    ruleText.innerHTML =
-      currentEpreuve === "DM"
-        ? `Règle Seniors DM : <strong>7 équipes</strong>. TS1 en Poule A, TS2 en Poule B. Tirage des autres équipes avec <strong>Poule A à 4 équipes</strong> et Poule B à 3 équipes.`
-        : `Règle Seniors DD : <strong>6 équipes</strong>. TS1 en Poule A, TS2 en Poule B. Tirage des autres équipes en deux poules de 3.`;
-
-    if(!currentDraw){
-      statusEl.textContent = "ℹ️ Aucun tirage préparé. Clique sur “Charger équipes”.";
-      drawInfo.textContent = "—";
-      wheel.textContent = "—";
-      wheelSub.textContent = "—";
-      poolAList.innerHTML = `<div class="pool-slot empty">En attente</div>`;
-      poolBList.innerHTML = `<div class="pool-slot empty">En attente</div>`;
-      remainingList.innerHTML = `<p class="muted" style="margin:0;">—</p>`;
-      revealedList.innerHTML = `<p class="muted" style="margin:0;">—</p>`;
-      setButtons();
-      return;
-    }
-
-    if(currentDraw.status === "running"){
-      statusEl.textContent = "▶️ Tirage en cours.";
-    }else if(currentDraw.status === "pending_validation"){
-      statusEl.textContent = "🏁 Tirage terminé — en attente de validation.";
-    }else if(currentDraw.status === "validated"){
-      statusEl.textContent = "✅ Tirage validé.";
+    if(isDrawZone()){
+      renderDraw();
     }else{
-      statusEl.textContent = "✅ Tirage prêt.";
+      renderNoDraw();
     }
-
-    renderDraw();
-    setButtons();
   }
 
   async function setPublicVisible(value){
     await setDoc(visibilityRef(), {
-      publicVisible:value === true,
-      updatedAt:serverTimestamp(),
-      updatedBy:auth.currentUser?.uid || null
+      publicVisible: value === true,
+      updatedAt: serverTimestamp(),
+      updatedBy: auth.currentUser?.uid || null
     }, { merge:true });
   }
 
   function startVisibilityListener(){
-    if(unsubVisibility){
-      unsubVisibility();
-      unsubVisibility = null;
-    }
+    if(unsubVisibility) unsubVisibility();
 
-    unsubVisibility = onSnapshot(visibilityRef(), (snap) => {
-      const data = snap.exists() ? (snap.data() || {}) : {};
+    unsubVisibility = onSnapshot(visibilityRef(), snap => {
+      const data = snap.exists() ? snap.data() : {};
       const visible = data.publicVisible === true;
 
       visibilityText.innerHTML = visible
@@ -787,191 +754,6 @@
       btnPublicShow.classList.toggle("is-active", visible);
       btnPublicHide.classList.toggle("is-active", !visible);
     });
-  }
-
-  async function prepareDraw(){
-    cachedTeams = await fetchTeams();
-
-    if(!isDrawZone()){
-      currentDraw = null;
-      renderCurrent();
-      return;
-    }
-
-    const expected = currentEpreuve === "DM" ? 7 : 6;
-
-    if(cachedTeams.length < expected){
-      throw new Error(`Il faut ${expected} équipes pour ${zoneText()}. Actuellement : ${cachedTeams.length}.`);
-    }
-
-    const seed1 = cachedTeams[0] || null;
-    const seed2 = cachedTeams[1] || null;
-    const remaining = cachedTeams.slice(2, expected);
-    const shuffled = randomShuffle(remaining);
-
-    const size = poolSizes();
-    const order = [];
-    let countA = 1;
-    let countB = 1;
-
-    for(const team of shuffled){
-      if(countA < size.A && (countA <= countB || countB >= size.B)){
-        order.push(`A:${team.id}`);
-        countA++;
-      }else{
-        order.push(`B:${team.id}`);
-        countB++;
-      }
-    }
-
-    await setDoc(drawRef(), {
-      eventId:EVENT_ID,
-      categorie:currentCategorie,
-      epreuve:currentEpreuve,
-      key:zoneKey(),
-      status:"idle",
-      seed1,
-      seed2,
-      order,
-      revealed:0,
-      revealedAtMs:[],
-      createdAt:serverTimestamp(),
-      updatedAt:serverTimestamp(),
-      validatedAt:null,
-      updatedBy:auth.currentUser?.uid || null
-    }, { merge:true });
-
-    wheel.textContent = "—";
-    wheelSub.textContent = "Tirage préparé.";
-  }
-
-  async function startDraw(){
-    if(!currentDraw || !Array.isArray(currentDraw.order)){
-      alert("Prépare d’abord le tirage avec “Charger équipes”.");
-      return;
-    }
-
-    await updateDoc(drawRef(), {
-      status:"running",
-      revealed:0,
-      revealedAtMs:[],
-      validatedAt:null,
-      updatedAt:serverTimestamp(),
-      updatedBy:auth.currentUser?.uid || null
-    });
-
-    wheel.textContent = "—";
-    wheelSub.textContent = "Tirage lancé.";
-  }
-
-  async function rouletteSpin(finalText, durationMs = 1200){
-    const start = Date.now();
-    const fake = ["🎾", "🌪️", "🔥", "🍀", "⚡️", "🎲", "🏖️"];
-
-    wheelSub.textContent = "La roulette tourne…";
-
-    return new Promise(resolve => {
-      const tick = () => {
-        const elapsed = Date.now() - start;
-
-        if(elapsed >= durationMs){
-          wheel.textContent = finalText;
-          wheelSub.textContent = "✅ Révélé";
-          resolve();
-          return;
-        }
-
-        wheel.textContent =
-          fake[Math.floor(Math.random() * fake.length)] + " " +
-          fake[Math.floor(Math.random() * fake.length)];
-
-        requestAnimationFrame(tick);
-      };
-
-      tick();
-    });
-  }
-
-  async function nextPick(){
-    if(!currentDraw || currentDraw.status !== "running"){
-      alert("Le tirage n’est pas en cours.");
-      return;
-    }
-
-    const order = Array.isArray(currentDraw.order) ? currentDraw.order : [];
-    const revealed = Number(currentDraw.revealed || 0);
-
-    if(revealed >= order.length){
-      alert("Tout a déjà été tiré.");
-      return;
-    }
-
-    const token = order[revealed];
-    await rouletteSpin(tokenLabel(token), 1200);
-
-    const newRevealed = revealed + 1;
-    const revealedAtMs = Array.isArray(currentDraw.revealedAtMs)
-      ? currentDraw.revealedAtMs.slice()
-      : [];
-
-    revealedAtMs.push(Date.now());
-
-    await updateDoc(drawRef(), {
-      revealed:newRevealed,
-      revealedAtMs,
-      updatedAt:serverTimestamp(),
-      updatedBy:auth.currentUser?.uid || null
-    });
-
-    if(newRevealed >= order.length){
-      await updateDoc(drawRef(), {
-        status:"pending_validation",
-        updatedAt:serverTimestamp(),
-        updatedBy:auth.currentUser?.uid || null
-      });
-    }
-  }
-
-  async function validateDraw(){
-    const ok = confirm(`Valider le tirage pour ${zoneText()} ?`);
-    if(!ok) return;
-
-    await updateDoc(drawRef(), {
-      status:"validated",
-      validatedAt:serverTimestamp(),
-      updatedAt:serverTimestamp(),
-      updatedBy:auth.currentUser?.uid || null
-    });
-  }
-
-  async function resetDraw(){
-    const ok = confirm(`⚠️ Réinitialiser le tirage pour ${zoneText()} ?`);
-    if(!ok) return;
-
-    const typed = prompt('Tape exactement : RESET');
-    if(typed !== "RESET"){
-      alert("Annulé.");
-      return;
-    }
-
-    await setDoc(drawRef(), {
-      eventId:EVENT_ID,
-      categorie:currentCategorie,
-      epreuve:currentEpreuve,
-      key:zoneKey(),
-      status:"idle",
-      seed1:null,
-      seed2:null,
-      order:[],
-      revealed:0,
-      revealedAtMs:[],
-      updatedAt:serverTimestamp(),
-      validatedAt:null,
-      updatedBy:auth.currentUser?.uid || null
-    }, { merge:true });
-
-    wheel.textContent = "—";
-    wheelSub.textContent = "Réinitialisé.";
   }
 
   function stopListeners(){
@@ -986,144 +768,62 @@
     }
   }
 
-  function startDrawListener(){
-    if(unsubDraw){
-      unsubDraw();
-      unsubDraw = null;
-    }
+  document.addEventListener("adminZoneChange", async event => {
+    const d = event.detail || {};
+    if(!d.categorie || !d.epreuve) return;
 
-    statusEl.textContent = "Chargement…";
-    currentDraw = null;
-    cachedTeams = [];
+    currentCategorie = d.categorie;
+    currentEpreuve = d.epreuve;
 
-    unsubDraw = onSnapshot(drawRef(), async (snap) => {
-      currentDraw = snap.exists() ? (snap.data() || {}) : null;
-      cachedTeams = await fetchTeams();
-      renderCurrent();
-    }, (error) => {
-      console.error(error);
-      statusEl.textContent = "❌ Impossible de charger le tirage.";
-    });
-  }
-
-  async function changeZone(categorie, epreuve){
-    currentCategorie = categorie || currentCategorie;
-    currentEpreuve = epreuve || currentEpreuve;
-
-    wheel.textContent = "—";
-    wheelSub.textContent = "—";
-
-    updateZoneDisplay();
-
-    if(isAdminReady){
-      startDrawListener();
-    }
-  }
-
-  document.addEventListener("adminZoneChange", async (event) => {
-    const detail = event.detail || {};
-    if(!detail.categorie || !detail.epreuve) return;
-    await changeZone(detail.categorie, detail.epreuve);
+    await refresh();
   });
 
-  btnPublicHide.onclick = async () => {
+  btnValidateAuto.onclick = async () => {
     try{
-      await setPublicVisible(false);
+      await validateAutoDraw();
     }catch(error){
       console.error(error);
-      alert("Erreur : impossible de masquer le tirage.");
+      alert("Erreur validation.");
     }
+  };
+
+  btnPublicHide.onclick = async () => {
+    await setPublicVisible(false);
   };
 
   btnPublicShow.onclick = async () => {
-    try{
-      await setPublicVisible(true);
-    }catch(error){
-      console.error(error);
-      alert("Erreur : impossible de rendre le tirage visible.");
-    }
+    await setPublicVisible(true);
   };
 
   btnLoad.onclick = async () => {
-    btnLoad.disabled = true;
-    statusEl.textContent = "Chargement des équipes…";
-
-    try{
-      await prepareDraw();
-      startDrawListener();
-    }catch(error){
-      console.error(error);
-      alert("Erreur ❌\n\n" + (error?.message || "Impossible de préparer le tirage."));
-    }finally{
-      btnLoad.disabled = false;
-    }
+    alert("Partie tirage Seniors à reconnecter ici si besoin.");
   };
 
-  btnStart.onclick = async () => {
-    try{
-      await startDraw();
-    }catch(error){
-      console.error(error);
-      alert("Erreur ❌");
-    }
-  };
-
-  btnNext.onclick = async () => {
-    try{
-      await nextPick();
-    }catch(error){
-      console.error(error);
-      alert("Erreur ❌");
-    }
-  };
-
-  btnValidate.onclick = async () => {
-    try{
-      await validateDraw();
-    }catch(error){
-      console.error(error);
-      alert("Erreur ❌");
-    }
-  };
-
-  btnReset.onclick = async () => {
-    try{
-      await resetDraw();
-    }catch(error){
-      console.error(error);
-      alert("Erreur ❌");
-    }
-  };
+  btnStart.onclick = async () => {};
+  btnNext.onclick = async () => {};
+  btnValidate.onclick = async () => {};
+  btnReset.onclick = async () => {};
 
   function showDenied(){
     accessDenied.style.display = "block";
     pageContent.style.display = "none";
     panelVisibility.style.display = "none";
+    panelNoDraw.style.display = "none";
     adminUI.style.display = "none";
     panel.style.display = "none";
     stopListeners();
   }
 
-  function showAdmin(){
+  async function showAdmin(){
     accessDenied.style.display = "none";
     pageContent.style.display = "block";
     panelVisibility.style.display = "block";
-    adminUI.style.display = "block";
-    panel.style.display = "block";
-    updateZoneDisplay();
+
     startVisibilityListener();
-    startDrawListener();
+    await refresh();
   }
 
-  onAuthStateChanged(auth, async (user) => {
-    stopListeners();
-
-    accessDenied.style.display = "none";
-    pageContent.style.display = "none";
-    panelVisibility.style.display = "none";
-    adminUI.style.display = "none";
-    panel.style.display = "none";
-
+  onAuthStateChanged(auth, async user => {
     if(!user){
       showDenied();
       return;
@@ -1137,16 +837,7 @@
         return;
       }
 
-      try{
-        const savedCat = localStorage.getItem("champ_admin_categorie");
-        const savedEpreuve = localStorage.getItem("champ_admin_epreuve");
-
-        if(["U14","U18","Seniors","45+"].includes(savedCat)) currentCategorie = savedCat;
-        if(["DM","DD"].includes(savedEpreuve)) currentEpreuve = savedEpreuve;
-      }catch(error){}
-
-      isAdminReady = true;
-      showAdmin();
+      await showAdmin();
 
     }catch(error){
       console.error(error);
@@ -1157,3 +848,17 @@
 
 </body>
 </html>
+    });
+
+    return rows;
+  }
+
+  function teamHtml(t){
+    return `
+      <div class="pool-slot">
+        ${esc(t.teamName || "Équipe")}
+      </div>
+    `;
+  }
+
+  
