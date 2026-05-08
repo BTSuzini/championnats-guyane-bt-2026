@@ -1,0 +1,955 @@
+<!doctype html>
+<html lang="fr">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>JAT — Résultats — Championnats Guyane Beach Tennis</title>
+
+  <style>
+    :root{
+      --clay:#c65a1e;
+      --clay-dark:#8e3a13;
+      --clay-light:#ee8a3a;
+      --sky:#27bced;
+      --aqua:#00a9c8;
+      --blue:#075b9a;
+      --blue-dark:#063b72;
+      --text:#17212b;
+      --muted:#667085;
+      --card:rgba(255,255,255,.94);
+      --shadow:0 16px 40px rgba(16,24,40,.12);
+      --container:1180px;
+    }
+
+    *{box-sizing:border-box;}
+
+    html, body{
+      max-width:100%;
+      overflow-x:hidden;
+    }
+
+    body{
+      margin:0;
+      font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;
+      color:var(--text);
+      background:
+        radial-gradient(circle at 20% 0%, rgba(39,188,237,.22), transparent 28%),
+        radial-gradient(circle at 85% 10%, rgba(0,169,200,.16), transparent 26%),
+        linear-gradient(180deg,#f4fcff 0%,#e9f8ff 48%,#ffffff 100%);
+    }
+
+    a{color:inherit;text-decoration:none;}
+
+    .container{
+      width:min(var(--container), calc(100% - 28px));
+      margin:0 auto;
+    }
+
+    main{
+      padding-top:calc(var(--jat-total-top, 276px) + 24px);
+      padding-bottom:42px;
+    }
+
+    .section{margin-top:18px;}
+
+    .panel{
+      background:var(--card);
+      border:1px solid rgba(255,255,255,.6);
+      border-radius:24px;
+      box-shadow:var(--shadow);
+      padding:18px;
+    }
+
+    .panel-head{
+      display:flex;
+      justify-content:space-between;
+      align-items:flex-start;
+      gap:12px;
+      margin-bottom:14px;
+    }
+
+    .panel-title{
+      margin:0;
+      font-size:26px;
+      line-height:1.05;
+      letter-spacing:-.03em;
+    }
+
+    .panel-text{
+      margin:6px 0 0;
+      color:var(--muted);
+      font-size:15px;
+      line-height:1.45;
+    }
+
+    .panel-tag{
+      flex-shrink:0;
+      padding:8px 13px;
+      border-radius:999px;
+      background:#e4f7ff;
+      color:var(--blue-dark);
+      font-size:12px;
+      font-weight:1000;
+      text-transform:uppercase;
+      letter-spacing:.06em;
+    }
+
+    .btn{
+      appearance:none;
+      border:1px solid rgba(7,91,154,.14);
+      background:#fff;
+      border-radius:999px;
+      min-height:42px;
+      padding:10px 16px;
+      font-size:14px;
+      font-weight:1000;
+      cursor:pointer;
+      color:#1c2430;
+      text-align:center;
+      box-shadow:0 6px 14px rgba(16,24,40,.05);
+      white-space:nowrap;
+    }
+
+    .btn.primary,
+    .btn.is-active{
+      background:linear-gradient(180deg,var(--blue),var(--blue-dark));
+      color:#fff;
+      border-color:var(--blue);
+      box-shadow:0 10px 22px rgba(7,91,154,.22);
+    }
+
+    .btn:disabled{
+      opacity:.5;
+      cursor:not-allowed;
+    }
+
+    .status-box{
+      margin-top:12px;
+      padding:14px 16px;
+      border-radius:18px;
+      background:linear-gradient(135deg,rgba(39,188,237,.12),rgba(198,90,30,.08));
+      border:1px solid rgba(39,188,237,.22);
+      color:#475467;
+      font-size:14px;
+      line-height:1.5;
+    }
+
+    .general-toggle{
+      display:flex;
+      gap:10px;
+      flex-wrap:wrap;
+      margin-top:16px;
+    }
+
+    .muted{
+      color:var(--muted);
+      font-size:14px;
+      line-height:1.45;
+    }
+
+    .match-list{
+      display:flex;
+      flex-direction:column;
+      gap:14px;
+      margin-top:12px;
+    }
+
+    .match-card{
+      border-radius:18px;
+      border:2px solid rgba(0,0,0,.06);
+      padding:14px;
+      background:#fff;
+      box-shadow:0 1px 0 rgba(0,0,0,.03);
+    }
+
+    .match-card.courtA{
+      background:#fff8dd;
+      border-color:rgba(255,196,0,.35);
+    }
+
+    .match-card.courtB{
+      background:#ffeef2;
+      border-color:rgba(255,0,60,.20);
+    }
+
+    .match-head{
+      display:flex;
+      align-items:center;
+      gap:10px;
+      flex-wrap:wrap;
+    }
+
+    .m-slot{
+      font-size:12px;
+      font-weight:1000;
+      color:#667085;
+      white-space:nowrap;
+    }
+
+    .m-time{
+      font-size:14px;
+      font-weight:1000;
+      white-space:nowrap;
+    }
+
+    .m-court{
+      flex:1;
+      min-width:0;
+      font-size:13px;
+      font-style:italic;
+      color:#475467;
+      white-space:nowrap;
+      overflow:hidden;
+      text-overflow:ellipsis;
+    }
+
+    .pill{
+      display:inline-flex;
+      align-items:center;
+      gap:8px;
+      padding:6px 10px;
+      border-radius:999px;
+      border:1px solid #eee;
+      background:#fafafa;
+      font-weight:1000;
+      white-space:nowrap;
+      font-size:12px;
+    }
+
+    .dot{
+      width:10px;
+      height:10px;
+      border-radius:999px;
+      display:inline-block;
+    }
+
+    .dot.orange{ background:#f39c12; }
+    .dot.green{ background:#2ecc71; }
+
+    .score-grid{
+      margin-top:12px;
+      display:grid;
+      grid-template-columns:minmax(0,1fr) 60px 60px 60px;
+      gap:8px;
+      align-items:center;
+    }
+
+    .team{
+      min-width:0;
+    }
+
+    .team-title{
+      font-size:15px;
+      font-weight:1000;
+      line-height:1.15;
+      white-space:nowrap;
+      overflow:hidden;
+      text-overflow:ellipsis;
+    }
+
+    .team-sub{
+      margin-top:2px;
+      font-size:13px;
+      font-weight:800;
+      opacity:.85;
+      color:#475467;
+    }
+
+    .team-placeholder{
+      color:#667085;
+      font-style:italic;
+    }
+
+    .hdr{
+      font-size:11px;
+      font-weight:1000;
+      opacity:.6;
+      text-align:center;
+    }
+
+    .sc{
+      width:60px;
+      height:42px;
+      border-radius:12px;
+      border:1px solid #ddd;
+      background:#fff;
+      font-weight:1000;
+      text-align:center;
+      outline:none;
+      font-size:15px;
+      padding:0 6px;
+    }
+
+    .actions{
+      margin-top:14px;
+      display:flex;
+      justify-content:space-between;
+      gap:10px;
+      flex-wrap:wrap;
+      align-items:center;
+    }
+
+    .mini{
+      font-size:12px;
+      font-weight:900;
+      opacity:.75;
+    }
+
+    @media (min-width:760px){
+      .panel{padding:22px;}
+    }
+
+    @media (max-width:759px){
+      main{
+        padding-top:calc(var(--jat-total-top, 268px) + 20px);
+      }
+
+      .panel-title{
+        font-size:24px;
+      }
+
+      .score-grid{
+        grid-template-columns:minmax(0,1fr) 52px 52px 52px;
+      }
+
+      .sc{
+        width:52px;
+      }
+    }
+  </style>
+</head>
+
+<body data-zone-selector="select">
+
+<div id="jatHeader"></div>
+
+<main class="container">
+
+  <section class="section panel" id="accessDenied" style="display:none;">
+    <h2 class="panel-title">⛔ Accès refusé</h2>
+    <p class="panel-text">Cette page est réservée au JAT et aux administrateurs.</p>
+  </section>
+
+  <section class="section panel" id="pageContent" style="display:none;">
+    <div class="panel-head">
+      <div>
+        <h1 class="panel-title">🏆 Résultats</h1>
+        <p class="panel-text">
+          Saisie des scores liée à la programmation générale.
+        </p>
+      </div>
+      <div class="panel-tag">JAT</div>
+    </div>
+
+    <div class="status-box">
+      Vue actuelle : <strong id="zoneLabel">Chargement…</strong>
+      <br>
+      Les résultats saisis ici sont les mêmes que dans l’espace admin.
+    </div>
+
+    <div class="general-toggle">
+      <button class="btn primary" id="btnGeneral" type="button">🌐 Résultats généraux</button>
+      <button class="btn" id="btnFiltered" type="button">🎾 Vue catégorie / épreuve</button>
+    </div>
+  </section>
+
+  <section class="section panel" id="panelResults" style="display:none;">
+    <div class="panel-head">
+      <div>
+        <h2 class="panel-title">🏁 Saisie des scores</h2>
+        <p class="panel-text" id="statusText">Chargement…</p>
+      </div>
+      <div class="panel-tag">Live</div>
+    </div>
+
+    <div id="adminList"></div>
+  </section>
+
+</main>
+
+<script type="module" src="../assets/js/jat-header.js"></script>
+
+<script type="module">
+  import { auth, db } from "../assets/js/firebase.js";
+  import { getRoleByUid } from "../assets/js/session.js";
+
+  import { onAuthStateChanged }
+  from "https://www.gstatic.com/firebasejs/10.12.5/firebase-auth.js";
+
+  import {
+    doc,
+    collection,
+    setDoc,
+    onSnapshot,
+    serverTimestamp
+  } from "https://www.gstatic.com/firebasejs/10.12.5/firebase-firestore.js";
+
+  const EVENT_ID = "championnats-2026";
+
+  const CATEGORIES = ["U14", "U18", "Seniors", "45+"];
+  const EPREUVES = ["DM", "DD"];
+
+  const EPREUVE_LABELS = {
+    DM:"Double Messieurs",
+    DD:"Double Dames"
+  };
+
+  const accessDenied = document.getElementById("accessDenied");
+  const pageContent = document.getElementById("pageContent");
+  const panelResults = document.getElementById("panelResults");
+
+  const zoneLabel = document.getElementById("zoneLabel");
+  const btnGeneral = document.getElementById("btnGeneral");
+  const btnFiltered = document.getElementById("btnFiltered");
+
+  const statusText = document.getElementById("statusText");
+  const adminList = document.getElementById("adminList");
+
+  let currentCategorie = "U14";
+  let currentEpreuve = "DM";
+  let generalMode = true;
+
+  let currentProg = null;
+  let resultsMap = new Map();
+
+  let unsubProg = null;
+  let unsubResults = null;
+
+  function esc(s){
+    return (s ?? "").toString()
+      .replaceAll("&","&amp;")
+      .replaceAll("<","&lt;")
+      .replaceAll(">","&gt;");
+  }
+
+  function zoneText(){
+    return generalMode
+      ? "Résultats généraux"
+      : `${currentCategorie} — ${EPREUVE_LABELS[currentEpreuve]}`;
+  }
+
+  function generalProgRef(){
+    return doc(db, "events", EVENT_ID, "programmations", "general");
+  }
+
+  function resultsCollection(){
+    return collection(db, "events", EVENT_ID, "resultats", "general", "matches");
+  }
+
+  function courtLabel(court){
+    if(court === "A") return "🐝 Manon Queen Bee";
+    if(court === "B") return "🌶️ Lisa de Los Pimentos";
+    return "🎾 terrain";
+  }
+
+  function toNum(v){
+    if(v === null || v === undefined || v === "") return null;
+    const n = Number(String(v).replace(",", ".").trim());
+    return Number.isFinite(n) ? n : null;
+  }
+
+  function getResult(mid){
+    return resultsMap.get(mid) || null;
+  }
+
+  function computeWinnerSideFromScore(res){
+    if(!res) return null;
+
+    const sets = [
+      [toNum(res.s1A), toNum(res.s1B)],
+      [toNum(res.s2A), toNum(res.s2B)],
+      [toNum(res.s3A), toNum(res.s3B)]
+    ];
+
+    let setsA = 0;
+    let setsB = 0;
+
+    for(const [a,b] of sets){
+      if(a === null || b === null) continue;
+
+      if(a > b) setsA++;
+      else if(b > a) setsB++;
+    }
+
+    if(setsA > setsB) return "A";
+    if(setsB > setsA) return "B";
+
+    return null;
+  }
+
+  function visibleMatches(){
+    const all = Array.isArray(currentProg?.matches)
+      ? [...currentProg.matches]
+      : [];
+
+    if(generalMode) return all;
+
+    return all.filter(m =>
+      String(m.categorie || "") === currentCategorie &&
+      String(m.epreuve || "") === currentEpreuve
+    );
+  }
+
+  function poolKeyFromMatch(match){
+    const label = String(match?.label || "");
+
+    if(label.includes("Poule A")) return `${match.categorie}_${match.epreuve}_A`;
+    if(label.includes("Poule B")) return `${match.categorie}_${match.epreuve}_B`;
+    if(label.includes("Poule unique")) return `${match.categorie}_${match.epreuve}_U`;
+
+    return null;
+  }
+
+  function getPoolMatches(poolKey){
+    return visibleMatches().filter(m => poolKeyFromMatch(m) === poolKey);
+  }
+
+  function isPoolComplete(poolKey){
+    const list = getPoolMatches(poolKey);
+    if(!list.length) return false;
+    return list.every(m => computeWinnerSideFromScore(getResult(m.id)) !== null);
+  }
+
+  function buildPoolRanking(poolKey){
+    const list = getPoolMatches(poolKey);
+    const stats = new Map();
+
+    function ensure(name){
+      const key = String(name || "Équipe");
+      if(!stats.has(key)){
+        stats.set(key, {
+          teamName:key,
+          points:0,
+          setsWon:0,
+          setsLost:0,
+          gamesWon:0,
+          gamesLost:0
+        });
+      }
+      return stats.get(key);
+    }
+
+    for(const match of list){
+      const res = getResult(match.id);
+      const winnerSide = computeWinnerSideFromScore(res);
+      if(!winnerSide) continue;
+
+      const A = ensure(match.teamA);
+      const B = ensure(match.teamB);
+
+      const sets = [
+        [toNum(res.s1A), toNum(res.s1B)],
+        [toNum(res.s2A), toNum(res.s2B)],
+        [toNum(res.s3A), toNum(res.s3B)]
+      ];
+
+      let setsA = 0;
+      let setsB = 0;
+
+      for(const [ga, gb] of sets){
+        if(ga === null || gb === null) continue;
+
+        A.gamesWon += ga;
+        A.gamesLost += gb;
+        B.gamesWon += gb;
+        B.gamesLost += ga;
+
+        if(ga > gb) setsA++;
+        else if(gb > ga) setsB++;
+      }
+
+      A.setsWon += setsA;
+      A.setsLost += setsB;
+      B.setsWon += setsB;
+      B.setsLost += setsA;
+
+      if(winnerSide === "A"){
+        A.points += 2;
+        B.points += 1;
+      }else{
+        B.points += 2;
+        A.points += 1;
+      }
+    }
+
+    return Array.from(stats.values()).sort((x,y)=>{
+      if(y.points !== x.points) return y.points - x.points;
+
+      const sdX = x.setsWon - x.setsLost;
+      const sdY = y.setsWon - y.setsLost;
+      if(sdY !== sdX) return sdY - sdX;
+
+      const gdX = x.gamesWon - x.gamesLost;
+      const gdY = y.gamesWon - y.gamesLost;
+      return gdY - gdX;
+    });
+  }
+
+  function resolvePoolRank(categorie, epreuve, pool, rank){
+    const poolKey = `${categorie}_${epreuve}_${pool}`;
+
+    if(!isPoolComplete(poolKey)) return null;
+
+    const ranking = buildPoolRanking(poolKey);
+    return ranking[Number(rank) - 1] || null;
+  }
+
+  function findMatch(id){
+    return Array.isArray(currentProg?.matches)
+      ? currentProg.matches.find(m => m.id === id)
+      : null;
+  }
+
+  function resolveDynamicText(text, match){
+    const raw = String(text || "").trim();
+    if(!raw) return null;
+
+    const poolA1 = raw.match(/^1(?:er|re)?\s+Poule A$/i);
+    const poolA2 = raw.match(/^2e\s+Poule A$/i);
+    const poolB1 = raw.match(/^1(?:er|re)?\s+Poule B$/i);
+    const poolB2 = raw.match(/^2e\s+Poule B$/i);
+
+    if(poolA1) return resolvePoolRank(match.categorie, match.epreuve, "A", 1);
+    if(poolA2) return resolvePoolRank(match.categorie, match.epreuve, "A", 2);
+    if(poolB1) return resolvePoolRank(match.categorie, match.epreuve, "B", 1);
+    if(poolB2) return resolvePoolRank(match.categorie, match.epreuve, "B", 2);
+
+    const winnerDf1 = raw.match(/^Vainqueur(?:e)? DF1$/i);
+    const winnerDf2 = raw.match(/^Vainqueur(?:e)? DF2$/i);
+    const loserDf1 = raw.match(/^Perdant(?:e)? DF1$/i);
+    const loserDf2 = raw.match(/^Perdant(?:e)? DF2$/i);
+
+    const prefix =
+      match.epreuve === "DD"
+        ? "GIRLS"
+        : match.epreuve === "DM"
+          ? "MEN"
+          : "";
+
+    if(prefix && (winnerDf1 || loserDf1)){
+      const sf = findMatch(`${prefix}_SF1`);
+      const side = computeWinnerSideFromScore(getResult(`${prefix}_SF1`));
+      if(!sf || !side) return null;
+
+      if(winnerDf1) return { teamName: side === "A" ? sf.teamA : sf.teamB };
+      if(loserDf1) return { teamName: side === "A" ? sf.teamB : sf.teamA };
+    }
+
+    if(prefix && (winnerDf2 || loserDf2)){
+      const sf = findMatch(`${prefix}_SF2`);
+      const side = computeWinnerSideFromScore(getResult(`${prefix}_SF2`));
+      if(!sf || !side) return null;
+
+      if(winnerDf2) return { teamName: side === "A" ? sf.teamA : sf.teamB };
+      if(loserDf2) return { teamName: side === "A" ? sf.teamB : sf.teamA };
+    }
+
+    return null;
+  }
+
+  function displayTeam(text, sub, match){
+    const resolved = resolveDynamicText(text, match);
+
+    if(resolved){
+      return {
+        title:resolved.teamName || "Équipe",
+        sub:"",
+        placeholder:false
+      };
+    }
+
+    const raw = String(text || "").trim();
+
+    const isPlaceholder =
+      raw === "" ||
+      raw === "Équipe" ||
+      raw.includes("Poule") ||
+      raw.includes("Vainqueur") ||
+      raw.includes("Vainqueure") ||
+      raw.includes("Perdant") ||
+      raw.includes("Perdante") ||
+      raw.includes("Finaliste") ||
+      raw.includes("filles") ||
+      raw.includes("hommes");
+
+    return {
+      title:raw || "Équipe",
+      sub:sub || "",
+      placeholder:isPlaceholder
+    };
+  }
+
+  function render(){
+    const matches = visibleMatches();
+
+    matches.sort((a,b)=>{
+      if(Number(a.order) !== Number(b.order)){
+        return Number(a.order) - Number(b.order);
+      }
+      return String(a.court || "").localeCompare(String(b.court || ""));
+    });
+
+    statusText.textContent = currentProg
+      ? `${matches.length} élément(s) affiché(s)`
+      : "Programmation générale introuvable.";
+
+    if(!currentProg){
+      adminList.innerHTML = `<p class="muted">Génère d’abord la programmation générale.</p>`;
+      return;
+    }
+
+    adminList.innerHTML = `
+      <div class="match-list">
+        ${matches.map(match => {
+          const stored = getResult(match.id) || {};
+          const winnerSide = computeWinnerSideFromScore(stored);
+
+          const teamA = displayTeam(match.teamA, match.subA, match);
+          const teamB = displayTeam(match.teamB, match.subB, match);
+
+          const cls =
+            match.court === "A"
+              ? "courtA"
+              : match.court === "B"
+                ? "courtB"
+                : "";
+
+          const isWinnerOnly = match.type === "winner";
+
+          return `
+            <div class="match-card ${esc(cls)}" data-mid="${esc(match.id)}">
+              <div class="match-head">
+                <div class="m-slot">#${esc(match.order || "—")}</div>
+                <div class="m-time">${esc(match.time || "—")}</div>
+                <div class="m-court">${esc(courtLabel(match.court))}</div>
+                <div class="pill">
+                  <span class="dot ${winnerSide ? "green" : "orange"}"></span>
+                  ${esc(match.label || match.id)}
+                </div>
+              </div>
+
+              ${isWinnerOnly ? `
+                <div style="margin-top:12px;">
+                  <div class="team-title ${teamA.placeholder ? "team-placeholder" : ""}">
+                    ${esc(teamA.title)}
+                  </div>
+                  ${teamA.sub ? `<div class="team-sub">${esc(teamA.sub)}</div>` : ""}
+                </div>
+              ` : `
+                <div class="score-grid">
+                  <div class="hdr"></div>
+                  <div class="hdr">S1</div>
+                  <div class="hdr">S2</div>
+                  <div class="hdr">S3</div>
+
+                  <div class="team">
+                    <div class="team-title ${teamA.placeholder ? "team-placeholder" : ""}">
+                      ${esc(teamA.title)}
+                    </div>
+                    ${teamA.sub ? `<div class="team-sub">${esc(teamA.sub)}</div>` : ""}
+                  </div>
+
+                  <input class="sc" data-k="s1A" value="${esc(stored.s1A ?? "")}">
+                  <input class="sc" data-k="s2A" value="${esc(stored.s2A ?? "")}">
+                  <input class="sc" data-k="s3A" value="${esc(stored.s3A ?? "")}">
+
+                  <div class="team">
+                    <div class="team-title ${teamB.placeholder ? "team-placeholder" : ""}">
+                      ${esc(teamB.title)}
+                    </div>
+                    ${teamB.sub ? `<div class="team-sub">${esc(teamB.sub)}</div>` : ""}
+                  </div>
+
+                  <input class="sc" data-k="s1B" value="${esc(stored.s1B ?? "")}">
+                  <input class="sc" data-k="s2B" value="${esc(stored.s2B ?? "")}">
+                  <input class="sc" data-k="s3B" value="${esc(stored.s3B ?? "")}">
+                </div>
+
+                <div class="actions">
+                  <div class="mini">
+                    ${winnerSide
+                      ? `✅ Vainqueur : équipe ${winnerSide}`
+                      : "⏳ Résultat incomplet"}
+                  </div>
+
+                  <button class="btn primary" data-save="${esc(match.id)}">
+                    💾 Enregistrer
+                  </button>
+                </div>
+              `}
+            </div>
+          `;
+        }).join("")}
+      </div>
+    `;
+  }
+
+  adminList.addEventListener("click", async (e)=>{
+    const btn = e.target.closest("[data-save]");
+    if(!btn) return;
+
+    const mid = btn.dataset.save;
+    const card = btn.closest(".match-card");
+
+    const get = (k)=>{
+      const el = card.querySelector(`[data-k="${k}"]`);
+      return (el?.value || "").trim();
+    };
+
+    const payload = {
+      s1A:get("s1A"),
+      s2A:get("s2A"),
+      s3A:get("s3A"),
+      s1B:get("s1B"),
+      s2B:get("s2B"),
+      s3B:get("s3B"),
+      updatedAt:serverTimestamp(),
+      updatedBy:auth.currentUser?.uid || null
+    };
+
+    payload.winnerSide = computeWinnerSideFromScore(payload);
+
+    btn.disabled = true;
+
+    try{
+      await setDoc(
+        doc(resultsCollection(), mid),
+        payload,
+        { merge:true }
+      );
+    }catch(error){
+      console.error(error);
+      alert("Erreur Firestore ❌");
+    }finally{
+      btn.disabled = false;
+    }
+  });
+
+  btnGeneral.onclick = ()=>{
+    generalMode = true;
+    updateZone();
+  };
+
+  btnFiltered.onclick = ()=>{
+    generalMode = false;
+    updateZone();
+  };
+
+  function updateZone(){
+    zoneLabel.textContent = zoneText();
+
+    btnGeneral.classList.toggle("primary", generalMode);
+    btnFiltered.classList.toggle("primary", !generalMode);
+
+    render();
+  }
+
+  function stopListeners(){
+    if(unsubProg){
+      unsubProg();
+      unsubProg = null;
+    }
+
+    if(unsubResults){
+      unsubResults();
+      unsubResults = null;
+    }
+  }
+
+  function startListeners(){
+    stopListeners();
+
+    unsubProg = onSnapshot(generalProgRef(), (snap)=>{
+      currentProg = snap.exists()
+        ? (snap.data() || null)
+        : null;
+
+      render();
+    });
+
+    unsubResults = onSnapshot(resultsCollection(), (snap)=>{
+      resultsMap = new Map();
+
+      snap.forEach(d=>{
+        resultsMap.set(d.id, d.data() || {});
+      });
+
+      render();
+    });
+  }
+
+  function showDenied(){
+    accessDenied.style.display = "block";
+    pageContent.style.display = "none";
+    panelResults.style.display = "none";
+    stopListeners();
+  }
+
+  function showJat(){
+    accessDenied.style.display = "none";
+    pageContent.style.display = "block";
+    panelResults.style.display = "block";
+
+    try{
+      const savedCat = localStorage.getItem("champ_jat_categorie") || localStorage.getItem("champ_admin_categorie");
+      const savedEpreuve = localStorage.getItem("champ_jat_epreuve") || localStorage.getItem("champ_admin_epreuve");
+
+      if(CATEGORIES.includes(savedCat)) currentCategorie = savedCat;
+      if(EPREUVES.includes(savedEpreuve)) currentEpreuve = savedEpreuve;
+    }catch(error){}
+
+    updateZone();
+    startListeners();
+  }
+
+  document.addEventListener("jatZoneChange", (e)=>{
+    const d = e.detail || {};
+
+    if(CATEGORIES.includes(d.categorie)){
+      currentCategorie = d.categorie;
+    }
+
+    if(EPREUVES.includes(d.epreuve)){
+      currentEpreuve = d.epreuve;
+    }
+
+    try{
+      localStorage.setItem("champ_jat_categorie", currentCategorie);
+      localStorage.setItem("champ_jat_epreuve", currentEpreuve);
+      localStorage.setItem("champ_admin_categorie", currentCategorie);
+      localStorage.setItem("champ_admin_epreuve", currentEpreuve);
+    }catch(error){}
+
+    if(!generalMode){
+      updateZone();
+    }
+  });
+
+  onAuthStateChanged(auth, async (user)=>{
+    accessDenied.style.display = "none";
+    pageContent.style.display = "none";
+    panelResults.style.display = "none";
+
+    if(!user){
+      showDenied();
+      return;
+    }
+
+    try{
+      const role = await getRoleByUid(user.uid);
+
+      if(role !== "admin" && role !== "jat"){
+        showDenied();
+        return;
+      }
+
+      showJat();
+    }catch(error){
+      console.error(error);
+      showDenied();
+    }
+  });
+</script>
+
+</body>
+</html>
