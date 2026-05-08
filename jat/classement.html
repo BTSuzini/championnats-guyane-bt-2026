@@ -253,6 +253,93 @@
       letter-spacing:-.02em;
     }
 
+    .pending-list{
+      display:grid;
+      gap:12px;
+      margin-top:12px;
+    }
+
+    .pending-card{
+      border-radius:18px;
+      border:1px solid rgba(16,24,40,.08);
+      padding:13px;
+      background:#fff;
+      box-shadow:0 8px 18px rgba(16,24,40,.06);
+    }
+
+    .pending-card.courtA{
+      background:#fff8dd;
+      border-color:rgba(255,196,0,.35);
+    }
+
+    .pending-card.courtB{
+      background:#ffeef2;
+      border-color:rgba(255,0,60,.20);
+    }
+
+    .pending-head{
+      display:flex;
+      align-items:center;
+      gap:8px;
+      margin-bottom:10px;
+      flex-wrap:wrap;
+    }
+
+    .p-slot{
+      font-size:12px;
+      font-weight:1000;
+      color:#667085;
+    }
+
+    .p-time{
+      font-size:14px;
+      font-weight:1000;
+    }
+
+    .p-court{
+      flex:1;
+      min-width:0;
+      font-size:13px;
+      font-style:italic;
+      color:#475467;
+      white-space:nowrap;
+      overflow:hidden;
+      text-overflow:ellipsis;
+    }
+
+    .p-label{
+      padding:5px 10px;
+      border-radius:999px;
+      background:#f4f8ff;
+      color:var(--blue-dark);
+      border:1px solid rgba(7,91,154,.12);
+      font-size:12px;
+      font-weight:1000;
+    }
+
+    .p-team{
+      font-size:16px;
+      font-weight:1000;
+      line-height:1.15;
+      white-space:nowrap;
+      overflow:hidden;
+      text-overflow:ellipsis;
+    }
+
+    .p-team.placeholder{
+      color:#667085;
+      font-style:italic;
+    }
+
+    .vs-line{
+      margin:9px 0 5px;
+      text-align:center;
+      font-weight:1000;
+      letter-spacing:2px;
+      opacity:.55;
+      font-size:12px;
+    }
+
     @media (min-width:760px){
       .panel{padding:22px;}
     }
@@ -276,6 +363,10 @@
       .tag{
         font-size:10px;
         padding:5px 8px;
+      }
+
+      .p-team{
+        font-size:14px;
       }
     }
   </style>
@@ -327,6 +418,11 @@
     <div id="validatedBox" class="okbox" style="display:none;"></div>
     <div id="warningBox" class="warn" style="display:none;"></div>
 
+    <div id="pendingBox" style="display:none;">
+      <h3 class="section-title">🕒 Matchs restant à jouer</h3>
+      <div id="pendingList"></div>
+    </div>
+
     <h3 class="section-title">👥 Classement des équipes</h3>
     <div id="teamList"></div>
   </section>
@@ -368,6 +464,8 @@
   const btnValidate = document.getElementById("btnValidate");
   const validatedBox = document.getElementById("validatedBox");
   const warningBox = document.getElementById("warningBox");
+  const pendingBox = document.getElementById("pendingBox");
+  const pendingList = document.getElementById("pendingList");
   const teamList = document.getElementById("teamList");
 
   let currentCategorie = "U14";
@@ -384,7 +482,8 @@
   let unsubClassement = null;
   let unsubEquipes = null;
   let unsubInscriptions = null;
-    function esc(s){
+
+  function esc(s){
     return (s ?? "").toString()
       .replaceAll("&","&amp;")
       .replaceAll("<","&lt;")
@@ -473,7 +572,6 @@
       ["s2A","s2B"],
       ["s3A","s3B"]
     ].forEach(([ka,kb]) => {
-
       const na = toNum(res[ka]);
       const nb = toNum(res[kb]);
 
@@ -488,8 +586,7 @@
 
     return null;
   }
-
-  function allMatches(){
+    function allMatches(){
     return Array.isArray(currentProg?.matches)
       ? [...currentProg.matches]
       : [];
@@ -520,8 +617,13 @@
     ) || null;
   }
 
-  function resolveDynamicTeam(match, side, guard = new Set()){
+  function courtLabel(court){
+    if(court === "A") return "🐝 Manon Queen Bee";
+    if(court === "B") return "🌶️ Lisa de Los Pimentos";
+    return "🎾 terrain";
+  }
 
+  function resolveDynamicTeam(match, side, guard = new Set()){
     if(!match) return null;
 
     const raw = side === "A"
@@ -539,7 +641,6 @@
     }
 
     if(ref?.type === "winner" || ref?.type === "loser"){
-
       const sourceId = ref.matchId;
 
       if(!sourceId || guard.has(sourceId)){
@@ -576,7 +677,6 @@
   }
 
   function matchWinnerTeam(match){
-
     const w = winnerSide(getResult(match.id));
 
     if(w !== "A" && w !== "B") return null;
@@ -586,7 +686,6 @@
   }
 
   function matchLoserTeam(match){
-
     const w = winnerSide(getResult(match.id));
 
     if(w !== "A" && w !== "B") return null;
@@ -601,12 +700,209 @@
     return winnerSide(getResult(match.id)) !== null;
   }
 
-  function buildRanking(){
+  function pendingMatches(){
+    return normalZoneMatches()
+      .filter(m => !isFinished(m))
+      .sort((a,b)=>{
+        if(Number(a.order) !== Number(b.order)){
+          return Number(a.order) - Number(b.order);
+        }
 
+        return String(a.court || "")
+          .localeCompare(String(b.court || ""));
+      });
+  }
+
+  function renderPendingCard(match){
+    const cls =
+      match.court === "A"
+        ? "courtA"
+        : match.court === "B"
+          ? "courtB"
+          : "";
+
+    const a = teamName(match, "A");
+    const b = teamName(match, "B");
+
+    return `
+      <div class="pending-card ${esc(cls)}">
+        <div class="pending-head">
+          <div class="p-slot">#${esc(match.order || "—")}</div>
+          <div class="p-time">${esc(match.time || "—")}</div>
+          <div class="p-court">${esc(courtLabel(match.court))}</div>
+          <div class="p-label">${esc(match.label || match.id)}</div>
+        </div>
+
+        <div class="p-team ${a.includes("Poule") || a.includes("Vainqueur") || a.includes("Perdant") ? "placeholder" : ""}">
+          ${esc(a)}
+        </div>
+
+        <div class="vs-line">VS</div>
+
+        <div class="p-team ${b.includes("Poule") || b.includes("Vainqueur") || b.includes("Perdant") ? "placeholder" : ""}">
+          ${esc(b)}
+        </div>
+      </div>
+    `;
+  }
+
+  function renderPendingMatches(){
+    const list = pendingMatches();
+
+    if(!list.length){
+      pendingBox.style.display = "none";
+      pendingList.innerHTML = "";
+      return;
+    }
+
+    pendingBox.style.display = "block";
+    pendingList.innerHTML = `
+      <div class="pending-list">
+        ${list.map(renderPendingCard).join("")}
+      </div>
+    `;
+  }
+
+  function poolKeyFromMatch(match){
+    const label = String(match?.label || "");
+
+    if(label.includes("Poule A")){
+      return `${match.categorie}_${match.epreuve}_A`;
+    }
+
+    if(label.includes("Poule B")){
+      return `${match.categorie}_${match.epreuve}_B`;
+    }
+
+    if(label.includes("Poule unique")){
+      return `${match.categorie}_${match.epreuve}_U`;
+    }
+
+    if(label.includes("Poule places 5-7")){
+      return `${match.categorie}_${match.epreuve}_5_7`;
+    }
+
+    return null;
+  }
+
+  function getPoolMatches(poolKey){
+    return normalZoneMatches()
+      .filter(m => poolKeyFromMatch(m) === poolKey);
+  }
+
+  function isPoolComplete(poolKey){
+    const list = getPoolMatches(poolKey);
+
+    if(!list.length) return false;
+
+    return list.every(isFinished);
+  }
+
+  function buildPoolRanking(poolKey){
+    const list = getPoolMatches(poolKey);
+    const stats = new Map();
+
+    function ensure(team){
+      const name = team?.teamName || "Équipe";
+      const key = normalizeTeamName(name);
+
+      if(!stats.has(key)){
+        stats.set(key, {
+          team,
+          teamName:name,
+          wins:0,
+          losses:0,
+          points:0,
+          setsWon:0,
+          setsLost:0,
+          gamesWon:0,
+          gamesLost:0
+        });
+      }
+
+      return stats.get(key);
+    }
+
+    for(const match of list){
+      const res = getResult(match.id);
+      const w = winnerSide(res);
+
+      if(w !== "A" && w !== "B") continue;
+
+      const teamA = resolveDynamicTeam(match, "A")
+        || { teamName:teamName(match, "A") };
+
+      const teamB = resolveDynamicTeam(match, "B")
+        || { teamName:teamName(match, "B") };
+
+      const A = ensure(teamA);
+      const B = ensure(teamB);
+
+      let setsA = 0;
+      let setsB = 0;
+
+      [
+        ["s1A","s1B"],
+        ["s2A","s2B"],
+        ["s3A","s3B"]
+      ].forEach(([ka,kb]) => {
+        const ga = toNum(res?.[ka]);
+        const gb = toNum(res?.[kb]);
+
+        if(ga === null || gb === null) return;
+
+        A.gamesWon += ga;
+        A.gamesLost += gb;
+        B.gamesWon += gb;
+        B.gamesLost += ga;
+
+        if(ga > gb) setsA++;
+        else if(gb > ga) setsB++;
+      });
+
+      A.setsWon += setsA;
+      A.setsLost += setsB;
+      B.setsWon += setsB;
+      B.setsLost += setsA;
+
+      if(w === "A"){
+        A.wins++;
+        A.points += 2;
+        B.losses++;
+        B.points += 1;
+      }else{
+        B.wins++;
+        B.points += 2;
+        A.losses++;
+        A.points += 1;
+      }
+    }
+
+    return Array.from(stats.values())
+      .sort((a,b)=>{
+        if(b.points !== a.points) return b.points - a.points;
+        if(b.wins !== a.wins) return b.wins - a.wins;
+
+        const sdA = a.setsWon - a.setsLost;
+        const sdB = b.setsWon - b.setsLost;
+        if(sdB !== sdA) return sdB - sdA;
+
+        const gdA = a.gamesWon - a.gamesLost;
+        const gdB = b.gamesWon - b.gamesLost;
+        if(gdB !== gdA) return gdB - gdA;
+
+        return a.teamName.localeCompare(b.teamName, "fr");
+      })
+      .map(x => ({
+        team:x.team || { teamName:x.teamName },
+        stats:x
+      }));
+  }
+
+  function buildRanking(){
     const winners = winnerOnlyMatches();
 
     if(winners.length){
-
       return {
         complete:true,
         rows:winners.map((m, index) => ({
@@ -678,77 +974,30 @@
       });
     }
 
-    /*
-      CAS PARTICULIER :
-      Seniors DM = 3 équipes restantes classées 5e ex-aequo
-    */
-
     const isSeniorDM =
       currentCategorie === "Seniors"
       && currentEpreuve === "DM";
 
     if(isSeniorDM){
+      const pool57Key = "Seniors_DM_5_7";
+      const pool57 = buildPoolRanking(pool57Key);
 
-      const alreadyRanked = new Set(
-        ranking.map(x =>
-          normalizeTeamName(x.team?.teamName || "")
-        )
-      );
-
-      const allTeams = new Map();
-
-      rows.forEach(match => {
-
-        const ta = matchWinnerTeam({
-          ...match,
-          id:match.id,
-          teamA:teamName(match,"A")
+      pool57.forEach((row, index) => {
+        ranking.push({
+          pos:5 + index,
+          team:row.team,
+          label:`${5 + index}e`
         });
-
-        const tb = matchLoserTeam({
-          ...match,
-          id:match.id,
-          teamB:teamName(match,"B")
-        });
-
-        const na = normalizeTeamName(teamName(match,"A"));
-        const nb = normalizeTeamName(teamName(match,"B"));
-
-        if(!allTeams.has(na)){
-          allTeams.set(na, {
-            teamName:teamName(match,"A")
-          });
-        }
-
-        if(!allTeams.has(nb)){
-          allTeams.set(nb, {
-            teamName:teamName(match,"B")
-          });
-        }
-      });
-
-      Array.from(allTeams.values()).forEach(team => {
-
-        const key = normalizeTeamName(team.teamName);
-
-        if(!alreadyRanked.has(key)){
-          ranking.push({
-            pos:5,
-            team,
-            label:"5e ex-aequo"
-          });
-        }
       });
 
       return {
-        complete:true,
+        complete:ranking.every(x => x.team?.teamName),
         rows:ranking,
         missing:[]
       };
     }
 
     if(fifthMatch){
-
       ranking.push({
         pos:5,
         team:matchWinnerTeam(fifthMatch),
@@ -770,39 +1019,49 @@
   }
 
   function teamDetails(team){
-
     const teamName = team?.teamName || "Équipe";
-
     const ins = getInscriptionForTeamName(teamName);
 
     const p1FirstName =
       ins?.joueur1?.firstName
       || ins?.p1FirstName
+      || team?.joueur1FirstName
+      || team?.p1FirstName
       || "";
 
     const p1LastName =
       ins?.joueur1?.lastName
       || ins?.p1LastName
+      || team?.joueur1LastName
+      || team?.p1LastName
       || "";
 
     const p1Licence =
       ins?.joueur1?.licence
       || ins?.p1Licence
+      || team?.joueur1Licence
+      || team?.p1Licence
       || "—";
 
     const p2FirstName =
       ins?.joueur2?.firstName
       || ins?.p2FirstName
+      || team?.joueur2FirstName
+      || team?.p2FirstName
       || "";
 
     const p2LastName =
       ins?.joueur2?.lastName
       || ins?.p2LastName
+      || team?.joueur2LastName
+      || team?.p2LastName
       || "";
 
     const p2Licence =
       ins?.joueur2?.licence
       || ins?.p2Licence
+      || team?.joueur2Licence
+      || team?.p2Licence
       || "—";
 
     return {
@@ -819,36 +1078,33 @@
   }
 
   function render(){
-
     zoneLabel.textContent = zoneText();
 
     if(!currentProg){
-
       statusText.textContent =
         "⏳ Programmation générale non disponible.";
 
       btnValidate.disabled = true;
 
       validatedBox.style.display = "none";
+      pendingBox.style.display = "none";
 
       warningBox.style.display = "block";
       warningBox.textContent =
         "Génère d’abord la programmation générale.";
 
       teamList.innerHTML = "";
+      pendingList.innerHTML = "";
 
       return;
     }
 
     if(currentClassementDoc?.validatedAt){
-
       validatedBox.style.display = "block";
 
       validatedBox.innerHTML =
         `✅ Classement validé le <b>${esc(fmtDate(currentClassementDoc.validatedAt))}</b> par <b>${esc(currentClassementDoc.validatedBy || "—")}</b>.`;
-
     }else{
-
       validatedBox.style.display = "none";
       validatedBox.innerHTML = "";
     }
@@ -856,7 +1112,6 @@
     const ranking = buildRanking();
 
     if(!ranking.complete){
-
       statusText.textContent =
         "⏳ Classement non disponible.";
 
@@ -869,9 +1124,13 @@
       btnValidate.disabled = true;
 
       teamList.innerHTML = "";
+      renderPendingMatches();
 
       return;
     }
+
+    pendingBox.style.display = "none";
+    pendingList.innerHTML = "";
 
     warningBox.style.display = "none";
     warningBox.textContent = "";
@@ -885,24 +1144,20 @@
     teamList.innerHTML = ranking.rows.length
       ? `<div class="list">${
           ranking.rows.map(row => {
-
             const t = teamDetails(row.team);
 
             return `
               <div class="rank-card">
-
                 <div class="rk">
                   ${esc(row.pos)}
                 </div>
 
                 <div class="rmain">
-
                   <div class="rtitle">
                     ${esc(t.teamName)}
                   </div>
 
                   <div class="team-lines">
-
                     <div class="team-line">
                       <strong>Joueur/Joueuse 1 :</strong>
                       ${esc(t.p1Display)}
@@ -918,14 +1173,12 @@
                       <strong>Licence :</strong>
                       ${esc(t.p2Licence)}
                     </div>
-
                   </div>
                 </div>
 
                 <div class="tag">
                   ${esc(row.label)}
                 </div>
-
               </div>
             `;
           }).join("")
@@ -934,7 +1187,6 @@
   }
 
   async function validateClassement(){
-
     const ranking = buildRanking();
 
     if(!ranking.complete){
@@ -943,7 +1195,6 @@
     }
 
     const positions = ranking.rows.map(row => {
-
       const t = teamDetails(row.team);
 
       return {
@@ -960,28 +1211,21 @@
     });
 
     await setDoc(classementRef(), {
-
       eventId:EVENT_ID,
       key:zoneKey(),
       categorie:currentCategorie,
       epreuve:currentEpreuve,
-
       positions,
-
       computedAt:serverTimestamp(),
-
       validatedAt:serverTimestamp(),
-
       validatedBy:
         auth.currentUser?.email
         || auth.currentUser?.uid
         || null
-
     }, { merge:true });
   }
 
   btnValidate.onclick = async () => {
-
     const ok = confirm(
       "Valider ce classement final ?\n\n⚠️ Action enregistrée en base."
     );
@@ -991,24 +1235,17 @@
     btnValidate.disabled = true;
 
     try{
-
       await validateClassement();
-
       alert("✅ Classement validé !");
-
     }catch(error){
-
       console.error(error);
-
       alert("Erreur Firestore ❌");
-
     }finally{
       render();
     }
   };
 
   function startListeners(){
-
     if(unsubProg) unsubProg();
     if(unsubResults) unsubResults();
     if(unsubClassement) unsubClassement();
@@ -1016,7 +1253,6 @@
     if(unsubInscriptions) unsubInscriptions();
 
     unsubProg = onSnapshot(generalProgRef(), (snap) => {
-
       currentProg = snap.exists()
         ? (snap.data() || null)
         : null;
@@ -1025,7 +1261,6 @@
     });
 
     unsubResults = onSnapshot(resultsCol(), (snap) => {
-
       resultsByMatch = new Map();
 
       snap.forEach(d => {
@@ -1036,7 +1271,6 @@
     });
 
     unsubClassement = onSnapshot(classementRef(), (snap) => {
-
       currentClassementDoc = snap.exists()
         ? (snap.data() || {})
         : null;
@@ -1045,7 +1279,6 @@
     });
 
     unsubEquipes = onSnapshot(equipesCol(), (snap) => {
-
       equipesById = new Map();
 
       snap.forEach(d => {
@@ -1059,11 +1292,9 @@
     });
 
     unsubInscriptions = onSnapshot(inscriptionsCol(), (snap) => {
-
       inscriptionsByTeamName = new Map();
 
       snap.forEach(d => {
-
         const x = {
           id:d.id,
           ...(d.data() || {})
@@ -1081,7 +1312,6 @@
   }
 
   function stopListeners(){
-
     if(unsubProg){
       unsubProg();
       unsubProg = null;
@@ -1109,7 +1339,6 @@
   }
 
   document.addEventListener("jatZoneChange", (event) => {
-
     const d = event.detail || {};
 
     if(CATEGORIES.includes(d.categorie)){
@@ -1131,7 +1360,6 @@
     }
 
     unsubClassement = onSnapshot(classementRef(), (snap) => {
-
       currentClassementDoc = snap.exists()
         ? (snap.data() || {})
         : null;
@@ -1143,7 +1371,6 @@
   });
 
   function showDenied(){
-
     accessDenied.style.display = "block";
     pageContent.style.display = "none";
     panelRank.style.display = "none";
@@ -1152,13 +1379,11 @@
   }
 
   function showJat(){
-
     accessDenied.style.display = "none";
     pageContent.style.display = "block";
     panelRank.style.display = "block";
 
     try{
-
       const savedCat =
         localStorage.getItem("champ_jat_categorie");
 
@@ -1172,7 +1397,6 @@
       if(EPREUVES.includes(savedEpreuve)){
         currentEpreuve = savedEpreuve;
       }
-
     }catch(error){}
 
     zoneLabel.textContent = zoneText();
@@ -1181,7 +1405,6 @@
   }
 
   onAuthStateChanged(auth, async (user) => {
-
     accessDenied.style.display = "none";
     pageContent.style.display = "none";
     panelRank.style.display = "none";
@@ -1192,7 +1415,6 @@
     }
 
     try{
-
       const role = await getRoleByUid(user.uid);
 
       if(role !== "admin" && role !== "jat"){
@@ -1201,15 +1423,11 @@
       }
 
       showJat();
-
     }catch(error){
-
       console.error(error);
-
       showDenied();
     }
   });
-
 </script>
 
 </body>
