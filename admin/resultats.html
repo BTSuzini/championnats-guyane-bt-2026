@@ -301,6 +301,42 @@
       opacity:.75;
     }
 
+    .pool-ranking-box{
+      margin-top:14px;
+      padding:12px;
+      border-radius:16px;
+      background:#f8fbff;
+      border:1px solid rgba(7,91,154,.12);
+    }
+
+    .pool-ranking-title{
+      margin:0 0 8px;
+      font-size:14px;
+      font-weight:1000;
+      color:var(--blue-dark);
+    }
+
+    .pool-ranking-table{
+      width:100%;
+      border-collapse:collapse;
+      font-size:12px;
+    }
+
+    .pool-ranking-table th,
+    .pool-ranking-table td{
+      padding:7px 6px;
+      border-bottom:1px solid rgba(0,0,0,.07);
+      text-align:center;
+      font-variant-numeric:tabular-nums;
+    }
+
+    .pool-ranking-table th:first-child,
+    .pool-ranking-table td:first-child,
+    .pool-ranking-table th:nth-child(2),
+    .pool-ranking-table td:nth-child(2){
+      text-align:left;
+    }
+
     @media (min-width:760px){
       .panel{padding:22px;}
       .grid.two{grid-template-columns:1fr 1fr;}
@@ -351,7 +387,7 @@
     <div class="status-box">
       Vue actuelle : <strong id="zoneLabel">Chargement…</strong>
       <br>
-      Les équipes issues des poules ne s’affichent qu’une fois tous les matchs de la poule terminés.
+      Les équipes issues des poules ne s’affichent qu’une fois tous les matchs de la poule concernée terminés.
     </div>
 
     <div class="general-toggle">
@@ -392,7 +428,6 @@
 <script type="module" src="../assets/js/admin-header.js"></script>
 
 <script type="module">
-
 import { auth, db } from "../assets/js/firebase.js";
 import { getRoleByUid } from "../assets/js/session.js";
 
@@ -487,7 +522,6 @@ function getResult(mid){
 }
 
 function computeWinnerSideFromScore(res){
-
   if(!res) return null;
 
   const sets = [
@@ -500,9 +534,7 @@ function computeWinnerSideFromScore(res){
   let setsB = 0;
 
   for(const [a,b] of sets){
-
     if(a === null || b === null) continue;
-
     if(a > b) setsA++;
     else if(b > a) setsB++;
   }
@@ -512,13 +544,34 @@ function computeWinnerSideFromScore(res){
 
   return null;
 }
-  function isPoolMatch(match){
-  return String(match?.phase || match?.label || "").toLowerCase().includes("poule");
+
+function visibleMatches(){
+  const all = Array.isArray(currentProg?.matches)
+    ? [...currentProg.matches]
+    : [];
+
+  if(generalMode) return all;
+
+  return all.filter(m =>
+    String(m.categorie || "") === currentCategorie &&
+    String(m.epreuve || "") === currentEpreuve
+  );
+}
+
+function allMatches(){
+  return Array.isArray(currentProg?.matches)
+    ? [...currentProg.matches]
+    : [];
+}
+
+function findMatch(id){
+  return allMatches().find(m => m.id === id) || null;
 }
 
 function poolKeyFromMatch(match){
   const label = String(match?.label || "");
 
+  if(label.includes("Poule places 5-7")) return "Seniors_DM_5_7";
   if(label.includes("Poule A")) return `${match.categorie}_${match.epreuve}_A`;
   if(label.includes("Poule B")) return `${match.categorie}_${match.epreuve}_B`;
   if(label.includes("Poule unique")) return `${match.categorie}_${match.epreuve}_U`;
@@ -527,7 +580,7 @@ function poolKeyFromMatch(match){
 }
 
 function getPoolMatches(poolKey){
-  return visibleMatches().filter(m => poolKeyFromMatch(m) === poolKey);
+  return allMatches().filter(m => poolKeyFromMatch(m) === poolKey);
 }
 
 function isPoolComplete(poolKey){
@@ -536,12 +589,20 @@ function isPoolComplete(poolKey){
   return list.every(m => computeWinnerSideFromScore(getResult(m.id)) !== null);
 }
 
+function poolTeamNameFromMatch(match, side){
+  if(!match) return "Équipe";
+  const raw = side === "A" ? match.teamA : match.teamB;
+  const sub = side === "A" ? match.subA : match.subB;
+  const resolved = resolveDynamicText(raw, match);
+  return resolved?.teamName || raw || sub || "Équipe";
+}
+
 function buildPoolRanking(poolKey){
   const list = getPoolMatches(poolKey);
   const stats = new Map();
 
   function ensure(name){
-    const key = String(name || "Équipe");
+    const key = String(name || "Équipe").trim() || "Équipe";
     if(!stats.has(key)){
       stats.set(key, {
         teamName:key,
@@ -558,10 +619,14 @@ function buildPoolRanking(poolKey){
   for(const match of list){
     const res = getResult(match.id);
     const winnerSide = computeWinnerSideFromScore(res);
-    if(!winnerSide) continue;
 
-    const A = ensure(match.teamA);
-    const B = ensure(match.teamB);
+    const nameA = poolTeamNameFromMatch(match, "A");
+    const nameB = poolTeamNameFromMatch(match, "B");
+
+    const A = ensure(nameA);
+    const B = ensure(nameB);
+
+    if(!winnerSide) continue;
 
     const sets = [
       [toNum(res.s1A), toNum(res.s1B)],
@@ -620,10 +685,21 @@ function resolvePoolRank(categorie, epreuve, pool, rank){
   return ranking[Number(rank) - 1] || null;
 }
 
-function findMatch(id){
-  return Array.isArray(currentProg?.matches)
-    ? currentProg.matches.find(m => m.id === id)
-    : null;
+function resolveMatchWinnerOrLoser(matchId, want){
+  const source = findMatch(matchId);
+  const side = computeWinnerSideFromScore(getResult(matchId));
+
+  if(!source || (side !== "A" && side !== "B")) return null;
+
+  const targetSide = want === "winner"
+    ? side
+    : (side === "A" ? "B" : "A");
+
+  return displayTeam(
+    targetSide === "A" ? source.teamA : source.teamB,
+    targetSide === "A" ? source.subA : source.subB,
+    source
+  );
 }
 
 function resolveDynamicText(text, match){
@@ -633,13 +709,23 @@ function resolveDynamicText(text, match){
 
   const poolA1 = raw.match(/^1(?:er|re)?\s+Poule A$/i);
   const poolA2 = raw.match(/^2e\s+Poule A$/i);
+  const poolA3 = raw.match(/^3e\s+Poule A$/i);
+  const poolA4 = raw.match(/^4e\s+Poule A$/i);
+
   const poolB1 = raw.match(/^1(?:er|re)?\s+Poule B$/i);
   const poolB2 = raw.match(/^2e\s+Poule B$/i);
+  const poolB3 = raw.match(/^3e\s+Poule B$/i);
+  const poolB4 = raw.match(/^4e\s+Poule B$/i);
 
   if(poolA1) return resolvePoolRank(match.categorie, match.epreuve, "A", 1);
   if(poolA2) return resolvePoolRank(match.categorie, match.epreuve, "A", 2);
+  if(poolA3) return resolvePoolRank(match.categorie, match.epreuve, "A", 3);
+  if(poolA4) return resolvePoolRank(match.categorie, match.epreuve, "A", 4);
+
   if(poolB1) return resolvePoolRank(match.categorie, match.epreuve, "B", 1);
   if(poolB2) return resolvePoolRank(match.categorie, match.epreuve, "B", 2);
+  if(poolB3) return resolvePoolRank(match.categorie, match.epreuve, "B", 3);
+  if(poolB4) return resolvePoolRank(match.categorie, match.epreuve, "B", 4);
 
   const winnerDf1 = raw.match(/^Vainqueur(?:e)? DF1$/i);
   const winnerDf2 = raw.match(/^Vainqueur(?:e)? DF2$/i);
@@ -654,366 +740,31 @@ function resolveDynamicText(text, match){
         : "";
 
   if(prefix && (winnerDf1 || loserDf1)){
-    const sf = findMatch(`${prefix}_SF1`);
-    const side = computeWinnerSideFromScore(getResult(`${prefix}_SF1`));
-    if(!sf || !side) return null;
-
-    if(winnerDf1) return { teamName: side === "A" ? sf.teamA : sf.teamB };
-    if(loserDf1) return { teamName: side === "A" ? sf.teamB : sf.teamA };
+    const resolved = resolveMatchWinnerOrLoser(
+      `${prefix}_SF1`,
+      winnerDf1 ? "winner" : "loser"
+    );
+    if(resolved) return { teamName:resolved.title };
   }
 
   if(prefix && (winnerDf2 || loserDf2)){
-    const sf = findMatch(`${prefix}_SF2`);
-    const side = computeWinnerSideFromScore(getResult(`${prefix}_SF2`));
-    if(!sf || !side) return null;
+    const resolved = resolveMatchWinnerOrLoser(
+      `${prefix}_SF2`,
+      winnerDf2 ? "winner" : "loser"
+    );
+    if(resolved) return { teamName:resolved.title };
+  }
 
-    if(winnerDf2) return { teamName: side === "A" ? sf.teamA : sf.teamB };
-    if(loserDf2) return { teamName: side === "A" ? sf.teamB : sf.teamA };
+  const loserM57A = raw.match(/^Perdant match 1$/i);
+  const winnerM57A = raw.match(/^Vainqueur match 1$/i);
+
+  if(match.categorie === "Seniors" && match.epreuve === "DM" && (loserM57A || winnerM57A)){
+    const resolved = resolveMatchWinnerOrLoser(
+      "MEN_5_7_A",
+      winnerM57A ? "winner" : "loser"
+    );
+    if(resolved) return { teamName:resolved.title };
   }
 
   return null;
 }
-
-function displayTeam(text, sub, match){
-  const resolved = resolveDynamicText(text, match);
-
-  if(resolved){
-    return {
-      title:resolved.teamName || "Équipe",
-      sub:"",
-      placeholder:false
-    };
-  }
-
-  const raw = String(text || "").trim();
-
-  const isPlaceholder =
-    raw === "" ||
-    raw === "Équipe" ||
-    raw.includes("Poule") ||
-    raw.includes("Vainqueur") ||
-    raw.includes("Vainqueure") ||
-    raw.includes("Perdant") ||
-    raw.includes("Perdante") ||
-    raw.includes("Finaliste") ||
-    raw.includes("filles") ||
-    raw.includes("hommes");
-
-  return {
-    title:raw || "Équipe",
-    sub:sub || "",
-    placeholder:isPlaceholder
-  };
-}
-
-function visibleMatches(){
-  const all = Array.isArray(currentProg?.matches)
-    ? [...currentProg.matches]
-    : [];
-
-  if(generalMode) return all;
-
-  return all.filter(m =>
-    String(m.categorie || "") === currentCategorie &&
-    String(m.epreuve || "") === currentEpreuve
-  );
-}
-
-function render(){
-  const matches = visibleMatches();
-
-  matches.sort((a,b)=>{
-    if(Number(a.order) !== Number(b.order)){
-      return Number(a.order) - Number(b.order);
-    }
-    return String(a.court || "").localeCompare(String(b.court || ""));
-  });
-
-  statusText.textContent = currentProg
-    ? `${matches.length} élément(s) affiché(s)`
-    : "Programmation générale introuvable.";
-
-  if(!currentProg){
-    adminList.innerHTML = `<p class="muted">Génère d’abord la programmation générale.</p>`;
-    return;
-  }
-
-  adminList.innerHTML = `
-    <div class="match-list">
-      ${matches.map(match => {
-        const stored = getResult(match.id) || {};
-        const winnerSide = computeWinnerSideFromScore(stored);
-
-        const teamA = displayTeam(match.teamA, match.subA, match);
-        const teamB = displayTeam(match.teamB, match.subB, match);
-
-        const cls =
-          match.court === "A"
-            ? "courtA"
-            : match.court === "B"
-              ? "courtB"
-              : "";
-
-        const isWinnerOnly = match.type === "winner";
-
-        return `
-          <div class="match-card ${esc(cls)}" data-mid="${esc(match.id)}">
-            <div class="match-head">
-              <div class="m-slot">#${esc(match.order || "—")}</div>
-              <div class="m-time">${esc(match.time || "—")}</div>
-              <div class="m-court">${esc(courtLabel(match.court))}</div>
-              <div class="pill">
-                <span class="dot ${winnerSide ? "green" : "orange"}"></span>
-                ${esc(match.label || match.id)}
-              </div>
-            </div>
-
-            ${isWinnerOnly ? `
-              <div style="margin-top:12px;">
-                <div class="team-title ${teamA.placeholder ? "team-placeholder" : ""}">
-                  ${esc(teamA.title)}
-                </div>
-                ${teamA.sub ? `<div class="team-sub">${esc(teamA.sub)}</div>` : ""}
-              </div>
-            ` : `
-              <div class="score-grid">
-                <div class="hdr"></div>
-                <div class="hdr">S1</div>
-                <div class="hdr">S2</div>
-                <div class="hdr">S3</div>
-
-                <div class="team">
-                  <div class="team-title ${teamA.placeholder ? "team-placeholder" : ""}">
-                    ${esc(teamA.title)}
-                  </div>
-                  ${teamA.sub ? `<div class="team-sub">${esc(teamA.sub)}</div>` : ""}
-                </div>
-
-                <input class="sc" data-k="s1A" value="${esc(stored.s1A ?? "")}">
-                <input class="sc" data-k="s2A" value="${esc(stored.s2A ?? "")}">
-                <input class="sc" data-k="s3A" value="${esc(stored.s3A ?? "")}">
-
-                <div class="team">
-                  <div class="team-title ${teamB.placeholder ? "team-placeholder" : ""}">
-                    ${esc(teamB.title)}
-                  </div>
-                  ${teamB.sub ? `<div class="team-sub">${esc(teamB.sub)}</div>` : ""}
-                </div>
-
-                <input class="sc" data-k="s1B" value="${esc(stored.s1B ?? "")}">
-                <input class="sc" data-k="s2B" value="${esc(stored.s2B ?? "")}">
-                <input class="sc" data-k="s3B" value="${esc(stored.s3B ?? "")}">
-              </div>
-
-              <div class="actions">
-                <div class="mini">
-                  ${winnerSide
-                    ? `✅ Vainqueur : équipe ${winnerSide}`
-                    : "⏳ Résultat incomplet"}
-                </div>
-
-                <button class="btn primary" data-save="${esc(match.id)}">
-                  💾 Enregistrer
-                </button>
-              </div>
-            `}
-          </div>
-        `;
-      }).join("")}
-    </div>
-  `;
-}
-
-adminList.addEventListener("click", async (e)=>{
-  const btn = e.target.closest("[data-save]");
-  if(!btn) return;
-
-  const mid = btn.dataset.save;
-  const card = btn.closest(".match-card");
-
-  const get = (k)=>{
-    const el = card.querySelector(`[data-k="${k}"]`);
-    return (el?.value || "").trim();
-  };
-
-  const payload = {
-    s1A:get("s1A"),
-    s2A:get("s2A"),
-    s3A:get("s3A"),
-    s1B:get("s1B"),
-    s2B:get("s2B"),
-    s3B:get("s3B"),
-    updatedAt:serverTimestamp(),
-    updatedBy:auth.currentUser?.uid || null
-  };
-
-  payload.winnerSide = computeWinnerSideFromScore(payload);
-
-  await setDoc(
-    doc(resultsCollection(), mid),
-    payload,
-    { merge:true }
-  );
-});
-
-async function setPublicVisible(value){
-  await setDoc(visibilityRef(), {
-    publicVisible:value === true,
-    updatedAt:serverTimestamp(),
-    updatedBy:auth.currentUser?.uid || null
-  }, { merge:true });
-}
-
-btnPublicHide.onclick = async ()=>{
-  await setPublicVisible(false);
-};
-
-btnPublicShow.onclick = async ()=>{
-  await setPublicVisible(true);
-};
-
-btnGeneral.onclick = ()=>{
-  generalMode = true;
-  updateZone();
-};
-
-btnFiltered.onclick = ()=>{
-  generalMode = false;
-  updateZone();
-};
-
-function updateZone(){
-  zoneLabel.textContent = zoneText();
-
-  btnGeneral.classList.toggle("primary", generalMode);
-  btnFiltered.classList.toggle("primary", !generalMode);
-
-  render();
-}
-
-function stopListeners(){
-  if(unsubProg){
-    unsubProg();
-    unsubProg = null;
-  }
-
-  if(unsubResults){
-    unsubResults();
-    unsubResults = null;
-  }
-
-  if(unsubVisibility){
-    unsubVisibility();
-    unsubVisibility = null;
-  }
-}
-
-function startListeners(){
-  stopListeners();
-
-  unsubProg = onSnapshot(generalProgRef(), (snap)=>{
-    currentProg = snap.exists()
-      ? (snap.data() || null)
-      : null;
-
-    render();
-  });
-
-  unsubResults = onSnapshot(resultsCollection(), (snap)=>{
-    resultsMap = new Map();
-
-    snap.forEach(d=>{
-      resultsMap.set(d.id, d.data() || {});
-    });
-
-    render();
-  });
-
-  unsubVisibility = onSnapshot(visibilityRef(), (snap)=>{
-    const data = snap.exists()
-      ? (snap.data() || {})
-      : {};
-
-    const visible = data.publicVisible === true;
-
-    visibilityText.innerHTML = visible
-      ? "Statut actuel : <strong>visible publiquement ✅</strong>"
-      : "Statut actuel : <strong>maintenance / masqué 🔒</strong>";
-
-    btnPublicShow.classList.toggle("is-active", visible);
-    btnPublicHide.classList.toggle("is-active", !visible);
-  });
-}
-
-function showDenied(){
-  accessDenied.style.display = "block";
-  pageContent.style.display = "none";
-  panelVisibility.style.display = "none";
-  panelResults.style.display = "none";
-  stopListeners();
-}
-
-function showAdmin(){
-  accessDenied.style.display = "none";
-  pageContent.style.display = "block";
-  panelVisibility.style.display = "block";
-  panelResults.style.display = "block";
-
-  try{
-    const savedCat = localStorage.getItem("champ_admin_categorie");
-    const savedEpreuve = localStorage.getItem("champ_admin_epreuve");
-
-    if(CATEGORIES.includes(savedCat)) currentCategorie = savedCat;
-    if(EPREUVES.includes(savedEpreuve)) currentEpreuve = savedEpreuve;
-  }catch(error){}
-
-  updateZone();
-  startListeners();
-}
-
-document.addEventListener("adminZoneChange", (e)=>{
-  const d = e.detail || {};
-
-  if(CATEGORIES.includes(d.categorie)){
-    currentCategorie = d.categorie;
-  }
-
-  if(EPREUVES.includes(d.epreuve)){
-    currentEpreuve = d.epreuve;
-  }
-
-  try{
-    localStorage.setItem("champ_admin_categorie", currentCategorie);
-    localStorage.setItem("champ_admin_epreuve", currentEpreuve);
-  }catch(error){}
-
-  if(!generalMode){
-    updateZone();
-  }
-});
-
-onAuthStateChanged(auth, async (user)=>{
-  if(!user){
-    showDenied();
-    return;
-  }
-
-  try{
-    const role = await getRoleByUid(user.uid);
-
-    if(role !== "admin"){
-      showDenied();
-      return;
-    }
-
-    showAdmin();
-  }catch(error){
-    console.error(error);
-    showDenied();
-  }
-});
-
-</script>
-
-</body>
-</html>
