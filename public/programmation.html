@@ -137,11 +137,7 @@
       box-shadow:0 10px 22px rgba(7,91,154,.22);
     }
 
-    .match-list{
-      display:grid;
-      gap:12px;
-      margin-top:12px;
-    }
+    .match-list{display:grid;gap:12px;margin-top:12px;}
 
     .match-card{
       border-radius:18px;
@@ -151,15 +147,8 @@
       box-shadow:0 8px 18px rgba(16,24,40,.06);
     }
 
-    .match-card.courtA{
-      background:#fff8dd;
-      border-color:rgba(255,196,0,.35);
-    }
-
-    .match-card.courtB{
-      background:#ffeef2;
-      border-color:rgba(255,0,60,.20);
-    }
+    .match-card.courtA{background:#fff8dd;border-color:rgba(255,196,0,.35);}
+    .match-card.courtB{background:#ffeef2;border-color:rgba(255,0,60,.20);}
 
     .match-head{
       display:flex;
@@ -167,20 +156,11 @@
       gap:8px;
       min-width:0;
       margin-bottom:10px;
+      flex-wrap:wrap;
     }
 
-    .m-slot{
-      font-size:12px;
-      font-weight:1000;
-      color:#667085;
-      white-space:nowrap;
-    }
-
-    .m-time{
-      font-size:14px;
-      font-weight:1000;
-      white-space:nowrap;
-    }
+    .m-slot{font-size:12px;font-weight:1000;color:#667085;white-space:nowrap;}
+    .m-time{font-size:14px;font-weight:1000;white-space:nowrap;}
 
     .m-court{
       min-width:0;
@@ -191,6 +171,17 @@
       color:#475467;
       overflow:hidden;
       text-overflow:ellipsis;
+      white-space:nowrap;
+    }
+
+    .m-label{
+      padding:5px 10px;
+      border-radius:999px;
+      background:#f4f8ff;
+      color:var(--blue-dark);
+      border:1px solid rgba(7,91,154,.12);
+      font-size:12px;
+      font-weight:1000;
       white-space:nowrap;
     }
 
@@ -212,12 +203,9 @@
       text-overflow:ellipsis;
     }
 
-    .team-sub{
-      margin-top:2px;
-      font-size:13px;
-      color:#475467;
-      font-weight:800;
-      line-height:1.25;
+    .team-placeholder{
+      color:#667085;
+      font-style:italic;
     }
 
     .score-cell{
@@ -234,56 +222,6 @@
       letter-spacing:2px;
       opacity:.55;
       font-size:12px;
-    }
-
-    .filter-grid{
-      display:grid;
-      grid-template-columns:1fr;
-      gap:10px;
-      margin-top:12px;
-    }
-
-    .field{
-      display:grid;
-      gap:7px;
-    }
-
-    .field label{
-      font-size:13px;
-      font-weight:1000;
-      color:#1c2430;
-    }
-
-    .field select{
-      min-height:44px;
-      border-radius:14px;
-      border:1px solid rgba(16,24,40,.12);
-      padding:0 12px;
-      background:#fff;
-      font-weight:900;
-      color:#1c2430;
-    }
-
-    .pool-table{
-      width:100%;
-      border-collapse:collapse;
-      margin-top:8px;
-      font-size:13px;
-    }
-
-    .pool-table th,
-    .pool-table td{
-      padding:8px 6px;
-      border-bottom:1px solid rgba(0,0,0,.08);
-      text-align:center;
-      font-variant-numeric:tabular-nums;
-    }
-
-    .pool-table th:first-child,
-    .pool-table td:first-child,
-    .pool-table th:nth-child(2),
-    .pool-table td:nth-child(2){
-      text-align:left;
     }
 
     .pool-grid{
@@ -308,117 +246,78 @@
       color:var(--blue-dark);
     }
 
-    .bracket-page{
+    .pool-table{
       width:100%;
-      overflow-x:auto;
-      overflow-y:hidden;
-      -webkit-overflow-scrolling:touch;
-      padding-bottom:8px;
+      border-collapse:collapse;
+      margin-top:8px;
+      font-size:13px;
     }
 
-    .bracket-board{
-      min-width:900px;
-      padding:12px 10px 20px;
+    .pool-table th,
+    .pool-table td{
+      padding:8px 6px;
+      border-bottom:1px solid rgba(0,0,0,.08);
+      text-align:center;
+      font-variant-numeric:tabular-nums;
+    }
+
+    .pool-table th:first-child,
+    .pool-table td:first-child,
+    .pool-table th:nth-child(2),
+    .pool-table td:nth-child(2){
+      text-align:left;
     }
 
     .bracket-grid{
       display:grid;
-      grid-template-columns:260px 260px 260px;
-      gap:50px;
-      align-items:start;
-      position:relative;
-      min-height:560px;
+      grid-template-columns:1fr;
+      gap:14px;
+      margin-top:12px;
     }
 
-    .bracket-col{
-      position:relative;
-      min-height:560px;
-    }
-
-    .bracket-col-title{
-      font-size:14px;
-      font-weight:1000;
-      margin-bottom:14px;
-      opacity:.8;
-      letter-spacing:.2px;
-      text-transform:uppercase;
-    }
-
-    .bracket-match{
-      position:absolute;
-      width:240px;
+    .bracket-card{
+      border-radius:20px;
       background:#fff;
-      border:1px solid rgba(0,0,0,.10);
-      border-radius:12px;
-      padding:8px;
-      box-shadow:0 4px 10px rgba(0,0,0,.04);
+      border:1px solid rgba(16,24,40,.08);
+      box-shadow:0 8px 18px rgba(16,24,40,.06);
+      padding:14px;
     }
 
-    .bracket-match-title{
-      font-size:11px;
+    .bracket-title{
+      margin:0 0 12px;
+      font-size:20px;
       font-weight:1000;
-      opacity:.55;
-      margin-bottom:6px;
-      letter-spacing:.3px;
-      text-transform:uppercase;
+      color:var(--blue-dark);
     }
 
-    .bracket-team{
-      border:1px solid rgba(0,0,0,.08);
-      background:#fafafa;
-      border-radius:8px;
-      padding:8px 9px;
+    .bracket-phase{
+      margin-top:14px;
+      display:grid;
+      gap:10px;
+    }
+
+    .phase-title{
       font-size:13px;
-      font-weight:900;
-      line-height:1.2;
-      min-height:38px;
-      display:flex;
-      align-items:center;
+      font-weight:1000;
+      color:#667085;
+      text-transform:uppercase;
+      letter-spacing:.06em;
     }
 
-    .bracket-team + .bracket-team{margin-top:6px;}
-
-    .bracket-team.seed{
-      background:#fff9e8;
-      border-color:#f1dca1;
-    }
-
-    .bracket-team.placeholder{
-      background:#f7fbff;
-      border-color:#d9ebfb;
-      font-weight:800;
-    }
-
-    .muted{
-      color:var(--muted);
-      font-size:14px;
-      line-height:1.45;
-    }
+    .muted{color:var(--muted);font-size:14px;line-height:1.45;}
 
     @media (min-width:760px){
-      :root{--zone-h:104px;}
       .panel{padding:22px;}
-      .tabs{grid-template-columns:repeat(4,1fr);}
-      .filter-grid{grid-template-columns:1fr 1fr;}
+      .tabs{grid-template-columns:repeat(3,1fr);}
       .pool-grid{grid-template-columns:1fr 1fr;}
+      .bracket-grid{grid-template-columns:1fr 1fr;}
     }
 
     @media (max-width:759px){
-      :root{--zone-h:104px;}
-
-      main{
-        padding-top:calc(var(--public-total-top, 150px) + var(--zone-h) + 28px);
-      }
-
+      main{padding-top:calc(var(--public-total-top, 150px) + var(--zone-h) + 28px);}
       .panel-title{font-size:24px;}
-
-      .team-row{
-        grid-template-columns:1fr 28px 28px 32px;
-      }
-
-      .score-cell{
-        font-size:14px;
-      }
+      .team-row{grid-template-columns:1fr 28px 28px 32px;}
+      .score-cell{font-size:14px;}
     }
   </style>
 </head>
@@ -429,14 +328,14 @@
 
 <section class="public-zonebar">
   <div class="public-container public-zonebar-inner">
-    <div class="public-zone-line" aria-label="Sélection catégorie">
-      <button class="public-zone-btn zone-cat-btn" data-categorie="U14" type="button" aria-selected="true">U14</button>
+    <div class="public-zone-line">
+      <button class="public-zone-btn zone-cat-btn" data-categorie="U14" type="button" aria-selected="false">U14</button>
       <button class="public-zone-btn zone-cat-btn" data-categorie="U18" type="button" aria-selected="false">U18</button>
-      <button class="public-zone-btn zone-cat-btn" data-categorie="Seniors" type="button" aria-selected="false">Seniors</button>
+      <button class="public-zone-btn zone-cat-btn" data-categorie="Seniors" type="button" aria-selected="true">Seniors</button>
       <button class="public-zone-btn zone-cat-btn" data-categorie="45+" type="button" aria-selected="false">45+</button>
     </div>
 
-    <div class="public-zone-line" aria-label="Sélection épreuve">
+    <div class="public-zone-line">
       <button class="public-zone-btn zone-epreuve-btn" data-epreuve="DM" type="button" aria-selected="true">👨 Double Messieurs</button>
       <button class="public-zone-btn zone-epreuve-btn" data-epreuve="DD" type="button" aria-selected="false">👩 Double Dames</button>
     </div>
@@ -449,7 +348,7 @@
     <div class="panel-head">
       <div>
         <h1 class="panel-title">📅 Programmation</h1>
-        <p class="panel-text" id="pageIntro">Planning des matchs, horaires et terrains.</p>
+        <p class="panel-text" id="pageIntro">Planning des matchs, horaires, terrains et scores.</p>
       </div>
       <div class="panel-tag" id="pageTag">Direct</div>
     </div>
@@ -464,41 +363,21 @@
       <div class="work-badge" id="workBadge">Fichier de travail</div>
 
       <div class="placeholder">
-        <p><strong id="zoneLabel">U14 — Double Messieurs</strong></p>
+        <p><strong id="zoneLabel">Seniors — Double Messieurs</strong></p>
         <p id="statusText">Chargement de la programmation…</p>
-        <p id="subtitle"></p>
       </div>
 
       <div class="tabs">
         <button class="tab-btn" id="tabChrono" type="button" aria-selected="true">🕒 Chrono</button>
-        <button class="tab-btn" id="tabTableau" type="button" aria-selected="false">🧩 Tableau</button>
         <button class="tab-btn" id="tabPoules" type="button" aria-selected="false">🏖️ Poules</button>
-        <button class="tab-btn" id="tabBracketFull" type="button" aria-selected="false">🏆 Tableau final</button>
+        <button class="tab-btn" id="tabFinal" type="button" aria-selected="false">🏆 Tableau final</button>
       </div>
     </div>
   </section>
 
   <section class="section panel" id="panelChrono" style="display:none;">
-    <h2 class="panel-title">🕒 Planning des matchs</h2>
+    <h2 class="panel-title">🕒 Planning chronologique</h2>
     <div id="chronoList"></div>
-  </section>
-
-  <section class="section panel" id="panelTableau" style="display:none;">
-    <h2 class="panel-title">🧩 Tableau</h2>
-
-    <div class="filter-grid">
-      <div class="field">
-        <label for="selBracket">Tableau</label>
-        <select id="selBracket"></select>
-      </div>
-
-      <div class="field">
-        <label for="selRound">Tour</label>
-        <select id="selRound"></select>
-      </div>
-    </div>
-
-    <div id="tableList" class="match-list"></div>
   </section>
 
   <section class="section panel" id="panelPoules" style="display:none;">
@@ -506,84 +385,48 @@
 
     <div class="pool-grid">
       <div class="pool-card">
-        <h3 class="pool-title">Poule A</h3>
+        <h3 class="pool-title">Classement — Poule A</h3>
         <div id="poolAStandings"></div>
       </div>
 
       <div class="pool-card">
-        <h3 class="pool-title">Poule B</h3>
+        <h3 class="pool-title">Classement — Poule B</h3>
         <div id="poolBStandings"></div>
       </div>
     </div>
 
-    <p class="muted" id="poolValidationInfo" style="margin-top:10px;"></p>
+    <div class="pool-grid">
+      <div class="pool-card">
+        <h3 class="pool-title">Résultats — Poule A</h3>
+        <div id="poolAMatches" class="match-list"></div>
+      </div>
+
+      <div class="pool-card">
+        <h3 class="pool-title">Résultats — Poule B</h3>
+        <div id="poolBMatches" class="match-list"></div>
+      </div>
+    </div>
+
+    <p class="muted" style="margin-top:10px;">
+      Classement : victoire = 2 points, défaite = 1 point. Égalité : différence de sets, puis différence de jeux.
+    </p>
   </section>
 
-  <section class="section panel" id="panelBracketFull" style="display:none;">
-    <h2 class="panel-title">🏆 Tableau final complet</h2>
+  <section class="section panel" id="panelFinal" style="display:none;">
+    <h2 class="panel-title">🏆 Tableau final Seniors</h2>
     <p class="muted" style="margin-top:8px;">
-      Affichage large avec défilement horizontal.
+      Demi-finales, petites finales et finales Seniors Hommes / Seniors Dames.
     </p>
 
-    <div class="bracket-page">
-      <div class="bracket-board">
-        <div class="bracket-grid">
+    <div class="bracket-grid">
+      <div class="bracket-card">
+        <h3 class="bracket-title">👨 Seniors — Double Messieurs</h3>
+        <div id="finalDM"></div>
+      </div>
 
-          <div class="bracket-col">
-            <div class="bracket-col-title">Quarts</div>
-
-            <div class="bracket-match" data-match="QF1" style="top:20px;left:0;">
-              <div class="bracket-match-title">QF1</div>
-              <div id="bf-qf1-a"></div>
-              <div id="bf-qf1-b"></div>
-            </div>
-
-            <div class="bracket-match" data-match="QF2" style="top:160px;left:0;">
-              <div class="bracket-match-title">QF2</div>
-              <div id="bf-qf2-a"></div>
-              <div id="bf-qf2-b"></div>
-            </div>
-
-            <div class="bracket-match" data-match="QF3" style="top:300px;left:0;">
-              <div class="bracket-match-title">QF3</div>
-              <div id="bf-qf3-a"></div>
-              <div id="bf-qf3-b"></div>
-            </div>
-
-            <div class="bracket-match" data-match="QF4" style="top:440px;left:0;">
-              <div class="bracket-match-title">QF4</div>
-              <div id="bf-qf4-a"></div>
-              <div id="bf-qf4-b"></div>
-            </div>
-          </div>
-
-          <div class="bracket-col">
-            <div class="bracket-col-title">Demies</div>
-
-            <div class="bracket-match" data-match="SF1" style="top:90px;left:0;">
-              <div class="bracket-match-title">SF1</div>
-              <div id="bf-sf1-a"></div>
-              <div id="bf-sf1-b"></div>
-            </div>
-
-            <div class="bracket-match" data-match="SF2" style="top:370px;left:0;">
-              <div class="bracket-match-title">SF2</div>
-              <div id="bf-sf2-a"></div>
-              <div id="bf-sf2-b"></div>
-            </div>
-          </div>
-
-          <div class="bracket-col">
-            <div class="bracket-col-title">Finale</div>
-
-            <div class="bracket-match" data-match="F" style="top:230px;left:0;">
-              <div class="bracket-match-title">Finale</div>
-              <div id="bf-f-a"></div>
-              <div id="bf-f-b"></div>
-            </div>
-          </div>
-
-        </div>
+      <div class="bracket-card">
+        <h3 class="bracket-title">👩 Seniors — Double Dames</h3>
+        <div id="finalDD"></div>
       </div>
     </div>
   </section>
@@ -596,11 +439,7 @@
   import { auth, db } from "../assets/js/firebase.js";
   import { getRoleByUid } from "../assets/js/session.js";
   import { onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.12.5/firebase-auth.js";
-  import {
-    doc,
-    collection,
-    onSnapshot
-  } from "https://www.gstatic.com/firebasejs/10.12.5/firebase-firestore.js";
+  import { doc, collection, onSnapshot } from "https://www.gstatic.com/firebasejs/10.12.5/firebase-firestore.js";
 
   const EVENT_ID = "championnats-2026";
 
@@ -611,17 +450,13 @@
 
   const params = new URLSearchParams(location.search);
 
-  let currentCategorie = params.get("categorie") || "U14";
+  let currentCategorie = params.get("categorie") || "Seniors";
   let currentEpreuve = params.get("epreuve") || "DM";
   let currentRole = null;
   let publicVisible = false;
   let currentProg = null;
-  let resultsByMatch = new Map();
+  let resultsMap = new Map();
   let currentTab = "chrono";
-
-  let unsubVisibility = null;
-  let unsubProg = null;
-  let unsubResults = null;
 
   const pageIntro = document.getElementById("pageIntro");
   const pageTag = document.getElementById("pageTag");
@@ -630,25 +465,22 @@
   const workBadge = document.getElementById("workBadge");
   const zoneLabel = document.getElementById("zoneLabel");
   const statusText = document.getElementById("statusText");
-  const subtitle = document.getElementById("subtitle");
 
   const tabChrono = document.getElementById("tabChrono");
-  const tabTableau = document.getElementById("tabTableau");
   const tabPoules = document.getElementById("tabPoules");
-  const tabBracketFull = document.getElementById("tabBracketFull");
+  const tabFinal = document.getElementById("tabFinal");
 
   const panelChrono = document.getElementById("panelChrono");
-  const panelTableau = document.getElementById("panelTableau");
   const panelPoules = document.getElementById("panelPoules");
-  const panelBracketFull = document.getElementById("panelBracketFull");
+  const panelFinal = document.getElementById("panelFinal");
 
   const chronoList = document.getElementById("chronoList");
-  const tableList = document.getElementById("tableList");
-  const selBracket = document.getElementById("selBracket");
-  const selRound = document.getElementById("selRound");
   const poolAStandings = document.getElementById("poolAStandings");
   const poolBStandings = document.getElementById("poolBStandings");
-  const poolValidationInfo = document.getElementById("poolValidationInfo");
+  const poolAMatches = document.getElementById("poolAMatches");
+  const poolBMatches = document.getElementById("poolBMatches");
+  const finalDM = document.getElementById("finalDM");
+  const finalDD = document.getElementById("finalDD");
 
   const zoneCatBtns = [...document.querySelectorAll(".zone-cat-btn")];
   const zoneEpreuveBtns = [...document.querySelectorAll(".zone-epreuve-btn")];
@@ -660,24 +492,20 @@
       .replaceAll(">","&gt;");
   }
 
-  function zoneKey(){
-    return `${currentCategorie}_${currentEpreuve}`.replace("+","plus");
-  }
-
-  function zoneText(){
-    return `${currentCategorie} — ${EPREUVE_LABELS[currentEpreuve]}`;
-  }
-
-  function progRef(){
-    return doc(db, "events", EVENT_ID, "programmations", zoneKey());
-  }
-
   function visibilityRef(){
     return doc(db, "events", EVENT_ID, "config", "programmation");
   }
 
+  function generalProgRef(){
+    return doc(db, "events", EVENT_ID, "programmations", "general");
+  }
+
   function resultsCol(){
-    return collection(db, "events", EVENT_ID, "resultats", zoneKey(), "matches");
+    return collection(db, "events", EVENT_ID, "resultats", "general", "matches");
+  }
+
+  function zoneText(){
+    return `${currentCategorie} — ${EPREUVE_LABELS[currentEpreuve]}`;
   }
 
   function canSeeWork(){
@@ -705,85 +533,37 @@
     }catch(error){}
   }
 
-  function stopProgListener(){
-    if(unsubProg){ unsubProg(); unsubProg = null; }
-    if(unsubResults){ unsubResults(); unsubResults = null; }
-  }
-
-  function startProgListener(){
-    stopProgListener();
-
-    currentProg = null;
-    resultsByMatch = new Map();
-
-    unsubProg = onSnapshot(progRef(), (snap) => {
-      currentProg = snap.exists() ? (snap.data() || {}) : null;
-      rebuildFilters();
-      render();
-    });
-
-    unsubResults = onSnapshot(resultsCol(), (snap) => {
-      resultsByMatch = new Map();
-      snap.forEach(d => resultsByMatch.set(d.id, d.data() || {}));
-      renderCurrentTab();
-    });
-  }
-
-  function normalizeEntry(entry, slotObj){
-    if(typeof entry === "number"){
-      return {
-        slot:Number(entry),
-        court:slotObj?.court || "A"
-      };
-    }
-
-    return {
-      slot:Number(entry?.slot || slotObj?.slot || 1),
-      court:entry?.court || slotObj?.court || "A"
-    };
-  }
-
-  function courtLabel(courtKey){
-    if(courtKey === "A") return "🐝 court Manon";
-    if(courtKey === "B") return "🌶️ court Lisa";
+  function courtLabel(court){
+    if(court === "A") return "🐝 Manon Queen Bee";
+    if(court === "B") return "🌶️ Lisa de Los Pimentos";
     return "🎾 terrain";
   }
 
-  function fmtScore(v){
-    if(v === null || v === undefined || v === "") return "—";
-    return String(v);
+  function result(mid){
+    return resultsMap.get(mid) || {};
   }
 
-  function teamPartsFromTeam(t){
-    if(!t) return { title:"—", sub:"" };
-
-    return {
-      title:t.teamName || "Équipe",
-      sub:`${t.joueur1FirstName || t.p1FirstName || "?"} / ${t.joueur2FirstName || t.p2FirstName || "?"}`
-    };
+  function fmt(v){
+    return v === null || v === undefined || v === "" ? "—" : String(v);
   }
 
-  function getResult(mid){
-    return resultsByMatch.get(mid) || null;
-  }
-
-  function scoreNum(v){
-    const n = Number(v);
+  function num(v){
+    if(v === null || v === undefined || v === "") return null;
+    const n = Number(String(v).replace(",", ".").trim());
     return Number.isFinite(n) ? n : null;
   }
 
   function winnerSide(res){
-    if(!res) return null;
-    if(res.winnerSide === "A" || res.winnerSide === "B") return res.winnerSide;
+    if(res?.winnerSide === "A" || res?.winnerSide === "B") return res.winnerSide;
 
     let a = 0;
     let b = 0;
 
     [["s1A","s1B"],["s2A","s2B"],["s3A","s3B"]].forEach(([ka,kb])=>{
-      const na = scoreNum(res[ka]);
-      const nb = scoreNum(res[kb]);
-      if(na === null || nb === null || na === nb) return;
-      if(na > nb) a++;
+      const A = num(res?.[ka]);
+      const B = num(res?.[kb]);
+      if(A === null || B === null || A === B) return;
+      if(A > B) a++;
       else b++;
     });
 
@@ -792,267 +572,88 @@
     return null;
   }
 
-  function resolveTeamRef(ref, guard = new Set()){
-    if(!currentProg || !ref) return null;
+  function filteredMatches(){
+    const all = Array.isArray(currentProg?.matches) ? [...currentProg.matches] : [];
 
-    if(ref.type === "team"){
-      if(ref.team) return ref.team;
-      return currentProg.teams?.[ref.key] || null;
-    }
+    return all.filter(m =>
+      String(m.categorie || "") === currentCategorie &&
+      String(m.epreuve || "") === currentEpreuve
+    );
+  }
 
-    if(ref.type === "winner" || ref.type === "loser"){
-      const mid = ref.matchId;
-      if(!mid || guard.has(mid)) return null;
-      guard.add(mid);
+  function allMatches(){
+    return Array.isArray(currentProg?.matches) ? [...currentProg.matches] : [];
+  }
 
-      const m = currentProg.matches?.[mid];
-      if(!m) return null;
+  function isDynamicPlaceholder(name){
+    const s = String(name || "");
+    return (
+      s.includes("Poule") ||
+      s.includes("Vainqueur") ||
+      s.includes("Vainqueure") ||
+      s.includes("Perdant") ||
+      s.includes("Perdante") ||
+      s.includes("Finaliste") ||
+      s.includes("filles") ||
+      s.includes("hommes")
+    );
+  }
 
-      const res = getResult(mid);
-      const w = winnerSide(res);
-      if(w !== "A" && w !== "B") return null;
-
-      const A = resolveTeamRef(m.A, guard);
-      const B = resolveTeamRef(m.B, guard);
-
-      const winner = w === "A" ? A : B;
-      const loser = w === "A" ? B : A;
-
-      return ref.type === "winner" ? winner : loser;
-    }
-
-    if(ref.type === "poolRank"){
-      const ranking = computePoolRanking(ref.pool);
-      return ranking[Number(ref.rank) - 1]?.team || null;
-    }
-
+  function poolKey(match){
+    const label = String(match?.label || "");
+    if(label.includes("Poule A")) return "A";
+    if(label.includes("Poule B")) return "B";
+    if(label.includes("Poule unique")) return "U";
     return null;
   }
 
-  function describeRef(ref){
-    if(!ref) return "—";
-
-    const resolved = resolveTeamRef(ref);
-    if(resolved) return resolved.teamName || "Équipe";
-
-    if(ref.type === "team") return ref.key || "Équipe";
-    if(ref.type === "winner") return `Vainqueur ${ref.matchId}`;
-    if(ref.type === "loser") return `Perdant ${ref.matchId}`;
-    if(ref.type === "poolRank") return `${ref.rank}e Poule ${ref.pool}`;
-
-    return "—";
+  function poolMatches(pool, categorie = currentCategorie, epreuve = currentEpreuve){
+    return allMatches().filter(m =>
+      String(m.categorie || "") === categorie &&
+      String(m.epreuve || "") === epreuve &&
+      poolKey(m) === pool
+    );
   }
 
-  function teamPartsForRef(ref){
-    const resolved = resolveTeamRef(ref);
-    if(resolved) return teamPartsFromTeam(resolved);
-
-    return {
-      title:describeRef(ref),
-      sub:""
-    };
+  function isPoolComplete(pool, categorie = currentCategorie, epreuve = currentEpreuve){
+    const list = poolMatches(pool, categorie, epreuve);
+    if(!list.length) return false;
+    return list.every(m => winnerSide(result(m.id)) !== null);
   }
 
-  function renderMatchCard({ slot, time, courtKey, mid, teamA, teamB }){
-    const res = getResult(mid);
+  function buildPoolRanking(pool, categorie = currentCategorie, epreuve = currentEpreuve){
+    const list = poolMatches(pool, categorie, epreuve);
+    const stats = new Map();
 
-    return `
-      <div class="match-card ${esc(courtKey === "A" ? "courtA" : "courtB")}">
-        <div class="match-head">
-          <div class="m-slot">#${esc(slot)} · ${esc(mid)}</div>
-          <div class="m-time">${esc(time || "—")}</div>
-          <div class="m-court">${esc(courtLabel(courtKey))}</div>
-        </div>
-
-        <div class="team-row">
-          <div class="team-block">
-            <div class="team-name">${esc(teamA.title)}</div>
-            ${teamA.sub ? `<div class="team-sub">${esc(teamA.sub)}</div>` : ""}
-          </div>
-          <div class="score-cell">${esc(fmtScore(res?.s1A))}</div>
-          <div class="score-cell">${esc(fmtScore(res?.s2A))}</div>
-          <div class="score-cell">${esc(fmtScore(res?.s3A))}</div>
-        </div>
-
-        <div class="vs-line">VS</div>
-
-        <div class="team-row">
-          <div class="team-block">
-            <div class="team-name">${esc(teamB.title)}</div>
-            ${teamB.sub ? `<div class="team-sub">${esc(teamB.sub)}</div>` : ""}
-          </div>
-          <div class="score-cell">${esc(fmtScore(res?.s1B))}</div>
-          <div class="score-cell">${esc(fmtScore(res?.s2B))}</div>
-          <div class="score-cell">${esc(fmtScore(res?.s3B))}</div>
-        </div>
-      </div>
-    `;
-  }
-
-  function scheduledMatches(){
-    if(!currentProg) return [];
-
-    const matches = currentProg.matches || {};
-    const slots = Array.isArray(currentProg.slots) ? currentProg.slots : [];
-    const schedule = currentProg.schedule || {};
-    const rows = [];
-
-    for(const [mid, entry] of Object.entries(schedule)){
-      const slotNum = typeof entry === "number" ? Number(entry) : Number(entry?.slot);
-      const slotObj = slots.find(x => Number(x.slot) === slotNum) || { slot:slotNum, time:"—", court:"A" };
-      const norm = normalizeEntry(entry, slotObj);
-      const match = matches[mid];
-      if(!match) continue;
-
-      rows.push({
-        mid,
-        match,
-        slot:slotObj.slot,
-        time:slotObj.time,
-        court:norm.court,
-        bracket:match.bracket || "general",
-        round:match.round || "Match"
-      });
+    function ensure(name){
+      const key = String(name || "Équipe");
+      if(!stats.has(key)){
+        stats.set(key, {
+          teamName:key,
+          points:0,
+          setsWon:0,
+          setsLost:0,
+          gamesWon:0,
+          gamesLost:0
+        });
+      }
+      return stats.get(key);
     }
 
-    return rows.sort((a,b)=>Number(a.slot || 0) - Number(b.slot || 0));
-  }
-
-  function renderChrono(){
-    const rows = scheduledMatches();
-
-    chronoList.innerHTML = rows.length
-      ? `<div class="match-list">${rows.map(r => renderMatchCard({
-          slot:r.slot,
-          time:r.time,
-          courtKey:r.court,
-          mid:r.mid,
-          teamA:teamPartsForRef(r.match.A),
-          teamB:teamPartsForRef(r.match.B)
-        })).join("")}</div>`
-      : `<p class="muted" style="margin:0;">Aucune programmation à afficher.</p>`;
-  }
-
-  function rebuildFilters(){
-    if(!currentProg){
-      selBracket.innerHTML = "";
-      selRound.innerHTML = "";
-      return;
-    }
-
-    const rows = scheduledMatches();
-
-    const brackets = [...new Set(rows.map(r => r.bracket || "general"))];
-
-    selBracket.innerHTML = brackets.length
-      ? brackets.map(b => `<option value="${esc(b)}">${esc(labelBracket(b))}</option>`).join("")
-      : `<option value="general">Tableau</option>`;
-
-    rebuildRoundFilter();
-  }
-
-  function labelBracket(b){
-    if(b === "main") return "Tableau principal";
-    if(b === "places") return "Classements";
-    if(b === "pools") return "Poules";
-    if(b === "general") return "Général";
-    return b;
-  }
-
-  function rebuildRoundFilter(){
-    const bracket = selBracket.value;
-    const rows = scheduledMatches().filter(r => r.bracket === bracket);
-    const rounds = [...new Set(rows.map(r => r.round || "Match"))];
-
-    selRound.innerHTML = rounds.length
-      ? rounds.map(r => `<option value="${esc(r)}">${esc(labelRound(r))}</option>`).join("")
-      : `<option value="Match">Match</option>`;
-  }
-
-  function labelRound(r){
-    const map = {
-      QF:"Quarts de finale",
-      SF:"Demi-finales",
-      F:"Finale",
-      "3rd":"Petite finale",
-      A:"Poule A",
-      B:"Poule B"
-    };
-
-    return map[r] || r;
-  }
-
-  function renderTableau(){
-    const bracket = selBracket.value;
-    const round = selRound.value;
-
-    const rows = scheduledMatches()
-      .filter(r => r.bracket === bracket && r.round === round);
-
-    tableList.innerHTML = rows.length
-      ? rows.map(r => renderMatchCard({
-          slot:r.slot,
-          time:r.time,
-          courtKey:r.court,
-          mid:r.mid,
-          teamA:teamPartsForRef(r.match.A),
-          teamB:teamPartsForRef(r.match.B)
-        })).join("")
-      : `<p class="muted" style="margin:0;">Aucun match pour ce filtre.</p>`;
-  }
-
-  function getPoolTeamRefs(pool){
-    const rows = Object.values(currentProg?.matches || {})
-      .filter(m => m.bracket === "pools" && m.round === pool);
-
-    const refs = [];
-
-    rows.forEach(m => {
-      [m.A, m.B].forEach(ref => {
-        const key = ref?.key || JSON.stringify(ref);
-        if(ref && !refs.some(x => (x.key || JSON.stringify(x)) === key)){
-          refs.push(ref);
-        }
-      });
-    });
-
-    return refs;
-  }
-
-  function computePoolRanking(pool){
-    const refs = getPoolTeamRefs(pool);
-    const stats = refs.map(ref => ({
-      ref,
-      team:resolveTeamRef(ref),
-      points:0,
-      setsWon:0,
-      setsLost:0,
-      gamesWon:0,
-      gamesLost:0
-    }));
-
-    const matches = Object.entries(currentProg?.matches || {})
-      .filter(([mid,m]) => m.bracket === "pools" && m.round === pool);
-
-    matches.forEach(([mid,m]) => {
-      const res = getResult(mid);
+    for(const match of list){
+      const res = result(match.id);
       const w = winnerSide(res);
-      if(!w) return;
+      if(!w) continue;
 
-      const keyA = m.A?.key || JSON.stringify(m.A);
-      const keyB = m.B?.key || JSON.stringify(m.B);
-
-      const A = stats.find(s => (s.ref?.key || JSON.stringify(s.ref)) === keyA);
-      const B = stats.find(s => (s.ref?.key || JSON.stringify(s.ref)) === keyB);
-
-      if(!A || !B) return;
+      const A = ensure(match.teamA);
+      const B = ensure(match.teamB);
 
       let setsA = 0;
       let setsB = 0;
 
       [["s1A","s1B"],["s2A","s2B"],["s3A","s3B"]].forEach(([ka,kb])=>{
-        const ga = scoreNum(res?.[ka]);
-        const gb = scoreNum(res?.[kb]);
+        const ga = num(res[ka]);
+        const gb = num(res[kb]);
         if(ga === null || gb === null) return;
 
         A.gamesWon += ga;
@@ -1061,7 +662,7 @@
         B.gamesLost += ga;
 
         if(ga > gb) setsA++;
-        if(gb > ga) setsB++;
+        else if(gb > ga) setsB++;
       });
 
       A.setsWon += setsA;
@@ -1076,24 +677,146 @@
         B.points += 2;
         A.points += 1;
       }
-    });
+    }
 
-    return stats.sort((a,b)=>{
-      if(b.points !== a.points) return b.points - a.points;
-      const dsA = a.setsWon - a.setsLost;
-      const dsB = b.setsWon - b.setsLost;
-      if(dsB !== dsA) return dsB - dsA;
-      const dgA = a.gamesWon - a.gamesLost;
-      const dgB = b.gamesWon - b.gamesLost;
-      return dgB - dgA;
+    return Array.from(stats.values()).sort((x,y)=>{
+      if(y.points !== x.points) return y.points - x.points;
+
+      const sdX = x.setsWon - x.setsLost;
+      const sdY = y.setsWon - y.setsLost;
+      if(sdY !== sdX) return sdY - sdX;
+
+      const gdX = x.gamesWon - x.gamesLost;
+      const gdY = y.gamesWon - y.gamesLost;
+      return gdY - gdX;
     });
   }
 
+  function resolveDynamic(name, match){
+    const s = String(name || "").trim();
+
+    const pA1 = /^1(?:er|re)?\s+Poule A$/i.test(s);
+    const pA2 = /^2e\s+Poule A$/i.test(s);
+    const pB1 = /^1(?:er|re)?\s+Poule B$/i.test(s);
+    const pB2 = /^2e\s+Poule B$/i.test(s);
+
+    if(pA1 || pA2){
+      if(!isPoolComplete("A", match.categorie, match.epreuve)) return null;
+      const r = buildPoolRanking("A", match.categorie, match.epreuve);
+      return pA1 ? r[0]?.teamName : r[1]?.teamName;
+    }
+
+    if(pB1 || pB2){
+      if(!isPoolComplete("B", match.categorie, match.epreuve)) return null;
+      const r = buildPoolRanking("B", match.categorie, match.epreuve);
+      return pB1 ? r[0]?.teamName : r[1]?.teamName;
+    }
+
+    const prefix = match.epreuve === "DD" ? "GIRLS" : "MEN";
+
+    const sf1 = allMatches().find(m => m.id === `${prefix}_SF1`);
+    const sf2 = allMatches().find(m => m.id === `${prefix}_SF2`);
+
+    if(/^Vainqueur(?:e)? DF1$/i.test(s) && sf1){
+      const w = winnerSide(result(sf1.id));
+      if(!w) return null;
+      return w === "A" ? resolveTeamName(sf1.teamA, sf1) : resolveTeamName(sf1.teamB, sf1);
+    }
+
+    if(/^Vainqueur(?:e)? DF2$/i.test(s) && sf2){
+      const w = winnerSide(result(sf2.id));
+      if(!w) return null;
+      return w === "A" ? resolveTeamName(sf2.teamA, sf2) : resolveTeamName(sf2.teamB, sf2);
+    }
+
+    if(/^Perdant(?:e)? DF1$/i.test(s) && sf1){
+      const w = winnerSide(result(sf1.id));
+      if(!w) return null;
+      return w === "A" ? resolveTeamName(sf1.teamB, sf1) : resolveTeamName(sf1.teamA, sf1);
+    }
+
+    if(/^Perdant(?:e)? DF2$/i.test(s) && sf2){
+      const w = winnerSide(result(sf2.id));
+      if(!w) return null;
+      return w === "A" ? resolveTeamName(sf2.teamB, sf2) : resolveTeamName(sf2.teamA, sf2);
+    }
+
+    return null;
+  }
+
+  function resolveTeamName(name, match){
+    const resolved = resolveDynamic(name, match);
+    return resolved || name || "Équipe";
+  }
+
+  function teamDisplay(name, match){
+    const resolved = resolveDynamic(name, match);
+
+    return {
+      title: resolved || name || "Équipe",
+      placeholder: !resolved && isDynamicPlaceholder(name)
+    };
+  }
+
+  function renderMatchCard(match){
+    const res = result(match.id);
+    const A = teamDisplay(match.teamA, match);
+    const B = teamDisplay(match.teamB, match);
+
+    const cls = match.court === "A" ? "courtA" : match.court === "B" ? "courtB" : "";
+
+    return `
+      <div class="match-card ${esc(cls)}">
+        <div class="match-head">
+          <div class="m-slot">#${esc(match.order || "—")}</div>
+          <div class="m-time">${esc(match.time || "—")}</div>
+          <div class="m-court">${esc(courtLabel(match.court))}</div>
+          <div class="m-label">${esc(match.label || match.id)}</div>
+        </div>
+
+        <div class="team-row">
+          <div class="team-block">
+            <div class="team-name ${A.placeholder ? "team-placeholder" : ""}">${esc(A.title)}</div>
+          </div>
+          <div class="score-cell">${esc(fmt(res.s1A))}</div>
+          <div class="score-cell">${esc(fmt(res.s2A))}</div>
+          <div class="score-cell">${esc(fmt(res.s3A))}</div>
+        </div>
+
+        <div class="vs-line">VS</div>
+
+        <div class="team-row">
+          <div class="team-block">
+            <div class="team-name ${B.placeholder ? "team-placeholder" : ""}">${esc(B.title)}</div>
+          </div>
+          <div class="score-cell">${esc(fmt(res.s1B))}</div>
+          <div class="score-cell">${esc(fmt(res.s2B))}</div>
+          <div class="score-cell">${esc(fmt(res.s3B))}</div>
+        </div>
+      </div>
+    `;
+  }
+
+  function chronological(matches){
+    return [...matches].sort((a,b)=>{
+      if(Number(a.order) !== Number(b.order)) return Number(a.order) - Number(b.order);
+      return String(a.court || "").localeCompare(String(b.court || ""));
+    });
+  }
+
+  function renderChrono(){
+    const matches = chronological(filteredMatches());
+
+    chronoList.innerHTML = matches.length
+      ? `<div class="match-list">${matches.map(renderMatchCard).join("")}</div>`
+      : `<p class="muted">Aucun match pour cette catégorie / épreuve.</p>`;
+  }
+
   function renderPoolTable(pool){
-    const rows = computePoolRanking(pool);
+    const rows = buildPoolRanking(pool);
 
     if(!rows.length){
-      return `<p class="muted" style="margin:0;">Aucune poule ${pool}.</p>`;
+      return `<p class="muted">Aucune poule ${pool}.</p>`;
     }
 
     return `
@@ -1110,8 +833,8 @@
         <tbody>
           ${rows.map((r,i)=>`
             <tr>
-              <td>${i+1}</td>
-              <td>${esc(r.team?.teamName || describeRef(r.ref))}</td>
+              <td>${i + 1}</td>
+              <td>${esc(r.teamName)}</td>
               <td>${esc(r.points)}</td>
               <td>${esc(r.setsWon - r.setsLost)}</td>
               <td>${esc(r.gamesWon - r.gamesLost)}</td>
@@ -1125,74 +848,87 @@
   function renderPoules(){
     poolAStandings.innerHTML = renderPoolTable("A");
     poolBStandings.innerHTML = renderPoolTable("B");
-    poolValidationInfo.textContent =
-      "Classement : victoire = 2 points, défaite = 1 point. En cas d’égalité : différence de sets, puis différence de jeux.";
+
+    const aMatches = chronological(poolMatches("A"));
+    const bMatches = chronological(poolMatches("B"));
+
+    poolAMatches.innerHTML = aMatches.length
+      ? aMatches.map(renderMatchCard).join("")
+      : `<p class="muted">Aucun match en poule A.</p>`;
+
+    poolBMatches.innerHTML = bMatches.length
+      ? bMatches.map(renderMatchCard).join("")
+      : `<p class="muted">Aucun match en poule B.</p>`;
   }
 
-  function bracketTeamHtml(ref){
-    const resolved = resolveTeamRef(ref);
-    const label = resolved?.teamName || describeRef(ref);
-    const cls = resolved ? "bracket-team" : "bracket-team placeholder";
-    return `<div class="${cls}">${esc(label)}</div>`;
+  function finalMatches(epreuve){
+    return allMatches()
+      .filter(m =>
+        m.categorie === "Seniors" &&
+        m.epreuve === epreuve &&
+        (
+          String(m.id).includes("_SF") ||
+          String(m.id).includes("_3_4") ||
+          String(m.id).includes("_FINAL")
+        )
+      )
+      .sort((a,b)=>Number(a.order) - Number(b.order));
   }
 
-  function renderBracketMatch(targetA, targetB, match){
-    const a = document.getElementById(targetA);
-    const b = document.getElementById(targetB);
+  function renderFinalBlock(epreuve){
+    const list = finalMatches(epreuve);
 
-    if(!a || !b) return;
-
-    if(!match){
-      a.innerHTML = `<div class="bracket-team placeholder">—</div>`;
-      b.innerHTML = `<div class="bracket-team placeholder">—</div>`;
-      return;
+    if(!list.length){
+      return `<p class="muted">Tableau final à venir.</p>`;
     }
 
-    a.innerHTML = bracketTeamHtml(match.A);
-    b.innerHTML = bracketTeamHtml(match.B);
+    const sf = list.filter(m => String(m.id).includes("_SF"));
+    const p34 = list.filter(m => String(m.id).includes("_3_4"));
+    const f = list.filter(m => String(m.id).includes("_FINAL"));
+
+    return `
+      <div class="bracket-phase">
+        <div class="phase-title">Demi-finales</div>
+        ${sf.length ? sf.map(renderMatchCard).join("") : `<p class="muted">À venir.</p>`}
+      </div>
+
+      <div class="bracket-phase">
+        <div class="phase-title">Place 3 / 4</div>
+        ${p34.length ? p34.map(renderMatchCard).join("") : `<p class="muted">À venir.</p>`}
+      </div>
+
+      <div class="bracket-phase">
+        <div class="phase-title">Finale</div>
+        ${f.length ? f.map(renderMatchCard).join("") : `<p class="muted">À venir.</p>`}
+      </div>
+    `;
   }
 
-  function renderBracketFull(){
-    const rows = scheduledMatches();
-
-    const qf = rows.filter(r => r.round === "QF").slice(0,4);
-    const sf = rows.filter(r => r.round === "SF").slice(0,2);
-    const f = rows.find(r => r.round === "F");
-
-    renderBracketMatch("bf-qf1-a","bf-qf1-b", qf[0]?.match);
-    renderBracketMatch("bf-qf2-a","bf-qf2-b", qf[1]?.match);
-    renderBracketMatch("bf-qf3-a","bf-qf3-b", qf[2]?.match);
-    renderBracketMatch("bf-qf4-a","bf-qf4-b", qf[3]?.match);
-
-    renderBracketMatch("bf-sf1-a","bf-sf1-b", sf[0]?.match);
-    renderBracketMatch("bf-sf2-a","bf-sf2-b", sf[1]?.match);
-
-    renderBracketMatch("bf-f-a","bf-f-b", f?.match);
-  }
-
-  function setActiveTab(tab){
-    currentTab = tab;
-
-    tabChrono.setAttribute("aria-selected", tab === "chrono" ? "true" : "false");
-    tabTableau.setAttribute("aria-selected", tab === "tableau" ? "true" : "false");
-    tabPoules.setAttribute("aria-selected", tab === "poules" ? "true" : "false");
-    tabBracketFull.setAttribute("aria-selected", tab === "bracketFull" ? "true" : "false");
-
-    panelChrono.style.display = canSeeWork() && tab === "chrono" ? "block" : "none";
-    panelTableau.style.display = canSeeWork() && tab === "tableau" ? "block" : "none";
-    panelPoules.style.display = canSeeWork() && tab === "poules" ? "block" : "none";
-    panelBracketFull.style.display = canSeeWork() && tab === "bracketFull" ? "block" : "none";
-
-    renderCurrentTab();
+  function renderFinal(){
+    finalDM.innerHTML = renderFinalBlock("DM");
+    finalDD.innerHTML = renderFinalBlock("DD");
   }
 
   function renderCurrentTab(){
     if(!canSeeWork()) return;
 
     if(currentTab === "chrono") renderChrono();
-    if(currentTab === "tableau") renderTableau();
     if(currentTab === "poules") renderPoules();
-    if(currentTab === "bracketFull") renderBracketFull();
+    if(currentTab === "final") renderFinal();
+  }
+
+  function setTab(tab){
+    currentTab = tab;
+
+    tabChrono.setAttribute("aria-selected", tab === "chrono" ? "true" : "false");
+    tabPoules.setAttribute("aria-selected", tab === "poules" ? "true" : "false");
+    tabFinal.setAttribute("aria-selected", tab === "final" ? "true" : "false");
+
+    panelChrono.style.display = canSeeWork() && tab === "chrono" ? "block" : "none";
+    panelPoules.style.display = canSeeWork() && tab === "poules" ? "block" : "none";
+    panelFinal.style.display = canSeeWork() && tab === "final" ? "block" : "none";
+
+    renderCurrentTab();
   }
 
   function render(){
@@ -1204,14 +940,13 @@
       maintenanceBox.style.display = "block";
       workBox.style.display = "none";
       panelChrono.style.display = "none";
-      panelTableau.style.display = "none";
       panelPoules.style.display = "none";
-      panelBracketFull.style.display = "none";
+      panelFinal.style.display = "none";
       return;
     }
 
     pageIntro.textContent = publicVisible
-      ? "Planning des matchs, horaires et terrains."
+      ? "Planning des matchs, horaires, terrains et scores."
       : "Aperçu réservé aux admins et JAT pendant la maintenance.";
 
     pageTag.textContent = publicVisible ? "Direct" : "Travail";
@@ -1220,23 +955,18 @@
     maintenanceBox.style.display = "none";
     workBox.style.display = "block";
 
-    if(!currentProg){
-      statusText.textContent = "Aucune programmation enregistrée pour cette catégorie / épreuve.";
-      subtitle.textContent = "Programmation à venir.";
-    }else{
-      statusText.textContent = "✅ Programmation disponible.";
-      subtitle.textContent = "Affichage chrono, tableau, poules et tableau final complet.";
-    }
+    statusText.textContent = currentProg
+      ? "✅ Programmation disponible."
+      : "Aucune programmation générale enregistrée.";
 
-    setActiveTab(currentTab);
+    setTab(currentTab);
   }
 
   function changeZone(categorie, epreuve){
     currentCategorie = categorie || currentCategorie;
     currentEpreuve = epreuve || currentEpreuve;
     setUrlZone();
-    syncZoneButtons();
-    startProgListener();
+    render();
   }
 
   zoneCatBtns.forEach(btn => {
@@ -1247,32 +977,28 @@
     btn.onclick = () => changeZone(currentCategorie, btn.dataset.epreuve);
   });
 
-  tabChrono.onclick = () => setActiveTab("chrono");
-  tabTableau.onclick = () => setActiveTab("tableau");
-  tabPoules.onclick = () => setActiveTab("poules");
-  tabBracketFull.onclick = () => setActiveTab("bracketFull");
+  tabChrono.onclick = () => setTab("chrono");
+  tabPoules.onclick = () => setTab("poules");
+  tabFinal.onclick = () => setTab("final");
 
-  selBracket.onchange = () => {
-    rebuildRoundFilter();
-    renderTableau();
-  };
+  onSnapshot(visibilityRef(), (snap)=>{
+    const data = snap.exists() ? (snap.data() || {}) : {};
+    publicVisible = data.publicVisible === true;
+    render();
+  });
 
-  selRound.onchange = () => renderTableau();
+  onSnapshot(generalProgRef(), (snap)=>{
+    currentProg = snap.exists() ? (snap.data() || {}) : null;
+    render();
+  });
 
-  function startVisibilityListener(){
-    if(unsubVisibility){
-      unsubVisibility();
-      unsubVisibility = null;
-    }
+  onSnapshot(resultsCol(), (snap)=>{
+    resultsMap = new Map();
+    snap.forEach(d => resultsMap.set(d.id, d.data() || {}));
+    renderCurrentTab();
+  });
 
-    unsubVisibility = onSnapshot(visibilityRef(), (snap) => {
-      const data = snap.exists() ? (snap.data() || {}) : {};
-      publicVisible = data.publicVisible === true;
-      render();
-    });
-  }
-
-  onAuthStateChanged(auth, async (user) => {
+  onAuthStateChanged(auth, async (user)=>{
     currentRole = null;
 
     if(user){
@@ -1287,8 +1013,6 @@
   });
 
   syncZoneButtons();
-  startVisibilityListener();
-  startProgListener();
 </script>
 
 </body>
