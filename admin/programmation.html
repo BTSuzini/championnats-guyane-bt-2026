@@ -331,7 +331,7 @@
     <div id="adminList"></div>
 
     <p class="muted" style="margin-top:12px;">
-      🕒 permet de modifier l’horaire. 🐝/🌶️ change le terrain. ↑ ↓ changent l’ordre.
+      🕒 permet de modifier l’heure de début. 🐝/🌶️ change le terrain. ↑ ↓ échangent l’ordre et donc l’heure.
     </p>
   </section>
 
@@ -365,6 +365,35 @@
   const EPREUVE_LABELS = {
     DM:"Double Messieurs",
     DD:"Double Dames"
+  };
+
+  const ORDER_TIMES = {
+    "-100":"Info",
+    "-99":"Info",
+    "-98":"Info",
+    "-97":"Info",
+    "-96":"Info",
+    "-95":"Info",
+    "-94":"Info",
+    "-93":"Info",
+    1:"09h00",
+    2:"09h45",
+    3:"10h30",
+    4:"11h15",
+    5:"12h00",
+    6:"12h45",
+    7:"13h30",
+    8:"14h00",
+    9:"14h30",
+    10:"15h00",
+    11:"15h30",
+    12:"16h00",
+    13:"16h30",
+    14:"17h30",
+    15:"18h30",
+    16:"19h30",
+    17:"20h15",
+    18:"21h15"
   };
 
   const accessDenied = document.getElementById("accessDenied");
@@ -401,6 +430,11 @@
       .replaceAll(">","&gt;");
   }
 
+  function timeForOrder(order, fallback = "À confirmer"){
+    const key = String(Number(order));
+    return ORDER_TIMES[key] || fallback;
+  }
+
   function zoneKey(categorie = currentCategorie, epreuve = currentEpreuve){
     return `${categorie}_${epreuve}`.replace("+","plus");
   }
@@ -428,8 +462,8 @@
   }
 
   function courtLabel(court){
-    if(court === "A") return "🐝 court Manon";
-    if(court === "B") return "🌶️ court Lisa";
+    if(court === "A") return "🐝 Manon Queen Bee";
+    if(court === "B") return "🌶️ Lisa de Los Pimentos";
     return "🎾 terrain";
   }
 
@@ -575,11 +609,11 @@
     };
   }
 
-  function makeMatch(id, order, time, court, teamA, teamB, label, meta = {}){
+  function makeMatch(id, order, court, teamA, teamB, label, meta = {}){
     return {
       id,
       order,
-      time,
+      time:timeForOrder(order),
       court,
       teamA:teamTitle(teamA),
       teamB:teamTitle(teamB),
@@ -594,7 +628,7 @@
     return {
       id,
       order,
-      time:"Info",
+      time:timeForOrder(order, "Info"),
       court:"AUTO",
       teamA:team ? teamTitle(team) : "Aucune équipe",
       teamB:"Vainqueur",
@@ -610,8 +644,8 @@
     return list?.[index] || { teamName:placeholder };
   }
 
-  function addMatch(list, id, order, time, court, teamA, teamB, label, meta = {}){
-    list.push(makeMatch(id, order, time, court, teamA, teamB, label, meta));
+  function addMatch(list, id, order, court, teamA, teamB, label, meta = {}){
+    list.push(makeMatch(id, order, court, teamA, teamB, label, meta));
   }
 
   function addWinnerIfSingle(list, data, orderBase){
@@ -642,59 +676,59 @@
     const gA = girls?.pools?.poolA || [];
     const gB = girls?.pools?.poolB || [];
 
-    addMatch(matches, "GIRLS_A1", 1, "09h00 - 09h45", "A", getTeam(gA,0,"Filles A1"), getTeam(gA,1,"Filles A2"), "Seniors DD · Poule A", {categorie:"Seniors", epreuve:"DD"});
-    addMatch(matches, "GIRLS_B1", 1, "09h00 - 09h45", "B", getTeam(gB,0,"Filles B1"), getTeam(gB,1,"Filles B2"), "Seniors DD · Poule B", {categorie:"Seniors", epreuve:"DD"});
+    addMatch(matches, "GIRLS_A1", 1, "A", getTeam(gA,0,"Filles A1"), getTeam(gA,1,"Filles A2"), "Seniors DD · Poule A", {categorie:"Seniors", epreuve:"DD"});
+    addMatch(matches, "GIRLS_B1", 1, "B", getTeam(gB,0,"Filles B1"), getTeam(gB,1,"Filles B2"), "Seniors DD · Poule B", {categorie:"Seniors", epreuve:"DD"});
 
     const u18 = (u18dm?.teams?.length ? u18dm : u18dd);
     const u = u18?.teams || [];
-    addMatch(matches, "U18_1", 2, "09h45 - 10h30", "A", getTeam(u,0,"U1"), getTeam(u,1,"U2"), "U18 · Poule unique", {categorie:u18?.categorie || "U18", epreuve:u18?.epreuve || "DM"});
+    addMatch(matches, "U18_1", 2, "A", getTeam(u,0,"U1"), getTeam(u,1,"U2"), "U18 · Poule unique", {categorie:u18?.categorie || "U18", epreuve:u18?.epreuve || "DM"});
 
-    addMatch(matches, "GIRLS_A2", 3, "10h30 - 11h15", "A", getTeam(gA,0,"Filles A1"), getTeam(gA,2,"Filles A3"), "Seniors DD · Poule A", {categorie:"Seniors", epreuve:"DD"});
-    addMatch(matches, "GIRLS_B2", 3, "10h30 - 11h15", "B", getTeam(gB,0,"Filles B1"), getTeam(gB,2,"Filles B3"), "Seniors DD · Poule B", {categorie:"Seniors", epreuve:"DD"});
+    addMatch(matches, "GIRLS_A2", 3, "A", getTeam(gA,0,"Filles A1"), getTeam(gA,2,"Filles A3"), "Seniors DD · Poule A", {categorie:"Seniors", epreuve:"DD"});
+    addMatch(matches, "GIRLS_B2", 3, "B", getTeam(gB,0,"Filles B1"), getTeam(gB,2,"Filles B3"), "Seniors DD · Poule B", {categorie:"Seniors", epreuve:"DD"});
 
-    addMatch(matches, "U18_2", 4, "11h15 - 12h00", "A", getTeam(u,0,"U1"), getTeam(u,2,"U3"), "U18 · Poule unique", {categorie:u18?.categorie || "U18", epreuve:u18?.epreuve || "DM"});
+    addMatch(matches, "U18_2", 4, "A", getTeam(u,0,"U1"), getTeam(u,2,"U3"), "U18 · Poule unique", {categorie:u18?.categorie || "U18", epreuve:u18?.epreuve || "DM"});
 
-    addMatch(matches, "GIRLS_A3", 5, "12h00 - 12h45", "A", getTeam(gA,1,"Filles A2"), getTeam(gA,2,"Filles A3"), "Seniors DD · Poule A", {categorie:"Seniors", epreuve:"DD"});
-    addMatch(matches, "GIRLS_B3", 5, "12h00 - 12h45", "B", getTeam(gB,1,"Filles B2"), getTeam(gB,2,"Filles B3"), "Seniors DD · Poule B", {categorie:"Seniors", epreuve:"DD"});
+    addMatch(matches, "GIRLS_A3", 5, "A", getTeam(gA,1,"Filles A2"), getTeam(gA,2,"Filles A3"), "Seniors DD · Poule A", {categorie:"Seniors", epreuve:"DD"});
+    addMatch(matches, "GIRLS_B3", 5, "B", getTeam(gB,1,"Filles B2"), getTeam(gB,2,"Filles B3"), "Seniors DD · Poule B", {categorie:"Seniors", epreuve:"DD"});
 
-    addMatch(matches, "U18_3", 6, "12h45 - 13h30", "A", getTeam(u,1,"U2"), getTeam(u,2,"U3"), "U18 · Poule unique", {categorie:u18?.categorie || "U18", epreuve:u18?.epreuve || "DM"});
+    addMatch(matches, "U18_3", 6, "A", getTeam(u,1,"U2"), getTeam(u,2,"U3"), "U18 · Poule unique", {categorie:u18?.categorie || "U18", epreuve:u18?.epreuve || "DM"});
 
     const mA = men?.pools?.poolA || [];
     const mB = men?.pools?.poolB || [];
 
-    addMatch(matches, "MEN_A1", 7, "13h30 - 14h00", "A", getTeam(mA,0,"Hommes A1"), getTeam(mA,1,"Hommes A2"), "Seniors DM · Poule A", {categorie:"Seniors", epreuve:"DM"});
-    addMatch(matches, "MEN_A2", 7, "13h30 - 14h00", "B", getTeam(mA,2,"Hommes A3"), getTeam(mA,3,"Hommes A4"), "Seniors DM · Poule A", {categorie:"Seniors", epreuve:"DM"});
+    addMatch(matches, "MEN_A1", 7, "A", getTeam(mA,0,"Hommes A1"), getTeam(mA,1,"Hommes A2"), "Seniors DM · Poule A", {categorie:"Seniors", epreuve:"DM"});
+    addMatch(matches, "MEN_A2", 7, "B", getTeam(mA,2,"Hommes A3"), getTeam(mA,3,"Hommes A4"), "Seniors DM · Poule A", {categorie:"Seniors", epreuve:"DM"});
 
-    addMatch(matches, "MEN_B1", 8, "14h00 - 14h30", "A", getTeam(mB,0,"Hommes B1"), getTeam(mB,1,"Hommes B2"), "Seniors DM · Poule B", {categorie:"Seniors", epreuve:"DM"});
+    addMatch(matches, "MEN_B1", 8, "A", getTeam(mB,0,"Hommes B1"), getTeam(mB,1,"Hommes B2"), "Seniors DM · Poule B", {categorie:"Seniors", epreuve:"DM"});
 
-    addMatch(matches, "MEN_A3", 9, "14h30 - 15h00", "A", getTeam(mA,0,"Hommes A1"), getTeam(mA,2,"Hommes A3"), "Seniors DM · Poule A", {categorie:"Seniors", epreuve:"DM"});
-    addMatch(matches, "MEN_A4", 9, "14h30 - 15h00", "B", getTeam(mA,1,"Hommes A2"), getTeam(mA,3,"Hommes A4"), "Seniors DM · Poule A", {categorie:"Seniors", epreuve:"DM"});
+    addMatch(matches, "MEN_A3", 9, "A", getTeam(mA,0,"Hommes A1"), getTeam(mA,2,"Hommes A3"), "Seniors DM · Poule A", {categorie:"Seniors", epreuve:"DM"});
+    addMatch(matches, "MEN_A4", 9, "B", getTeam(mA,1,"Hommes A2"), getTeam(mA,3,"Hommes A4"), "Seniors DM · Poule A", {categorie:"Seniors", epreuve:"DM"});
 
-    addMatch(matches, "MEN_B2", 10, "15h00 - 15h30", "A", getTeam(mB,0,"Hommes B1"), getTeam(mB,2,"Hommes B3"), "Seniors DM · Poule B", {categorie:"Seniors", epreuve:"DM"});
+    addMatch(matches, "MEN_B2", 10, "A", getTeam(mB,0,"Hommes B1"), getTeam(mB,2,"Hommes B3"), "Seniors DM · Poule B", {categorie:"Seniors", epreuve:"DM"});
 
-    addMatch(matches, "MEN_A5", 11, "15h30 - 16h00", "A", getTeam(mA,0,"Hommes A1"), getTeam(mA,3,"Hommes A4"), "Seniors DM · Poule A", {categorie:"Seniors", epreuve:"DM"});
-    addMatch(matches, "MEN_A6", 11, "15h30 - 16h00", "B", getTeam(mA,1,"Hommes A2"), getTeam(mA,2,"Hommes A3"), "Seniors DM · Poule A", {categorie:"Seniors", epreuve:"DM"});
+    addMatch(matches, "MEN_A5", 11, "A", getTeam(mA,0,"Hommes A1"), getTeam(mA,3,"Hommes A4"), "Seniors DM · Poule A", {categorie:"Seniors", epreuve:"DM"});
+    addMatch(matches, "MEN_A6", 11, "B", getTeam(mA,1,"Hommes A2"), getTeam(mA,2,"Hommes A3"), "Seniors DM · Poule A", {categorie:"Seniors", epreuve:"DM"});
 
-    addMatch(matches, "MEN_B3", 12, "16h00 - 16h30", "A", getTeam(mB,1,"Hommes B2"), getTeam(mB,2,"Hommes B3"), "Seniors DM · Poule B", {categorie:"Seniors", epreuve:"DM"});
+    addMatch(matches, "MEN_B3", 12, "A", getTeam(mB,1,"Hommes B2"), getTeam(mB,2,"Hommes B3"), "Seniors DM · Poule B", {categorie:"Seniors", epreuve:"DM"});
 
     const u14 = (u14dm?.teams?.length ? u14dm : u14dd);
-    addMatch(matches, "U14_FINAL", 12, "16h00 - 16h30", "B", getTeam(u14?.teams || [],0,"Finaliste U14 1"), getTeam(u14?.teams || [],1,"Finaliste U14 2"), "U14 · Finale", {categorie:u14?.categorie || "U14", epreuve:u14?.epreuve || "DM"});
+    addMatch(matches, "U14_FINAL", 12, "B", getTeam(u14?.teams || [],0,"Finaliste U14 1"), getTeam(u14?.teams || [],1,"Finaliste U14 2"), "U14 · Finale", {categorie:u14?.categorie || "U14", epreuve:u14?.epreuve || "DM"});
 
-    addMatch(matches, "GIRLS_SF1", 13, "16h30 - 17h30", "A", {teamName:"1re Poule A"}, {teamName:"2e Poule B"}, "Seniors DD · 1/2 finale", {categorie:"Seniors", epreuve:"DD"});
-    addMatch(matches, "GIRLS_SF2", 13, "16h30 - 17h30", "B", {teamName:"1re Poule B"}, {teamName:"2e Poule A"}, "Seniors DD · 1/2 finale", {categorie:"Seniors", epreuve:"DD"});
+    addMatch(matches, "GIRLS_SF1", 13, "A", {teamName:"1re Poule A"}, {teamName:"2e Poule B"}, "Seniors DD · 1/2 finale", {categorie:"Seniors", epreuve:"DD"});
+    addMatch(matches, "GIRLS_SF2", 13, "B", {teamName:"1re Poule B"}, {teamName:"2e Poule A"}, "Seniors DD · 1/2 finale", {categorie:"Seniors", epreuve:"DD"});
 
-    addMatch(matches, "MEN_SF1", 14, "17h30 - 18h30", "A", {teamName:"1er Poule A"}, {teamName:"2e Poule B"}, "Seniors DM · 1/2 finale", {categorie:"Seniors", epreuve:"DM"});
-    addMatch(matches, "MEN_SF2", 14, "17h30 - 18h30", "B", {teamName:"1er Poule B"}, {teamName:"2e Poule A"}, "Seniors DM · 1/2 finale", {categorie:"Seniors", epreuve:"DM"});
+    addMatch(matches, "MEN_SF1", 14, "A", {teamName:"1er Poule A"}, {teamName:"2e Poule B"}, "Seniors DM · 1/2 finale", {categorie:"Seniors", epreuve:"DM"});
+    addMatch(matches, "MEN_SF2", 14, "B", {teamName:"1er Poule B"}, {teamName:"2e Poule A"}, "Seniors DM · 1/2 finale", {categorie:"Seniors", epreuve:"DM"});
 
     const plus45 = (plus45dm?.teams?.length ? plus45dm : plus45dd);
-    addMatch(matches, "PLUS45_FINAL", 15, "18h30 - 19h30", "A", getTeam(plus45?.teams || [],0,"Finaliste +45 ans 1"), getTeam(plus45?.teams || [],1,"Finaliste +45 ans 2"), "+45 ans · Finale", {categorie:plus45?.categorie || "45+", epreuve:plus45?.epreuve || "DM"});
-    addMatch(matches, "GIRLS_5_6", 15, "18h30 - 19h30", "B", {teamName:"5e filles"}, {teamName:"6e filles"}, "Seniors DD · Place 5-6", {categorie:"Seniors", epreuve:"DD"});
+    addMatch(matches, "PLUS45_FINAL", 15, "A", getTeam(plus45?.teams || [],0,"Finaliste +45 ans 1"), getTeam(plus45?.teams || [],1,"Finaliste +45 ans 2"), "+45 ans · Finale", {categorie:plus45?.categorie || "45+", epreuve:plus45?.epreuve || "DM"});
+    addMatch(matches, "GIRLS_5_6", 15, "B", {teamName:"5e filles"}, {teamName:"6e filles"}, "Seniors DD · Place 5-6", {categorie:"Seniors", epreuve:"DD"});
 
-    addMatch(matches, "GIRLS_3_4", 16, "19h30 - 20h15", "A", {teamName:"Perdante DF1"}, {teamName:"Perdante DF2"}, "Seniors DD · Place 3-4", {categorie:"Seniors", epreuve:"DD"});
-    addMatch(matches, "MEN_3_4", 16, "19h30 - 20h15", "B", {teamName:"Perdant DF1"}, {teamName:"Perdant DF2"}, "Seniors DM · Place 3-4", {categorie:"Seniors", epreuve:"DM"});
+    addMatch(matches, "GIRLS_3_4", 16, "A", {teamName:"Perdante DF1"}, {teamName:"Perdante DF2"}, "Seniors DD · Place 3-4", {categorie:"Seniors", epreuve:"DD"});
+    addMatch(matches, "MEN_3_4", 16, "B", {teamName:"Perdant DF1"}, {teamName:"Perdant DF2"}, "Seniors DM · Place 3-4", {categorie:"Seniors", epreuve:"DM"});
 
-    addMatch(matches, "GIRLS_FINAL", 17, "20h15 - 21h15", "A", {teamName:"Vainqueure DF1"}, {teamName:"Vainqueure DF2"}, "Seniors DD · Finale", {categorie:"Seniors", epreuve:"DD"});
-    addMatch(matches, "MEN_FINAL", 18, "21h15 - 22h15", "A", {teamName:"Vainqueur DF1"}, {teamName:"Vainqueur DF2"}, "Seniors DM · Finale", {categorie:"Seniors", epreuve:"DM"});
+    addMatch(matches, "GIRLS_FINAL", 17, "A", {teamName:"Vainqueure DF1"}, {teamName:"Vainqueure DF2"}, "Seniors DD · Finale", {categorie:"Seniors", epreuve:"DD"});
+    addMatch(matches, "MEN_FINAL", 18, "A", {teamName:"Vainqueur DF1"}, {teamName:"Vainqueur DF2"}, "Seniors DM · Finale", {categorie:"Seniors", epreuve:"DM"});
 
     return matches;
   }
@@ -822,7 +856,7 @@
     const m = matches.find(x => x.id === id);
     if(!m) return;
 
-    const next = prompt("Nouvel horaire :", m.time || "");
+    const next = prompt("Nouvelle heure de début :", m.time || "");
     if(next === null) return;
 
     m.time = next.trim() || "À confirmer";
@@ -847,11 +881,17 @@
     if(!currentProg) return;
 
     const matches = [...(currentProg.matches || [])];
-    const target = dir === "up" ? Number(order) - 1 : Number(order) + 1;
+    const currentOrder = Number(order);
+    const targetOrder = dir === "up" ? currentOrder - 1 : currentOrder + 1;
 
     matches.forEach(m => {
-      if(Number(m.order) === Number(order)) m.order = target;
-      else if(Number(m.order) === Number(target)) m.order = Number(order);
+      if(Number(m.order) === currentOrder){
+        m.order = targetOrder;
+        m.time = timeForOrder(targetOrder, m.time || "À confirmer");
+      }else if(Number(m.order) === targetOrder){
+        m.order = currentOrder;
+        m.time = timeForOrder(currentOrder, m.time || "À confirmer");
+      }
     });
 
     await patchMatches(matches);
