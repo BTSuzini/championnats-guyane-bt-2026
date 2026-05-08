@@ -329,9 +329,6 @@
 
     <h3 class="section-title">👥 Classement des équipes</h3>
     <div id="teamList"></div>
-
-    <h3 class="section-title">🧍 Classement des joueurs</h3>
-    <div id="playerList"></div>
   </section>
 
 </main>
@@ -372,7 +369,6 @@
   const validatedBox = document.getElementById("validatedBox");
   const warningBox = document.getElementById("warningBox");
   const teamList = document.getElementById("teamList");
-  const playerList = document.getElementById("playerList");
 
   let currentCategorie = "U14";
   let currentEpreuve = "DM";
@@ -381,7 +377,6 @@
   let resultsByMatch = new Map();
   let currentClassementDoc = null;
   let equipesById = new Map();
-  let inscriptionsById = new Map();
   let inscriptionsByTeamName = new Map();
 
   let unsubProg = null;
@@ -389,8 +384,7 @@
   let unsubClassement = null;
   let unsubEquipes = null;
   let unsubInscriptions = null;
-
-  function esc(s){
+    function esc(s){
     return (s ?? "").toString()
       .replaceAll("&","&amp;")
       .replaceAll("<","&lt;")
@@ -440,6 +434,7 @@
     try{
       const d = ts?.toDate ? ts.toDate() : null;
       if(!d) return "—";
+
       return d.toLocaleString("fr-FR", {
         year:"numeric",
         month:"long",
@@ -454,6 +449,7 @@
 
   function toNum(v){
     if(v === null || v === undefined || v === "") return null;
+
     const n = Number(String(v).replace(",", ".").trim());
     return Number.isFinite(n) ? n : null;
   }
@@ -477,6 +473,7 @@
       ["s2A","s2B"],
       ["s3A","s3B"]
     ].forEach(([ka,kb]) => {
+
       const na = toNum(res[ka]);
       const nb = toNum(res[kb]);
 
@@ -493,7 +490,9 @@
   }
 
   function allMatches(){
-    return Array.isArray(currentProg?.matches) ? [...currentProg.matches] : [];
+    return Array.isArray(currentProg?.matches)
+      ? [...currentProg.matches]
+      : [];
   }
 
   function zoneMatches(){
@@ -516,27 +515,45 @@
   }
 
   function getInscriptionForTeamName(teamName){
-    return inscriptionsByTeamName.get(normalizeTeamName(teamName)) || null;
+    return inscriptionsByTeamName.get(
+      normalizeTeamName(teamName)
+    ) || null;
   }
-    function resolveDynamicTeam(match, side, guard = new Set()){
+
+  function resolveDynamicTeam(match, side, guard = new Set()){
+
     if(!match) return null;
 
-    const raw = side === "A" ? match.teamA : match.teamB;
-    const ref = side === "A" ? match.A : match.B;
+    const raw = side === "A"
+      ? match.teamA
+      : match.teamB;
+
+    const ref = side === "A"
+      ? match.A
+      : match.B;
 
     if(ref?.type === "team"){
-      return ref.team || equipesById.get(ref.key) || { teamName: raw || "Équipe" };
+      return ref.team
+        || equipesById.get(ref.key)
+        || { teamName: raw || "Équipe" };
     }
 
     if(ref?.type === "winner" || ref?.type === "loser"){
+
       const sourceId = ref.matchId;
-      if(!sourceId || guard.has(sourceId)) return null;
+
+      if(!sourceId || guard.has(sourceId)){
+        return null;
+      }
+
       guard.add(sourceId);
 
       const source = matchById(sourceId);
       const w = winnerSide(getResult(sourceId));
 
-      if(!source || (w !== "A" && w !== "B")) return null;
+      if(!source || (w !== "A" && w !== "B")){
+        return null;
+      }
 
       const wantedSide = ref.type === "winner"
         ? w
@@ -545,172 +562,204 @@
       return resolveDynamicTeam(source, wantedSide, guard);
     }
 
-    if(ref?.type === "poolRank"){
-      return null;
-    }
-
-    return raw ? { teamName: raw } : null;
+    return raw
+      ? { teamName: raw }
+      : null;
   }
 
   function teamName(match, side){
     const t = resolveDynamicTeam(match, side);
-    return t?.teamName || (side === "A" ? match.teamA : match.teamB) || "Équipe";
+
+    return t?.teamName
+      || (side === "A" ? match.teamA : match.teamB)
+      || "Équipe";
   }
 
   function matchWinnerTeam(match){
+
     const w = winnerSide(getResult(match.id));
+
     if(w !== "A" && w !== "B") return null;
-    return resolveDynamicTeam(match, w) || { teamName: teamName(match, w) };
+
+    return resolveDynamicTeam(match, w)
+      || { teamName: teamName(match, w) };
   }
 
   function matchLoserTeam(match){
+
     const w = winnerSide(getResult(match.id));
+
     if(w !== "A" && w !== "B") return null;
+
     const loserSide = w === "A" ? "B" : "A";
-    return resolveDynamicTeam(match, loserSide) || { teamName: teamName(match, loserSide) };
+
+    return resolveDynamicTeam(match, loserSide)
+      || { teamName: teamName(match, loserSide) };
   }
 
   function isFinished(match){
     return winnerSide(getResult(match.id)) !== null;
   }
 
-  function allZoneMatchesFinished(){
-    const rows = normalZoneMatches();
-    if(!rows.length) return false;
-    return rows.every(isFinished);
-  }
-
   function buildRanking(){
+
     const winners = winnerOnlyMatches();
 
     if(winners.length){
+
       return {
         complete:true,
         rows:winners.map((m, index) => ({
           pos:index + 1,
           team:{ teamName:m.teamA || "Équipe" },
-          label:index === 0 ? "🥇 Vainqueur" : `${index + 1}e`
+          label:index === 0
+            ? "🥇 Vainqueur"
+            : `${index + 1}e`
         })),
         missing:[]
       };
     }
 
     const rows = normalZoneMatches();
-    const missing = rows.filter(m => !isFinished(m)).map(m => m.id);
+
+    const missing = rows
+      .filter(m => !isFinished(m))
+      .map(m => m.id);
 
     if(missing.length){
-      return { complete:false, rows:[], missing };
+      return {
+        complete:false,
+        rows:[],
+        missing
+      };
     }
 
     const finalMatch = rows.find(m =>
-      String(m.id || "").includes("FINAL") ||
       String(m.label || "").toLowerCase().includes("finale")
     );
 
     const thirdMatch = rows.find(m =>
-      String(m.id || "").includes("3_4") ||
-      String(m.label || "").toLowerCase().includes("place 3") ||
-      String(m.label || "").toLowerCase().includes("3-4")
+      String(m.label || "").toLowerCase().includes("3")
+      && String(m.label || "").includes("4")
     );
 
     const fifthMatch = rows.find(m =>
-      String(m.id || "").includes("5_6") ||
-      String(m.label || "").toLowerCase().includes("place 5") ||
-      String(m.label || "").toLowerCase().includes("5-6")
+      String(m.label || "").toLowerCase().includes("5")
+      && String(m.label || "").includes("6")
     );
 
     const ranking = [];
 
     if(finalMatch){
-      ranking.push({ pos:1, team:matchWinnerTeam(finalMatch), label:"🥇 1er" });
-      ranking.push({ pos:2, team:matchLoserTeam(finalMatch), label:"🥈 2e" });
+      ranking.push({
+        pos:1,
+        team:matchWinnerTeam(finalMatch),
+        label:"🥇 1er"
+      });
+
+      ranking.push({
+        pos:2,
+        team:matchLoserTeam(finalMatch),
+        label:"🥈 2e"
+      });
     }
 
     if(thirdMatch){
-      ranking.push({ pos:3, team:matchWinnerTeam(thirdMatch), label:"🥉 3e" });
-      ranking.push({ pos:4, team:matchLoserTeam(thirdMatch), label:"4e" });
+      ranking.push({
+        pos:3,
+        team:matchWinnerTeam(thirdMatch),
+        label:"🥉 3e"
+      });
+
+      ranking.push({
+        pos:4,
+        team:matchLoserTeam(thirdMatch),
+        label:"4e"
+      });
     }
 
-    if(fifthMatch){
-      ranking.push({ pos:5, team:matchWinnerTeam(fifthMatch), label:"5e" });
-      ranking.push({ pos:6, team:matchLoserTeam(fifthMatch), label:"6e" });
-    }
+    /*
+      CAS PARTICULIER :
+      Seniors DM = 3 équipes restantes classées 5e ex-aequo
+    */
 
-    if(!ranking.length){
-      const stats = new Map();
+    const isSeniorDM =
+      currentCategorie === "Seniors"
+      && currentEpreuve === "DM";
 
-      function ensure(name){
-        const key = normalizeTeamName(name);
-        if(!stats.has(key)){
-          stats.set(key, {
-            teamName:name || "Équipe",
-            wins:0,
-            losses:0,
-            setsWon:0,
-            setsLost:0,
-            gamesWon:0,
-            gamesLost:0
-          });
-        }
-        return stats.get(key);
-      }
+    if(isSeniorDM){
 
-      for(const match of rows){
-        const res = getResult(match.id);
-        const w = winnerSide(res);
-        const A = ensure(teamName(match, "A"));
-        const B = ensure(teamName(match, "B"));
+      const alreadyRanked = new Set(
+        ranking.map(x =>
+          normalizeTeamName(x.team?.teamName || "")
+        )
+      );
 
-        let setsA = 0;
-        let setsB = 0;
+      const allTeams = new Map();
 
-        [["s1A","s1B"],["s2A","s2B"],["s3A","s3B"]].forEach(([ka,kb])=>{
-          const ga = toNum(res?.[ka]);
-          const gb = toNum(res?.[kb]);
-          if(ga === null || gb === null) return;
+      rows.forEach(match => {
 
-          A.gamesWon += ga;
-          A.gamesLost += gb;
-          B.gamesWon += gb;
-          B.gamesLost += ga;
-
-          if(ga > gb) setsA++;
-          else if(gb > ga) setsB++;
+        const ta = matchWinnerTeam({
+          ...match,
+          id:match.id,
+          teamA:teamName(match,"A")
         });
 
-        A.setsWon += setsA;
-        A.setsLost += setsB;
-        B.setsWon += setsB;
-        B.setsLost += setsA;
+        const tb = matchLoserTeam({
+          ...match,
+          id:match.id,
+          teamB:teamName(match,"B")
+        });
 
-        if(w === "A"){
-          A.wins++;
-          B.losses++;
-        }else{
-          B.wins++;
-          A.losses++;
+        const na = normalizeTeamName(teamName(match,"A"));
+        const nb = normalizeTeamName(teamName(match,"B"));
+
+        if(!allTeams.has(na)){
+          allTeams.set(na, {
+            teamName:teamName(match,"A")
+          });
         }
-      }
+
+        if(!allTeams.has(nb)){
+          allTeams.set(nb, {
+            teamName:teamName(match,"B")
+          });
+        }
+      });
+
+      Array.from(allTeams.values()).forEach(team => {
+
+        const key = normalizeTeamName(team.teamName);
+
+        if(!alreadyRanked.has(key)){
+          ranking.push({
+            pos:5,
+            team,
+            label:"5e ex-aequo"
+          });
+        }
+      });
 
       return {
         complete:true,
-        missing:[],
-        rows:Array.from(stats.values())
-          .sort((a,b)=>{
-            if(b.wins !== a.wins) return b.wins - a.wins;
-            const dsA = a.setsWon - a.setsLost;
-            const dsB = b.setsWon - b.setsLost;
-            if(dsB !== dsA) return dsB - dsA;
-            const dgA = a.gamesWon - a.gamesLost;
-            const dgB = b.gamesWon - b.gamesLost;
-            return dgB - dgA;
-          })
-          .map((x,i)=>({
-            pos:i + 1,
-            team:{ teamName:x.teamName },
-            label:i === 0 ? "🥇 1er" : `${i + 1}e`
-          }))
+        rows:ranking,
+        missing:[]
       };
+    }
+
+    if(fifthMatch){
+
+      ranking.push({
+        pos:5,
+        team:matchWinnerTeam(fifthMatch),
+        label:"5e"
+      });
+
+      ranking.push({
+        pos:6,
+        team:matchLoserTeam(fifthMatch),
+        label:"6e"
+      });
     }
 
     return {
@@ -721,16 +770,40 @@
   }
 
   function teamDetails(team){
+
     const teamName = team?.teamName || "Équipe";
+
     const ins = getInscriptionForTeamName(teamName);
 
-    const p1FirstName = ins?.joueur1?.firstName || ins?.p1FirstName || team?.joueur1FirstName || team?.p1FirstName || "";
-    const p1LastName = ins?.joueur1?.lastName || ins?.p1LastName || team?.joueur1LastName || team?.p1LastName || "";
-    const p1Licence = ins?.joueur1?.licence || ins?.p1Licence || team?.joueur1Licence || team?.p1Licence || "—";
+    const p1FirstName =
+      ins?.joueur1?.firstName
+      || ins?.p1FirstName
+      || "";
 
-    const p2FirstName = ins?.joueur2?.firstName || ins?.p2FirstName || team?.joueur2FirstName || team?.p2FirstName || "";
-    const p2LastName = ins?.joueur2?.lastName || ins?.p2LastName || team?.joueur2LastName || team?.p2LastName || "";
-    const p2Licence = ins?.joueur2?.licence || ins?.p2Licence || team?.joueur2Licence || team?.p2Licence || "—";
+    const p1LastName =
+      ins?.joueur1?.lastName
+      || ins?.p1LastName
+      || "";
+
+    const p1Licence =
+      ins?.joueur1?.licence
+      || ins?.p1Licence
+      || "—";
+
+    const p2FirstName =
+      ins?.joueur2?.firstName
+      || ins?.p2FirstName
+      || "";
+
+    const p2LastName =
+      ins?.joueur2?.lastName
+      || ins?.p2LastName
+      || "";
+
+    const p2Licence =
+      ins?.joueur2?.licence
+      || ins?.p2Licence
+      || "—";
 
     return {
       teamName,
@@ -746,23 +819,36 @@
   }
 
   function render(){
+
     zoneLabel.textContent = zoneText();
 
     if(!currentProg){
-      statusText.textContent = "⏳ Programmation générale non disponible.";
+
+      statusText.textContent =
+        "⏳ Programmation générale non disponible.";
+
       btnValidate.disabled = true;
+
       validatedBox.style.display = "none";
+
       warningBox.style.display = "block";
-      warningBox.textContent = "Génère d’abord la programmation générale.";
+      warningBox.textContent =
+        "Génère d’abord la programmation générale.";
+
       teamList.innerHTML = "";
-      playerList.innerHTML = "";
+
       return;
     }
 
     if(currentClassementDoc?.validatedAt){
+
       validatedBox.style.display = "block";
-      validatedBox.innerHTML = `✅ Classement validé le <b>${esc(fmtDate(currentClassementDoc.validatedAt))}</b> par <b>${esc(currentClassementDoc.validatedBy || "—")}</b>.`;
+
+      validatedBox.innerHTML =
+        `✅ Classement validé le <b>${esc(fmtDate(currentClassementDoc.validatedAt))}</b> par <b>${esc(currentClassementDoc.validatedBy || "—")}</b>.`;
+
     }else{
+
       validatedBox.style.display = "none";
       validatedBox.innerHTML = "";
     }
@@ -770,77 +856,85 @@
     const ranking = buildRanking();
 
     if(!ranking.complete){
-      statusText.textContent = "⏳ Classement non disponible.";
+
+      statusText.textContent =
+        "⏳ Classement non disponible.";
+
       warningBox.style.display = "block";
+
       warningBox.textContent = ranking.missing.length
         ? `Matchs à terminer : ${ranking.missing.join(", ")}.`
-        : "Tous les matchs de cette catégorie / épreuve doivent être terminés.";
+        : "Tous les matchs doivent être terminés.";
+
       btnValidate.disabled = true;
+
       teamList.innerHTML = "";
-      playerList.innerHTML = "";
+
       return;
     }
 
     warningBox.style.display = "none";
     warningBox.textContent = "";
-    statusText.textContent = `✅ Classement complet — ${ranking.rows.length} équipe(s).`;
-    btnValidate.disabled = !!currentClassementDoc?.validatedAt;
+
+    statusText.textContent =
+      `✅ Classement complet — ${ranking.rows.length} équipe(s).`;
+
+    btnValidate.disabled =
+      !!currentClassementDoc?.validatedAt;
 
     teamList.innerHTML = ranking.rows.length
       ? `<div class="list">${
           ranking.rows.map(row => {
+
             const t = teamDetails(row.team);
+
             return `
               <div class="rank-card">
-                <div class="rk">${esc(row.pos)}</div>
+
+                <div class="rk">
+                  ${esc(row.pos)}
+                </div>
+
                 <div class="rmain">
-                  <div class="rtitle">${esc(t.teamName)}</div>
+
+                  <div class="rtitle">
+                    ${esc(t.teamName)}
+                  </div>
+
                   <div class="team-lines">
-                    <div class="team-line"><strong>Joueur/Joueuse 1 :</strong> ${esc(t.p1Display)} — <strong>Licence :</strong> ${esc(t.p1Licence)}</div>
-                    <div class="team-line"><strong>Joueur/Joueuse 2 :</strong> ${esc(t.p2Display)} — <strong>Licence :</strong> ${esc(t.p2Licence)}</div>
+
+                    <div class="team-line">
+                      <strong>Joueur/Joueuse 1 :</strong>
+                      ${esc(t.p1Display)}
+                      —
+                      <strong>Licence :</strong>
+                      ${esc(t.p1Licence)}
+                    </div>
+
+                    <div class="team-line">
+                      <strong>Joueur/Joueuse 2 :</strong>
+                      ${esc(t.p2Display)}
+                      —
+                      <strong>Licence :</strong>
+                      ${esc(t.p2Licence)}
+                    </div>
+
                   </div>
                 </div>
-                <div class="tag">${esc(row.label)}</div>
+
+                <div class="tag">
+                  ${esc(row.label)}
+                </div>
+
               </div>
             `;
           }).join("")
         }</div>`
       : `<p class="muted">Aucune équipe classée.</p>`;
-
-    const players = [];
-    ranking.rows.forEach(row => {
-      const t = teamDetails(row.team);
-      players.push({
-        pos:row.pos,
-        name:t.p1Display,
-        licence:t.p1Licence,
-        teamName:t.teamName
-      });
-      players.push({
-        pos:row.pos,
-        name:t.p2Display,
-        licence:t.p2Licence,
-        teamName:t.teamName
-      });
-    });
-
-    playerList.innerHTML = players.length
-      ? `<div class="list">${
-          players.map(p => `
-            <div class="rank-card">
-              <div class="rk">${esc(p.pos)}</div>
-              <div class="rmain">
-                <div class="rtitle">${esc(p.name)}</div>
-                <div class="rsub">${esc(p.teamName)} — Licence : ${esc(p.licence)}</div>
-              </div>
-              <div class="tag">Position ${esc(p.pos)}</div>
-            </div>
-          `).join("")
-        }</div>`
-      : `<p class="muted">Aucun joueur classé.</p>`;
   }
 
   async function validateClassement(){
+
     const ranking = buildRanking();
 
     if(!ranking.complete){
@@ -849,10 +943,12 @@
     }
 
     const positions = ranking.rows.map(row => {
+
       const t = teamDetails(row.team);
 
       return {
         pos:row.pos,
+        label:row.label,
         teamName:t.teamName,
         p1FirstName:t.p1FirstName || null,
         p1LastName:t.p1LastName || null,
@@ -863,57 +959,56 @@
       };
     });
 
-    const players = [];
-
-    positions.forEach(p => {
-      players.push({
-        pos:p.pos,
-        firstName:p.p1FirstName,
-        lastName:p.p1LastName,
-        licence:p.p1Licence,
-        teamName:p.teamName
-      });
-
-      players.push({
-        pos:p.pos,
-        firstName:p.p2FirstName,
-        lastName:p.p2LastName,
-        licence:p.p2Licence,
-        teamName:p.teamName
-      });
-    });
-
     await setDoc(classementRef(), {
+
       eventId:EVENT_ID,
       key:zoneKey(),
       categorie:currentCategorie,
       epreuve:currentEpreuve,
+
       positions,
-      players,
+
       computedAt:serverTimestamp(),
+
       validatedAt:serverTimestamp(),
-      validatedBy:auth.currentUser?.email || auth.currentUser?.uid || null
+
+      validatedBy:
+        auth.currentUser?.email
+        || auth.currentUser?.uid
+        || null
+
     }, { merge:true });
   }
 
   btnValidate.onclick = async () => {
-    const ok = confirm("Valider ce classement final ?\n\n⚠️ Action enregistrée en base.");
+
+    const ok = confirm(
+      "Valider ce classement final ?\n\n⚠️ Action enregistrée en base."
+    );
+
     if(!ok) return;
 
     btnValidate.disabled = true;
 
     try{
+
       await validateClassement();
+
       alert("✅ Classement validé !");
+
     }catch(error){
+
       console.error(error);
+
       alert("Erreur Firestore ❌");
+
     }finally{
       render();
     }
   };
 
   function startListeners(){
+
     if(unsubProg) unsubProg();
     if(unsubResults) unsubResults();
     if(unsubClassement) unsubClassement();
@@ -921,37 +1016,64 @@
     if(unsubInscriptions) unsubInscriptions();
 
     unsubProg = onSnapshot(generalProgRef(), (snap) => {
-      currentProg = snap.exists() ? (snap.data() || null) : null;
+
+      currentProg = snap.exists()
+        ? (snap.data() || null)
+        : null;
+
       render();
     });
 
     unsubResults = onSnapshot(resultsCol(), (snap) => {
+
       resultsByMatch = new Map();
-      snap.forEach(d => resultsByMatch.set(d.id, d.data() || {}));
+
+      snap.forEach(d => {
+        resultsByMatch.set(d.id, d.data() || {});
+      });
+
       render();
     });
 
     unsubClassement = onSnapshot(classementRef(), (snap) => {
-      currentClassementDoc = snap.exists() ? (snap.data() || {}) : null;
+
+      currentClassementDoc = snap.exists()
+        ? (snap.data() || {})
+        : null;
+
       render();
     });
 
     unsubEquipes = onSnapshot(equipesCol(), (snap) => {
+
       equipesById = new Map();
-      snap.forEach(d => equipesById.set(d.id, { id:d.id, ...(d.data() || {}) }));
+
+      snap.forEach(d => {
+        equipesById.set(d.id, {
+          id:d.id,
+          ...(d.data() || {})
+        });
+      });
+
       render();
     });
 
     unsubInscriptions = onSnapshot(inscriptionsCol(), (snap) => {
-      inscriptionsById = new Map();
+
       inscriptionsByTeamName = new Map();
 
       snap.forEach(d => {
-        const x = { id:d.id, ...(d.data() || {}) };
-        inscriptionsById.set(d.id, x);
+
+        const x = {
+          id:d.id,
+          ...(d.data() || {})
+        };
 
         const key = normalizeTeamName(x.teamName);
-        if(key) inscriptionsByTeamName.set(key, x);
+
+        if(key){
+          inscriptionsByTeamName.set(key, x);
+        }
       });
 
       render();
@@ -959,24 +1081,48 @@
   }
 
   function stopListeners(){
-    if(unsubProg){ unsubProg(); unsubProg = null; }
-    if(unsubResults){ unsubResults(); unsubResults = null; }
-    if(unsubClassement){ unsubClassement(); unsubClassement = null; }
-    if(unsubEquipes){ unsubEquipes(); unsubEquipes = null; }
-    if(unsubInscriptions){ unsubInscriptions(); unsubInscriptions = null; }
+
+    if(unsubProg){
+      unsubProg();
+      unsubProg = null;
+    }
+
+    if(unsubResults){
+      unsubResults();
+      unsubResults = null;
+    }
+
+    if(unsubClassement){
+      unsubClassement();
+      unsubClassement = null;
+    }
+
+    if(unsubEquipes){
+      unsubEquipes();
+      unsubEquipes = null;
+    }
+
+    if(unsubInscriptions){
+      unsubInscriptions();
+      unsubInscriptions = null;
+    }
   }
 
   document.addEventListener("jatZoneChange", (event) => {
+
     const d = event.detail || {};
 
-    if(CATEGORIES.includes(d.categorie)) currentCategorie = d.categorie;
-    if(EPREUVES.includes(d.epreuve)) currentEpreuve = d.epreuve;
+    if(CATEGORIES.includes(d.categorie)){
+      currentCategorie = d.categorie;
+    }
+
+    if(EPREUVES.includes(d.epreuve)){
+      currentEpreuve = d.epreuve;
+    }
 
     try{
       localStorage.setItem("champ_jat_categorie", currentCategorie);
       localStorage.setItem("champ_jat_epreuve", currentEpreuve);
-      localStorage.setItem("champ_admin_categorie", currentCategorie);
-      localStorage.setItem("champ_admin_epreuve", currentEpreuve);
     }catch(error){}
 
     if(unsubClassement){
@@ -985,7 +1131,11 @@
     }
 
     unsubClassement = onSnapshot(classementRef(), (snap) => {
-      currentClassementDoc = snap.exists() ? (snap.data() || {}) : null;
+
+      currentClassementDoc = snap.exists()
+        ? (snap.data() || {})
+        : null;
+
       render();
     });
 
@@ -993,30 +1143,45 @@
   });
 
   function showDenied(){
+
     accessDenied.style.display = "block";
     pageContent.style.display = "none";
     panelRank.style.display = "none";
+
     stopListeners();
   }
 
   function showJat(){
+
     accessDenied.style.display = "none";
     pageContent.style.display = "block";
     panelRank.style.display = "block";
 
     try{
-      const savedCat = localStorage.getItem("champ_jat_categorie") || localStorage.getItem("champ_admin_categorie");
-      const savedEpreuve = localStorage.getItem("champ_jat_epreuve") || localStorage.getItem("champ_admin_epreuve");
 
-      if(CATEGORIES.includes(savedCat)) currentCategorie = savedCat;
-      if(EPREUVES.includes(savedEpreuve)) currentEpreuve = savedEpreuve;
+      const savedCat =
+        localStorage.getItem("champ_jat_categorie");
+
+      const savedEpreuve =
+        localStorage.getItem("champ_jat_epreuve");
+
+      if(CATEGORIES.includes(savedCat)){
+        currentCategorie = savedCat;
+      }
+
+      if(EPREUVES.includes(savedEpreuve)){
+        currentEpreuve = savedEpreuve;
+      }
+
     }catch(error){}
 
     zoneLabel.textContent = zoneText();
+
     startListeners();
   }
 
   onAuthStateChanged(auth, async (user) => {
+
     accessDenied.style.display = "none";
     pageContent.style.display = "none";
     panelRank.style.display = "none";
@@ -1027,6 +1192,7 @@
     }
 
     try{
+
       const role = await getRoleByUid(user.uid);
 
       if(role !== "admin" && role !== "jat"){
@@ -1035,11 +1201,15 @@
       }
 
       showJat();
+
     }catch(error){
+
       console.error(error);
+
       showDenied();
     }
   });
+
 </script>
 
 </body>
