@@ -130,6 +130,11 @@
       border-color:#f1b2b2;
     }
 
+    .btn:disabled{
+      opacity:.5;
+      cursor:not-allowed;
+    }
+
     .status-box{
       margin-top:12px;
       padding:14px 16px;
@@ -147,6 +152,13 @@
       line-height:1.45;
     }
 
+    .general-toggle{
+      display:flex;
+      gap:10px;
+      flex-wrap:wrap;
+      margin-top:16px;
+    }
+
     .match-list{
       display:flex;
       flex-direction:column;
@@ -162,11 +174,50 @@
       box-shadow:0 1px 0 rgba(0,0,0,.03);
     }
 
+    .match-card.courtA{
+      background:#fff8dd;
+      border-color:rgba(255,196,0,.35);
+    }
+
+    .match-card.courtB{
+      background:#ffeef2;
+      border-color:rgba(255,0,60,.20);
+    }
+
+    .match-card.winner-card{
+      background:#f3fff6;
+      border-color:#d9f2df;
+    }
+
     .match-head{
       display:flex;
       align-items:center;
       gap:10px;
       flex-wrap:wrap;
+    }
+
+    .m-slot{
+      font-size:12px;
+      font-weight:1000;
+      color:#667085;
+      white-space:nowrap;
+    }
+
+    .m-time{
+      font-size:14px;
+      font-weight:1000;
+      white-space:nowrap;
+    }
+
+    .m-court{
+      flex:1;
+      min-width:0;
+      font-size:13px;
+      font-style:italic;
+      color:#475467;
+      white-space:nowrap;
+      overflow:hidden;
+      text-overflow:ellipsis;
     }
 
     .pill{
@@ -179,6 +230,7 @@
       background:#fafafa;
       font-weight:1000;
       white-space:nowrap;
+      font-size:12px;
     }
 
     .dot{
@@ -200,10 +252,17 @@
       align-items:center;
     }
 
+    .team{
+      min-width:0;
+    }
+
     .team-title{
       font-size:15px;
       font-weight:1000;
       line-height:1.15;
+      white-space:nowrap;
+      overflow:hidden;
+      text-overflow:ellipsis;
     }
 
     .team-sub{
@@ -211,6 +270,12 @@
       font-size:13px;
       font-weight:800;
       opacity:.85;
+      color:#475467;
+    }
+
+    .team-placeholder{
+      color:#667085;
+      font-style:italic;
     }
 
     .hdr{
@@ -242,6 +307,12 @@
       align-items:center;
     }
 
+    .mini{
+      font-size:12px;
+      font-weight:900;
+      opacity:.75;
+    }
+
     @media (min-width:760px){
       .panel{padding:22px;}
       .grid.two{grid-template-columns:1fr 1fr;}
@@ -267,7 +338,7 @@
   </style>
 </head>
 
-<body data-zone-selector="none">
+<body data-zone-selector="select">
 
 <div id="adminHeader"></div>
 
@@ -279,27 +350,29 @@
   </section>
 
   <section class="section panel" id="pageContent" style="display:none;">
-
     <div class="panel-head">
       <div>
         <h1 class="panel-title">🏆 Résultats</h1>
         <p class="panel-text">
-          Gestion des résultats et de leur visibilité publique.
+          Les résultats sont liés à la programmation générale.
         </p>
       </div>
       <div class="panel-tag">Admin</div>
     </div>
 
     <div class="status-box">
-      Les scores acceptent désormais n’importe quelle valeur numérique.
+      Vue actuelle : <strong id="zoneLabel">Chargement…</strong>
       <br>
-      Exemple : 6, 7, 10, 15, 21, etc.
+      Les équipes issues des poules ne s’affichent qu’une fois tous les matchs de la poule terminés.
     </div>
 
+    <div class="general-toggle">
+      <button class="btn primary" id="btnGeneral" type="button">🌐 Résultats généraux</button>
+      <button class="btn" id="btnFiltered" type="button">🎾 Vue catégorie / épreuve</button>
+    </div>
   </section>
 
   <section class="section panel" id="panelVisibility" style="display:none;">
-
     <div class="panel-head">
       <div>
         <h2 class="panel-title">👀 Visibilité publique</h2>
@@ -309,32 +382,26 @@
     </div>
 
     <div class="grid two">
-      <button class="btn danger" id="btnPublicHide" type="button">
-        🔒 Mettre en maintenance
-      </button>
-
-      <button class="btn primary" id="btnPublicShow" type="button">
-        ✅ Rendre visible
-      </button>
+      <button class="btn danger" id="btnPublicHide" type="button">🔒 Mettre en maintenance</button>
+      <button class="btn primary" id="btnPublicShow" type="button">✅ Rendre visible</button>
     </div>
 
+    <div class="status-box">
+      Si les résultats sont masqués, le public verra une page de maintenance.
+      Les administrateurs et JAT pourront voir la page publique en version travail.
+    </div>
   </section>
 
   <section class="section panel" id="panelResults" style="display:none;">
-
     <div class="panel-head">
       <div>
-        <h2 class="panel-title">🏁 Saisie résultats</h2>
-        <p class="panel-text" id="statusText">
-          Chargement…
-        </p>
+        <h2 class="panel-title">🏁 Saisie des scores</h2>
+        <p class="panel-text" id="statusText">Chargement…</p>
       </div>
-
       <div class="panel-tag">Live</div>
     </div>
 
     <div id="adminList"></div>
-
   </section>
 
 </main>
@@ -342,156 +409,529 @@
 <script type="module" src="../assets/js/admin-header.js"></script>
 
 <script type="module">
+    import { auth, db } from "../assets/js/firebase.js";
+  import { getRoleByUid } from "../assets/js/session.js";
 
-import { auth, db } from "../assets/js/firebase.js";
-import { getRoleByUid } from "../assets/js/session.js";
+  import { onAuthStateChanged }
+  from "https://www.gstatic.com/firebasejs/10.12.5/firebase-auth.js";
 
-import { onAuthStateChanged }
-from "https://www.gstatic.com/firebasejs/10.12.5/firebase-auth.js";
+  import {
+    doc,
+    collection,
+    setDoc,
+    onSnapshot,
+    serverTimestamp
+  } from "https://www.gstatic.com/firebasejs/10.12.5/firebase-firestore.js";
 
-import {
-  doc,
-  collection,
-  getDocs,
-  setDoc,
-  onSnapshot,
-  serverTimestamp
-} from "https://www.gstatic.com/firebasejs/10.12.5/firebase-firestore.js";
+  const EVENT_ID = "championnats-2026";
 
-const EVENT_ID = "championnats-2026";
+  const CATEGORIES = ["U14", "U18", "Seniors", "45+"];
+  const EPREUVES = ["DM", "DD"];
 
-const accessDenied = document.getElementById("accessDenied");
-const pageContent = document.getElementById("pageContent");
-const panelVisibility = document.getElementById("panelVisibility");
-const panelResults = document.getElementById("panelResults");
-
-const visibilityText = document.getElementById("visibilityText");
-
-const btnPublicHide = document.getElementById("btnPublicHide");
-const btnPublicShow = document.getElementById("btnPublicShow");
-
-const statusText = document.getElementById("statusText");
-const adminList = document.getElementById("adminList");
-
-let currentCategorie = "U14";
-let currentEpreuve = "DM";
-
-let matches = [];
-let resultsMap = new Map();
-
-function esc(s){
-  return (s ?? "").toString()
-    .replaceAll("&","&amp;")
-    .replaceAll("<","&lt;")
-    .replaceAll(">","&gt;");
-}
-
-function zoneKey(){
-  return `${currentCategorie}_${currentEpreuve}`.replace("+","plus");
-}
-
-function visibilityRef(){
-  return doc(db, "events", EVENT_ID, "config", "resultats");
-}
-
-function resultsCollection(){
-  return collection(db, "events", EVENT_ID, "resultats", zoneKey(), "matches");
-}
-
-async function setPublicVisible(value){
-  await setDoc(visibilityRef(), {
-    publicVisible:value === true,
-    updatedAt:serverTimestamp(),
-    updatedBy:auth.currentUser?.uid || null
-  }, { merge:true });
-}
-
-btnPublicHide.onclick = async ()=>{
-  await setPublicVisible(false);
-};
-
-btnPublicShow.onclick = async ()=>{
-  await setPublicVisible(true);
-};
-
-function render(){
-
-  statusText.textContent =
-    `${matches.length} match(s)`;
-
-  adminList.innerHTML = `
-    <div class="match-list">
-      ${matches.map(match => {
-
-        const stored = resultsMap.get(match.id) || {};
-
-        return `
-          <div class="match-card" data-mid="${esc(match.id)}">
-
-            <div class="match-head">
-              <div class="pill">
-                <span class="dot green"></span>
-                ${esc(match.label || match.id)}
-              </div>
-            </div>
-
-            <div class="score-grid">
-
-              <div class="hdr"></div>
-              <div class="hdr">S1</div>
-              <div class="hdr">S2</div>
-              <div class="hdr">S3</div>
-
-              <div>
-                <div class="team-title">${esc(match.teamA || "Équipe A")}</div>
-              </div>
-
-              <input class="sc" data-k="s1A" value="${esc(stored.s1A || "")}">
-              <input class="sc" data-k="s2A" value="${esc(stored.s2A || "")}">
-              <input class="sc" data-k="s3A" value="${esc(stored.s3A || "")}">
-
-              <div>
-                <div class="team-title">${esc(match.teamB || "Équipe B")}</div>
-              </div>
-
-              <input class="sc" data-k="s1B" value="${esc(stored.s1B || "")}">
-              <input class="sc" data-k="s2B" value="${esc(stored.s2B || "")}">
-              <input class="sc" data-k="s3B" value="${esc(stored.s3B || "")}">
-
-            </div>
-
-            <div class="actions">
-
-              <button class="btn primary" data-save="${esc(match.id)}">
-                💾 Enregistrer
-              </button>
-
-            </div>
-
-          </div>
-        `;
-      }).join("")}
-    </div>
-  `;
-}
-
-adminList.addEventListener("click", async (e)=>{
-
-  const btn = e.target.closest("[data-save]");
-  if(!btn) return;
-
-  const mid = btn.dataset.save;
-
-  const card = btn.closest(".match-card");
-
-  const get = (k)=>{
-    const el = card.querySelector(`[data-k="${k}"]`);
-    return (el?.value || "").trim();
+  const EPREUVE_LABELS = {
+    DM:"Double Messieurs",
+    DD:"Double Dames"
   };
 
-  await setDoc(
-    doc(resultsCollection(), mid),
-    {
+  const accessDenied = document.getElementById("accessDenied");
+  const pageContent = document.getElementById("pageContent");
+  const panelVisibility = document.getElementById("panelVisibility");
+  const panelResults = document.getElementById("panelResults");
+
+  const visibilityText = document.getElementById("visibilityText");
+  const zoneLabel = document.getElementById("zoneLabel");
+
+  const btnPublicHide = document.getElementById("btnPublicHide");
+  const btnPublicShow = document.getElementById("btnPublicShow");
+
+  const btnGeneral = document.getElementById("btnGeneral");
+  const btnFiltered = document.getElementById("btnFiltered");
+
+  const statusText = document.getElementById("statusText");
+  const adminList = document.getElementById("adminList");
+
+  let currentCategorie = "U14";
+  let currentEpreuve = "DM";
+
+  let generalMode = true;
+
+  let currentProg = null;
+  let resultsMap = new Map();
+
+  let unsubProg = null;
+  let unsubResults = null;
+  let unsubVisibility = null;
+
+  function esc(s){
+    return (s ?? "").toString()
+      .replaceAll("&","&amp;")
+      .replaceAll("<","&lt;")
+      .replaceAll(">","&gt;");
+  }
+
+  function zoneText(){
+    return generalMode
+      ? "Résultats généraux"
+      : `${currentCategorie} — ${EPREUVE_LABELS[currentEpreuve]}`;
+  }
+
+  function generalProgRef(){
+    return doc(db, "events", EVENT_ID, "programmations", "general");
+  }
+
+  function resultsCollection(){
+    return collection(db, "events", EVENT_ID, "resultats", "general", "matches");
+  }
+
+  function visibilityRef(){
+    return doc(db, "events", EVENT_ID, "config", "resultats");
+  }
+
+  function courtLabel(court){
+    if(court === "A") return "🐝 Manon Queen Bee";
+    if(court === "B") return "🌶️ Lisa de Los Pimentos";
+    return "🎾 terrain";
+  }
+
+  function toNum(v){
+    if(v === null || v === undefined || v === "") return null;
+
+    const n = Number(String(v).replace(",", ".").trim());
+
+    return Number.isFinite(n) ? n : null;
+  }
+
+  function getResult(mid){
+    return resultsMap.get(mid) || null;
+  }
+
+  function computeWinnerSideFromScore(res){
+    if(!res) return null;
+
+    if(res.winnerSide === "A" || res.winnerSide === "B"){
+      return res.winnerSide;
+    }
+
+    const sets = [
+      [toNum(res.s1A), toNum(res.s1B)],
+      [toNum(res.s2A), toNum(res.s2B)],
+      [toNum(res.s3A), toNum(res.s3B)]
+    ];
+
+    let setsA = 0;
+    let setsB = 0;
+
+    for(const [a,b] of sets){
+
+      if(a === null || b === null) continue;
+
+      if(a > b) setsA++;
+      else if(b > a) setsB++;
+    }
+
+    if(setsA > setsB) return "A";
+    if(setsB > setsA) return "B";
+
+    return null;
+  }
+
+  function isMatchFinished(mid){
+    return computeWinnerSideFromScore(getResult(mid)) !== null;
+  }
+
+  function getPoolMatchIds(pool){
+
+    if(pool === "A"){
+      return [
+        "GIRLS_A1","GIRLS_A2","GIRLS_A3",
+        "MEN_A1","MEN_A2","MEN_A3","MEN_A4","MEN_A5","MEN_A6"
+      ];
+    }
+
+    return [
+      "GIRLS_B1","GIRLS_B2","GIRLS_B3",
+      "MEN_B1","MEN_B2","MEN_B3"
+    ];
+  }
+
+  function isPoolComplete(pool){
+
+    const ids = getPoolMatchIds(pool);
+
+    const relevant = visibleMatches()
+      .filter(m => ids.includes(m.id));
+
+    if(!relevant.length) return false;
+
+    return relevant.every(m => isMatchFinished(m.id));
+  }
+
+  function buildPoolRanking(pool){
+
+    const matches = visibleMatches()
+      .filter(m => {
+        if(pool === "A"){
+          return m.id.includes("_A");
+        }
+        return m.id.includes("_B");
+      });
+
+    const stats = new Map();
+
+    function ensure(name){
+
+      if(!stats.has(name)){
+
+        stats.set(name,{
+          teamName:name,
+          points:0,
+          setsWon:0,
+          setsLost:0,
+          gamesWon:0,
+          gamesLost:0
+        });
+
+      }
+
+      return stats.get(name);
+    }
+
+    for(const match of matches){
+
+      const res = getResult(match.id);
+
+      const winnerSide = computeWinnerSideFromScore(res);
+
+      if(!winnerSide) continue;
+
+      const A = ensure(match.teamA || "A");
+      const B = ensure(match.teamB || "B");
+
+      const sets = [
+        [toNum(res.s1A), toNum(res.s1B)],
+        [toNum(res.s2A), toNum(res.s2B)],
+        [toNum(res.s3A), toNum(res.s3B)]
+      ];
+
+      let setsA = 0;
+      let setsB = 0;
+
+      for(const [ga, gb] of sets){
+
+        if(ga === null || gb === null) continue;
+
+        A.gamesWon += ga;
+        A.gamesLost += gb;
+
+        B.gamesWon += gb;
+        B.gamesLost += ga;
+
+        if(ga > gb) setsA++;
+        else if(gb > ga) setsB++;
+      }
+
+      A.setsWon += setsA;
+      A.setsLost += setsB;
+
+      B.setsWon += setsB;
+      B.setsLost += setsA;
+
+      if(winnerSide === "A"){
+        A.points += 2;
+        B.points += 1;
+      }else{
+        B.points += 2;
+        A.points += 1;
+      }
+    }
+
+    return Array.from(stats.values()).sort((x,y)=>{
+
+      if(y.points !== x.points){
+        return y.points - x.points;
+      }
+
+      const sdX = x.setsWon - x.setsLost;
+      const sdY = y.setsWon - y.setsLost;
+
+      if(sdY !== sdX){
+        return sdY - sdX;
+      }
+
+      const gdX = x.gamesWon - x.gamesLost;
+      const gdY = y.gamesWon - y.gamesLost;
+
+      return gdY - gdX;
+    });
+  }
+
+  function resolvePoolRank(pool, rank){
+
+    if(!isPoolComplete(pool)){
+      return null;
+    }
+
+    const ranking = buildPoolRanking(pool);
+
+    return ranking[rank - 1] || null;
+  }
+
+  function resolveRef(ref){
+
+    if(!ref) return null;
+
+    if(ref.type === "team"){
+      return ref.team || null;
+    }
+
+    if(ref.type === "poolRank"){
+
+      const r = resolvePoolRank(ref.pool, ref.rank);
+
+      if(!r) return null;
+
+      return {
+        teamName:r.teamName
+      };
+    }
+
+    if(ref.type === "winner"){
+
+      const res = getResult(ref.matchId);
+
+      const side = computeWinnerSideFromScore(res);
+
+      if(side !== "A" && side !== "B"){
+        return null;
+      }
+
+      const match = currentProg.matches.find(x => x.id === ref.matchId);
+
+      if(!match) return null;
+
+      return side === "A"
+        ? resolveRef(match.A)
+        : resolveRef(match.B);
+    }
+
+    if(ref.type === "loser"){
+
+      const res = getResult(ref.matchId);
+
+      const side = computeWinnerSideFromScore(res);
+
+      if(side !== "A" && side !== "B"){
+        return null;
+      }
+
+      const match = currentProg.matches.find(x => x.id === ref.matchId);
+
+      if(!match) return null;
+
+      return side === "A"
+        ? resolveRef(match.B)
+        : resolveRef(match.A);
+    }
+
+    return null;
+  }
+
+  function displayRef(ref){
+
+    const resolved = resolveRef(ref);
+
+    if(resolved){
+      return {
+        title:resolved.teamName || "Équipe",
+        sub:"",
+        placeholder:false
+      };
+    }
+
+    if(ref?.type === "poolRank"){
+
+      return {
+        title:`${ref.rank}${ref.rank === 1 ? "er" : "e"} poule ${ref.pool}`,
+        sub:"En attente de fin de poule",
+        placeholder:true
+      };
+    }
+
+    if(ref?.type === "winner"){
+
+      return {
+        title:`Vainqueur ${ref.matchId}`,
+        sub:"En attente du résultat",
+        placeholder:true
+      };
+    }
+
+    if(ref?.type === "loser"){
+
+      return {
+        title:`Perdant ${ref.matchId}`,
+        sub:"En attente du résultat",
+        placeholder:true
+      };
+    }
+
+    return {
+      title:"Équipe",
+      sub:"",
+      placeholder:true
+    };
+  }
+
+  function visibleMatches(){
+
+    const all = Array.isArray(currentProg?.matches)
+      ? [...currentProg.matches]
+      : [];
+
+    if(generalMode){
+      return all;
+    }
+
+    return all.filter(m =>
+      String(m.categorie || "") === currentCategorie &&
+      String(m.epreuve || "") === currentEpreuve
+    );
+  }
+
+  function render(){
+
+    const matches = visibleMatches();
+
+    statusText.textContent = `${matches.length} match(s)`;
+
+    matches.sort((a,b)=>{
+
+      if(Number(a.order) !== Number(b.order)){
+        return Number(a.order) - Number(b.order);
+      }
+
+      return String(a.court || "")
+        .localeCompare(String(b.court || ""));
+    });
+
+    adminList.innerHTML = `
+      <div class="match-list">
+
+        ${matches.map(match => {
+
+          const stored = getResult(match.id) || {};
+
+          const teamA = displayRef(match.A);
+          const teamB = displayRef(match.B);
+
+          const winnerSide = computeWinnerSideFromScore(stored);
+
+          const cls =
+            match.court === "A"
+              ? "courtA"
+              : match.court === "B"
+                ? "courtB"
+                : "";
+
+          return `
+            <div class="match-card ${esc(cls)}">
+
+              <div class="match-head">
+
+                <div class="m-slot">
+                  #${esc(match.order || "—")}
+                </div>
+
+                <div class="m-time">
+                  ${esc(match.time || "—")}
+                </div>
+
+                <div class="m-court">
+                  ${esc(courtLabel(match.court))}
+                </div>
+
+                <div class="pill">
+                  <span class="dot ${winnerSide ? "green" : "orange"}"></span>
+                  ${esc(match.label || match.id)}
+                </div>
+
+              </div>
+
+              <div class="score-grid">
+
+                <div class="hdr"></div>
+                <div class="hdr">S1</div>
+                <div class="hdr">S2</div>
+                <div class="hdr">S3</div>
+
+                <div class="team">
+                  <div class="team-title ${teamA.placeholder ? "team-placeholder" : ""}">
+                    ${esc(teamA.title)}
+                  </div>
+
+                  ${teamA.sub
+                    ? `<div class="team-sub">${esc(teamA.sub)}</div>`
+                    : ``}
+                </div>
+
+                <input class="sc" data-k="s1A" value="${esc(stored.s1A || "")}">
+                <input class="sc" data-k="s2A" value="${esc(stored.s2A || "")}">
+                <input class="sc" data-k="s3A" value="${esc(stored.s3A || "")}">
+
+                <div class="team">
+                  <div class="team-title ${teamB.placeholder ? "team-placeholder" : ""}">
+                    ${esc(teamB.title)}
+                  </div>
+
+                  ${teamB.sub
+                    ? `<div class="team-sub">${esc(teamB.sub)}</div>`
+                    : ``}
+                </div>
+
+                <input class="sc" data-k="s1B" value="${esc(stored.s1B || "")}">
+                <input class="sc" data-k="s2B" value="${esc(stored.s2B || "")}">
+                <input class="sc" data-k="s3B" value="${esc(stored.s3B || "")}">
+
+              </div>
+
+              <div class="actions">
+
+                <div class="mini">
+                  ${winnerSide
+                    ? `✅ Vainqueur : équipe ${winnerSide}`
+                    : "⏳ Résultat incomplet"}
+                </div>
+
+                <button class="btn primary" data-save="${esc(match.id)}">
+                  💾 Enregistrer
+                </button>
+
+              </div>
+
+            </div>
+          `;
+
+        }).join("")}
+
+      </div>
+    `;
+  }
+
+  adminList.addEventListener("click", async (e)=>{
+
+    const btn = e.target.closest("[data-save]");
+    if(!btn) return;
+
+    const mid = btn.dataset.save;
+
+    const card = btn.closest(".match-card");
+
+    const get = (k)=>{
+      const el = card.querySelector(`[data-k="${k}"]`);
+      return (el?.value || "").trim();
+    };
+
+    const payload = {
       s1A:get("s1A"),
       s2A:get("s2A"),
       s3A:get("s3A"),
@@ -502,115 +942,219 @@ adminList.addEventListener("click", async (e)=>{
 
       updatedAt:serverTimestamp(),
       updatedBy:auth.currentUser?.uid || null
-    },
-    { merge:true }
-  );
+    };
 
-  alert("Résultat enregistré ✅");
+    payload.winnerSide =
+      computeWinnerSideFromScore(payload);
 
-});
-
-async function loadMatches(){
-
-  matches = [];
-
-  for(let i=1;i<=8;i++){
-
-    matches.push({
-      id:`M${i}`,
-      label:`Match ${i}`,
-      teamA:`Équipe A${i}`,
-      teamB:`Équipe B${i}`
-    });
-
-  }
-
-  render();
-}
-
-function showDenied(){
-
-  accessDenied.style.display = "block";
-
-  pageContent.style.display = "none";
-  panelVisibility.style.display = "none";
-  panelResults.style.display = "none";
-}
-
-function showAdmin(){
-
-  accessDenied.style.display = "none";
-
-  pageContent.style.display = "block";
-  panelVisibility.style.display = "block";
-  panelResults.style.display = "block";
-
-  loadMatches();
-
-  onSnapshot(visibilityRef(), (snap)=>{
-
-    const data = snap.exists() ? (snap.data() || {}) : {};
-
-    const visible = data.publicVisible === true;
-
-    visibilityText.innerHTML = visible
-      ? "Statut actuel : <strong>visible publiquement ✅</strong>"
-      : "Statut actuel : <strong>maintenance / masqué 🔒</strong>";
-
-    btnPublicShow.classList.toggle("is-active", visible);
-    btnPublicHide.classList.toggle("is-active", !visible);
+    await setDoc(
+      doc(resultsCollection(), mid),
+      payload,
+      { merge:true }
+    );
 
   });
 
-  onSnapshot(resultsCollection(), (snap)=>{
+  async function setPublicVisible(value){
 
-    resultsMap = new Map();
+    await setDoc(visibilityRef(), {
 
-    snap.forEach(d=>{
-      resultsMap.set(d.id, d.data() || {});
-    });
+      publicVisible:value === true,
+
+      updatedAt:serverTimestamp(),
+
+      updatedBy:auth.currentUser?.uid || null
+
+    }, { merge:true });
+
+  }
+
+  btnPublicHide.onclick = async ()=>{
+    await setPublicVisible(false);
+  };
+
+  btnPublicShow.onclick = async ()=>{
+    await setPublicVisible(true);
+  };
+
+  btnGeneral.onclick = ()=>{
+
+    generalMode = true;
+
+    updateZone();
+  };
+
+  btnFiltered.onclick = ()=>{
+
+    generalMode = false;
+
+    updateZone();
+  };
+
+  function updateZone(){
+
+    zoneLabel.textContent = zoneText();
+
+    btnGeneral.classList.toggle("primary", generalMode);
+    btnFiltered.classList.toggle("primary", !generalMode);
 
     render();
+  }
+
+  function stopListeners(){
+
+    if(unsubProg){
+      unsubProg();
+      unsubProg = null;
+    }
+
+    if(unsubResults){
+      unsubResults();
+      unsubResults = null;
+    }
+
+    if(unsubVisibility){
+      unsubVisibility();
+      unsubVisibility = null;
+    }
+  }
+
+  function startListeners(){
+
+    stopListeners();
+
+    unsubProg = onSnapshot(generalProgRef(), (snap)=>{
+
+      currentProg = snap.exists()
+        ? (snap.data() || null)
+        : null;
+
+      render();
+
+    });
+
+    unsubResults = onSnapshot(resultsCollection(), (snap)=>{
+
+      resultsMap = new Map();
+
+      snap.forEach(d=>{
+
+        resultsMap.set(d.id, d.data() || {});
+
+      });
+
+      render();
+
+    });
+
+    unsubVisibility = onSnapshot(visibilityRef(), (snap)=>{
+
+      const data = snap.exists()
+        ? (snap.data() || {})
+        : {};
+
+      const visible = data.publicVisible === true;
+
+      visibilityText.innerHTML = visible
+        ? "Statut actuel : <strong>visible publiquement ✅</strong>"
+        : "Statut actuel : <strong>maintenance / masqué 🔒</strong>";
+
+      btnPublicShow.classList.toggle("is-active", visible);
+      btnPublicHide.classList.toggle("is-active", !visible);
+
+    });
+
+  }
+
+  function showDenied(){
+
+    accessDenied.style.display = "block";
+
+    pageContent.style.display = "none";
+    panelVisibility.style.display = "none";
+    panelResults.style.display = "none";
+
+    stopListeners();
+  }
+
+  function showAdmin(){
+
+    accessDenied.style.display = "none";
+
+    pageContent.style.display = "block";
+    panelVisibility.style.display = "block";
+    panelResults.style.display = "block";
+
+    try{
+
+      const savedCat = localStorage.getItem("champ_admin_categorie");
+      const savedEpreuve = localStorage.getItem("champ_admin_epreuve");
+
+      if(CATEGORIES.includes(savedCat)){
+        currentCategorie = savedCat;
+      }
+
+      if(EPREUVES.includes(savedEpreuve)){
+        currentEpreuve = savedEpreuve;
+      }
+
+    }catch(error){}
+
+    updateZone();
+
+    startListeners();
+  }
+
+  document.addEventListener("adminZoneChange", (e)=>{
+
+    const d = e.detail || {};
+
+    if(CATEGORIES.includes(d.categorie)){
+      currentCategorie = d.categorie;
+    }
+
+    if(EPREUVES.includes(d.epreuve)){
+      currentEpreuve = d.epreuve;
+    }
+
+    try{
+      localStorage.setItem("champ_admin_categorie", currentCategorie);
+      localStorage.setItem("champ_admin_epreuve", currentEpreuve);
+    }catch(error){}
+
+    if(!generalMode){
+      updateZone();
+    }
 
   });
 
-}
+  onAuthStateChanged(auth, async (user)=>{
 
-document.addEventListener("adminZoneChange", (e)=>{
-
-  currentCategorie = e.detail.categorie || "U14";
-  currentEpreuve = e.detail.epreuve || "DM";
-
-  loadMatches();
-
-});
-
-onAuthStateChanged(auth, async (user)=>{
-
-  if(!user){
-    showDenied();
-    return;
-  }
-
-  try{
-
-    const role = await getRoleByUid(user.uid);
-
-    if(role !== "admin"){
+    if(!user){
       showDenied();
       return;
     }
 
-    showAdmin();
+    try{
 
-  }catch(error){
+      const role = await getRoleByUid(user.uid);
 
-    console.error(error);
-    showDenied();
+      if(role !== "admin"){
+        showDenied();
+        return;
+      }
 
-  }
+      showAdmin();
 
-});
+    }catch(error){
+
+      console.error(error);
+
+      showDenied();
+
+    }
+
+  });
 
 </script>
 
