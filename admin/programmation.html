@@ -82,11 +82,7 @@
       letter-spacing:.06em;
     }
 
-    .grid{
-      display:grid;
-      gap:10px;
-    }
-
+    .grid{display:grid;gap:10px;}
     .grid.two{grid-template-columns:1fr 1fr;}
     .grid.three{grid-template-columns:repeat(3,1fr);}
 
@@ -258,12 +254,8 @@
     @media (max-width:759px){
       .grid.two,
       .grid.three{grid-template-columns:1fr;}
-
       .panel-title{font-size:24px;}
-
-      main{
-        padding-top:calc(var(--admin-total-top, 150px) + 20px);
-      }
+      main{padding-top:calc(var(--admin-total-top, 150px) + 20px);}
     }
   </style>
 </head>
@@ -283,7 +275,7 @@
     <div class="panel-head">
       <div>
         <h1 class="panel-title">📅 Programmation</h1>
-        <p class="panel-text">Génère depuis les tirages validés, ajuste horaires et terrains.</p>
+        <p class="panel-text">La génération se fait uniquement depuis la programmation générale.</p>
       </div>
       <div class="panel-tag">Admin</div>
     </div>
@@ -323,15 +315,14 @@
     </div>
 
     <div class="grid three">
-      <button class="btn clay" id="btnGenerate">🧩 Générer depuis tirage validé</button>
       <button class="btn primary" id="btnGenerateAll">🌐 Générer programmation générale</button>
-      <button class="btn danger" id="btnResetProg">🧨 Réinitialiser</button>
-      <a class="btn" id="btnOpenPublic" href="../public/programmation.html?adminPreview=1">👀 Aperçu public</a>
+      <button class="btn danger" id="btnResetProg">🧨 Réinitialiser la vue affichée</button>
+      <a class="btn" id="btnOpenPublic" href="../public/programmation.html?general=1&adminPreview=1">👀 Aperçu public</a>
     </div>
 
     <div class="status-box">
-      La programmation est générée depuis les documents validés dans
-      <strong>events/championnats-2026/tirages</strong>.
+      Le bouton de génération est volontairement limité à la vue générale.
+      Les vues catégorie/épreuve servent uniquement de filtres de consultation.
     </div>
   </section>
 
@@ -397,7 +388,6 @@
 
   const btnPublicHide = document.getElementById("btnPublicHide");
   const btnPublicShow = document.getElementById("btnPublicShow");
-  const btnGenerate = document.getElementById("btnGenerate");
   const btnGenerateAll = document.getElementById("btnGenerateAll");
   const btnResetProg = document.getElementById("btnResetProg");
   const btnOpenPublic = document.getElementById("btnOpenPublic");
@@ -423,8 +413,9 @@
   }
 
   function zoneText(){
-    if(generalMode) return "Programmation générale";
-    return `${currentCategorie} — ${EPREUVE_LABELS[currentEpreuve]}`;
+    return generalMode
+      ? "Programmation générale"
+      : `${currentCategorie} — ${EPREUVE_LABELS[currentEpreuve]}`;
   }
 
   function progRef(key = null){
@@ -433,6 +424,10 @@
 
   function drawRef(key){
     return doc(db, "events", EVENT_ID, "tirages", key);
+  }
+
+  function equipesCol(){
+    return collection(db, "events", EVENT_ID, "equipes");
   }
 
   function visibilityRef(){
@@ -455,6 +450,52 @@
     return [a,b].filter(Boolean).join(" / ");
   }
 
+  function toNum(v){
+    if(v === null || v === undefined || v === "") return null;
+    const n = typeof v === "number" ? v : Number(String(v).replace(",", ".").trim());
+    return Number.isFinite(n) ? n : null;
+  }
+
+  function teamRank(t){
+    const a = toNum(t.p1Rank);
+    const b = toNum(t.p2Rank);
+    if(a === null || b === null) return Number.POSITIVE_INFINITY;
+    return a + b;
+  }
+
+  async function fetchTeams(categorie, epreuve){
+    const snap = await getDocs(query(equipesCol(), orderBy("createdAt", "asc")));
+    const rows = [];
+
+    snap.forEach(d => {
+      const x = d.data() || {};
+
+      if(String(x.categorie || "").trim() !== categorie) return;
+      if(String(x.epreuve || "").trim() !== epreuve) return;
+      if(x.stby === true) return;
+      if(x.list === "wait") return;
+
+      rows.push({
+        id:d.id,
+        createdAtMs:x.createdAt?.toMillis ? x.createdAt.toMillis() : 0,
+        teamName:x.teamName || "",
+        joueur1FirstName:x.joueur1FirstName || "",
+        joueur2FirstName:x.joueur2FirstName || "",
+        p1Rank:x.p1Rank ?? null,
+        p2Rank:x.p2Rank ?? null
+      });
+    });
+
+    rows.sort((a,b) => {
+      const ar = teamRank(a);
+      const br = teamRank(b);
+      if(ar !== br) return ar - br;
+      return (a.createdAtMs || 0) - (b.createdAtMs || 0);
+    });
+
+    return rows;
+  }
+
   function parseToken(token){
     const s = String(token || "");
     if(s.startsWith("A:")) return { pool:"A", id:s.slice(2) };
@@ -462,38 +503,31 @@
     return { pool:null, id:s };
   }
 
-  function teamFromListById(list, id){
-    return list.find(t => t.id === id) || null;
-  }
-
-  function buildPoolsFromDraw(draw){
-    if(draw.mode === "auto"){
-      const teams = Array.isArray(draw.teams) ? draw.teams : [];
+  function buildPoolsFromDraw(draw, fallbackTeams = []){
+    if(draw && draw.mode === "auto"){
+      const teams = Array.isArray(draw.teams) ? draw.teams : fallbackTeams;
 
       if(teams.length <= 1){
-        return {
-          mode:"single",
-          poolA:teams,
-          poolB:[],
-          teams
-        };
+        return { mode:"single", poolA:teams, poolB:[], teams };
       }
 
       if(teams.length === 2){
-        return {
-          mode:"match",
-          poolA:[teams[0]],
-          poolB:[teams[1]],
-          teams
-        };
+        return { mode:"match", poolA:[teams[0]], poolB:[teams[1]], teams };
       }
 
-      return {
-        mode:"pool3",
-        poolA:teams.slice(0, 3),
-        poolB:[],
-        teams:teams.slice(0, 3)
-      };
+      return { mode:"pool3", poolA:teams.slice(0,3), poolB:[], teams:teams.slice(0,3) };
+    }
+
+    if(!draw){
+      if(fallbackTeams.length <= 1){
+        return { mode:"single", poolA:fallbackTeams, poolB:[], teams:fallbackTeams };
+      }
+
+      if(fallbackTeams.length === 2){
+        return { mode:"match", poolA:[fallbackTeams[0]], poolB:[fallbackTeams[1]], teams:fallbackTeams };
+      }
+
+      return { mode:"pool3", poolA:fallbackTeams.slice(0,3), poolB:[], teams:fallbackTeams.slice(0,3) };
     }
 
     const seed1 = draw.seed1 || null;
@@ -502,14 +536,13 @@
     const all = [
       seed1,
       seed2,
-      ...(Array.isArray(draw.teams) ? draw.teams : [])
+      ...(Array.isArray(draw.teams) ? draw.teams : fallbackTeams)
     ].filter(Boolean);
 
     const poolA = seed1 ? [seed1] : [];
     const poolB = seed2 ? [seed2] : [];
 
     const byId = new Map(all.map(t => [t.id, t]));
-
     const order = Array.isArray(draw.order) ? draw.order : [];
     const revealed = Number(draw.revealed || order.length || 0);
 
@@ -517,7 +550,6 @@
       const p = parseToken(tok);
       const team = byId.get(p.id);
       if(!team) return;
-
       if(p.pool === "A") poolA.push(team);
       if(p.pool === "B") poolB.push(team);
     });
@@ -530,10 +562,39 @@
     };
   }
 
-  function makeMatch(id, slot, time, court, teamA, teamB, label, meta = {}){
+  async function loadZoneData(categorie, epreuve){
+    const key = zoneKey(categorie, epreuve);
+    const teams = await fetchTeams(categorie, epreuve);
+    const snap = await getDoc(drawRef(key));
+    const draw = snap.exists() ? (snap.data() || null) : null;
+
+    if(draw && draw.status === "validated"){
+      return {
+        key,
+        categorie,
+        epreuve,
+        teams,
+        draw,
+        pools:buildPoolsFromDraw(draw, teams),
+        source:"draw"
+      };
+    }
+
+    return {
+      key,
+      categorie,
+      epreuve,
+      teams,
+      draw:null,
+      pools:buildPoolsFromDraw(null, teams),
+      source:"teams"
+    };
+  }
+
+  function makeMatch(id, order, time, court, teamA, teamB, label, meta = {}){
     return {
       id,
-      slot,
+      order,
       time,
       court,
       teamA:teamTitle(teamA),
@@ -545,113 +606,134 @@
     };
   }
 
-  function buildZoneMatches(categorie, epreuve, draw, offset = 0){
-    const zLabel = `${categorie} — ${EPREUVE_LABELS[epreuve]}`;
-    const pools = buildPoolsFromDraw(draw);
-    const matches = [];
+  function makeWinner(id, order, team, label, meta = {}){
+    return {
+      id,
+      order,
+      time:"Info",
+      court:"AUTO",
+      teamA:team ? teamTitle(team) : "Aucune équipe",
+      teamB:"Vainqueur",
+      subA:team ? teamSub(team) : "",
+      subB:"",
+      label,
+      type:"winner",
+      ...meta
+    };
+  }
 
-    let n = 1;
+  function getTeam(pool, index, placeholder){
+    return pool[index] || { teamName:placeholder };
+  }
 
-    function id(){
-      return `${zoneKey(categorie, epreuve)}_M${n++}`;
-    }
+  function addMatch(list, id, order, time, court, teamA, teamB, label, meta = {}){
+    list.push(makeMatch(id, order, time, court, teamA, teamB, label, meta));
+  }
 
-    function add(slot, time, court, a, b, label, meta = {}){
-      matches.push(makeMatch(id(), offset + slot, time, court, a, b, `${zLabel} · ${label}`, {
-        categorie,
-        epreuve,
-        ...meta
+  function addWinnerIfSingle(list, data, orderBase){
+    if(data.teams.length === 1){
+      const label = `${data.categorie} — ${EPREUVE_LABELS[data.epreuve]} · Une seule équipe inscrite — vainqueur`;
+      list.push(makeWinner(`${data.key}_WIN`, orderBase, data.teams[0], label, {
+        categorie:data.categorie,
+        epreuve:data.epreuve
       }));
     }
+  }
 
-    if(pools.mode === "single"){
-      const t = pools.teams[0] || null;
+  function buildGeneralMatchesFromData(map){
+    const matches = [];
 
-      matches.push({
-        id:id(),
-        slot:offset + 1,
-        time:"À confirmer",
-        court:"AUTO",
-        teamA:t ? teamTitle(t) : "Aucune équipe",
-        teamB:"Vainqueur",
-        subA:t ? teamSub(t) : "",
-        subB:"",
-        label:`${zLabel} · Une seule équipe inscrite — vainqueur`,
-        type:"winner",
-        categorie,
-        epreuve
-      });
+    const girls = map.get("Seniors_DD");
+    const men = map.get("Seniors_DM");
+    const u18dm = map.get("U18_DM");
+    const u18dd = map.get("U18_DD");
+    const u14dm = map.get("U14_DM");
+    const u14dd = map.get("U14_DD");
+    const plus45dm = map.get("45plus_DM");
+    const plus45dd = map.get("45plus_DD");
 
-      return matches;
+    for(const data of map.values()){
+      addWinnerIfSingle(matches, data, -100 + matches.length);
     }
 
-    if(pools.mode === "match"){
-      add(1, "À confirmer", "A", pools.poolA[0], pools.poolB[0], "Finale directe");
-      return matches;
-    }
+    const gA = girls?.pools?.poolA || [];
+    const gB = girls?.pools?.poolB || [];
 
-    if(pools.mode === "pool3"){
-      const p = pools.poolA;
-      add(1, "À confirmer", "A", p[0], p[1], "Poule unique");
-      add(2, "À confirmer", "A", p[0], p[2], "Poule unique");
-      add(3, "À confirmer", "A", p[1], p[2], "Poule unique");
-      return matches;
-    }
+    addMatch(matches, "GIRLS_A1", 1, "09h00 - 09h45", "A", getTeam(gA,0,"Filles A1"), getTeam(gA,1,"Filles A2"), "Seniors DD · Poule A");
+    addMatch(matches, "GIRLS_B1", 1, "09h00 - 09h45", "B", getTeam(gB,0,"Filles B1"), getTeam(gB,1,"Filles B2"), "Seniors DD · Poule B");
 
-    const A = pools.poolA;
-    const B = pools.poolB;
+    const u18 = (u18dm?.teams?.length ? u18dm : u18dd);
+    const u = u18?.teams || [];
+    addMatch(matches, "U18_1", 2, "09h45 - 10h30", "A", getTeam(u,0,"U1"), getTeam(u,1,"U2"), "U18 · Poule unique");
 
-    if(A.length >= 3){
-      add(1, "À confirmer", "A", A[0], A[1], "Poule A");
-      add(2, "À confirmer", "A", A[2], A[0], "Poule A");
-      add(3, "À confirmer", "A", A[1], A[2], "Poule A");
-    }
+    addMatch(matches, "GIRLS_A2", 3, "10h30 - 11h15", "A", getTeam(gA,0,"Filles A1"), getTeam(gA,2,"Filles A3"), "Seniors DD · Poule A");
+    addMatch(matches, "GIRLS_B2", 3, "10h30 - 11h15", "B", getTeam(gB,0,"Filles B1"), getTeam(gB,2,"Filles B3"), "Seniors DD · Poule B");
 
-    if(A.length === 4){
-      add(4, "À confirmer", "A", A[3], A[0], "Poule A");
-      add(5, "À confirmer", "A", A[1], A[3], "Poule A");
-      add(6, "À confirmer", "A", A[2], A[3], "Poule A");
-    }
+    addMatch(matches, "U18_2", 4, "11h15 - 12h00", "A", getTeam(u,0,"U1"), getTeam(u,2,"U3"), "U18 · Poule unique");
 
-    if(B.length >= 3){
-      add(1, "À confirmer", "B", B[0], B[1], "Poule B");
-      add(2, "À confirmer", "B", B[2], B[0], "Poule B");
-      add(3, "À confirmer", "B", B[1], B[2], "Poule B");
-    }
+    addMatch(matches, "GIRLS_A3", 5, "12h00 - 12h45", "A", getTeam(gA,1,"Filles A2"), getTeam(gA,2,"Filles A3"), "Seniors DD · Poule A");
+    addMatch(matches, "GIRLS_B3", 5, "12h00 - 12h45", "B", getTeam(gB,1,"Filles B2"), getTeam(gB,2,"Filles B3"), "Seniors DD · Poule B");
 
-    add(20, "À confirmer", "A", {teamName:"1er Poule A"}, {teamName:"2e Poule B"}, "Demi-finale");
-    add(20, "À confirmer", "B", {teamName:"1er Poule B"}, {teamName:"2e Poule A"}, "Demi-finale");
-    add(21, "À confirmer", "B", {teamName:"Perdant DF1"}, {teamName:"Perdant DF2"}, "Petite finale");
-    add(22, "À confirmer", "A", {teamName:"Vainqueur DF1"}, {teamName:"Vainqueur DF2"}, "Finale");
+    addMatch(matches, "U18_3", 6, "12h45 - 13h30", "A", getTeam(u,1,"U2"), getTeam(u,2,"U3"), "U18 · Poule unique");
+
+    const mA = men?.pools?.poolA || [];
+    const mB = men?.pools?.poolB || [];
+
+    addMatch(matches, "MEN_A1", 7, "13h30 - 14h00", "A", getTeam(mA,0,"Hommes A1"), getTeam(mA,1,"Hommes A2"), "Seniors DM · Poule A");
+    addMatch(matches, "MEN_A2", 7, "13h30 - 14h00", "B", getTeam(mA,2,"Hommes A3"), getTeam(mA,3,"Hommes A4"), "Seniors DM · Poule A");
+
+    addMatch(matches, "MEN_B1", 8, "14h00 - 14h30", "A", getTeam(mB,0,"Hommes B1"), getTeam(mB,1,"Hommes B2"), "Seniors DM · Poule B");
+
+    addMatch(matches, "MEN_A3", 9, "14h30 - 15h00", "A", getTeam(mA,0,"Hommes A1"), getTeam(mA,2,"Hommes A3"), "Seniors DM · Poule A");
+    addMatch(matches, "MEN_A4", 9, "14h30 - 15h00", "B", getTeam(mA,1,"Hommes A2"), getTeam(mA,3,"Hommes A4"), "Seniors DM · Poule A");
+
+    addMatch(matches, "MEN_B2", 10, "15h00 - 15h30", "A", getTeam(mB,0,"Hommes B1"), getTeam(mB,2,"Hommes B3"), "Seniors DM · Poule B");
+
+    addMatch(matches, "MEN_A5", 11, "15h30 - 16h00", "A", getTeam(mA,0,"Hommes A1"), getTeam(mA,3,"Hommes A4"), "Seniors DM · Poule A");
+    addMatch(matches, "MEN_A6", 11, "15h30 - 16h00", "B", getTeam(mA,1,"Hommes A2"), getTeam(mA,2,"Hommes A3"), "Seniors DM · Poule A");
+
+    addMatch(matches, "MEN_B3", 12, "16h00 - 16h30", "A", getTeam(mB,1,"Hommes B2"), getTeam(mB,2,"Hommes B3"), "Seniors DM · Poule B");
+
+    const u14 = (u14dm?.teams?.length ? u14dm : u14dd);
+    addMatch(matches, "U14_FINAL", 12, "16h00 - 16h30", "B", getTeam(u14?.teams || [],0,"Finaliste U14 1"), getTeam(u14?.teams || [],1,"Finaliste U14 2"), "U14 · Finale");
+
+    addMatch(matches, "GIRLS_SF1", 13, "16h30 - 17h30", "A", {teamName:"1re Poule A"}, {teamName:"2e Poule B"}, "Seniors DD · 1/2 finale");
+    addMatch(matches, "GIRLS_SF2", 13, "16h30 - 17h30", "B", {teamName:"1re Poule B"}, {teamName:"2e Poule A"}, "Seniors DD · 1/2 finale");
+
+    addMatch(matches, "MEN_SF1", 14, "17h30 - 18h30", "A", {teamName:"1er Poule A"}, {teamName:"2e Poule B"}, "Seniors DM · 1/2 finale");
+    addMatch(matches, "MEN_SF2", 14, "17h30 - 18h30", "B", {teamName:"1er Poule B"}, {teamName:"2e Poule A"}, "Seniors DM · 1/2 finale");
+
+    const plus45 = (plus45dm?.teams?.length ? plus45dm : plus45dd);
+    addMatch(matches, "PLUS45_FINAL", 15, "18h30 - 19h30", "A", getTeam(plus45?.teams || [],0,"Finaliste +45 ans 1"), getTeam(plus45?.teams || [],1,"Finaliste +45 ans 2"), "+45 ans · Finale");
+    addMatch(matches, "GIRLS_5_6", 15, "18h30 - 19h30", "B", {teamName:"5e filles"}, {teamName:"6e filles"}, "Seniors DD · Place 5-6");
+
+    addMatch(matches, "GIRLS_3_4", 16, "19h30 - 20h15", "A", {teamName:"Perdante DF1"}, {teamName:"Perdante DF2"}, "Seniors DD · Place 3-4");
+    addMatch(matches, "MEN_3_4", 16, "19h30 - 20h15", "B", {teamName:"Perdant DF1"}, {teamName:"Perdant DF2"}, "Seniors DM · Place 3-4");
+
+    addMatch(matches, "GIRLS_FINAL", 17, "20h15 - 21h15", "A", {teamName:"Vainqueure DF1"}, {teamName:"Vainqueure DF2"}, "Seniors DD · Finale");
+    addMatch(matches, "MEN_FINAL", 18, "21h15 - 22h15", "A", {teamName:"Vainqueur DF1"}, {teamName:"Vainqueur DF2"}, "Seniors DM · Finale");
 
     return matches;
   }
 
-  async function generateZone(categorie, epreuve){
-    const key = zoneKey(categorie, epreuve);
-    const snap = await getDoc(drawRef(key));
+  async function generateGeneral(){
+    const map = new Map();
 
-    if(!snap.exists()){
-      throw new Error(`Tirage introuvable pour ${categorie} ${epreuve}.`);
+    for(const categorie of CATEGORIES){
+      for(const epreuve of EPREUVES){
+        const data = await loadZoneData(categorie, epreuve);
+        map.set(data.key, data);
+      }
     }
 
-    const draw = snap.data() || {};
+    const matches = buildGeneralMatchesFromData(map);
 
-    if(draw.status !== "validated"){
-      throw new Error(`Le tirage ${categorie} ${epreuve} doit être validé.`);
-    }
-
-    const matches = buildZoneMatches(categorie, epreuve, draw, 0);
-
-    await setDoc(progRef(key), {
+    await setDoc(progRef("general"), {
       eventId:EVENT_ID,
-      key,
-      categorie,
-      epreuve,
+      key:"general",
       source:{
-        type:"tirage",
-        drawDoc:`events/${EVENT_ID}/tirages/${key}`,
-        drawValidatedAt:draw.validatedAt || null
+        type:"programmation_generale_depuis_tirages_et_equipes",
+        generatedAt:new Date().toISOString()
       },
       matches,
       updatedAt:serverTimestamp(),
@@ -661,60 +743,18 @@
     return matches;
   }
 
-  async function generateGeneral(){
-    const all = [];
-    let offset = 0;
-
-    for(const categorie of CATEGORIES){
-      for(const epreuve of EPREUVES){
-        const key = zoneKey(categorie, epreuve);
-        const snap = await getDoc(drawRef(key));
-
-        if(!snap.exists()) continue;
-
-        const draw = snap.data() || {};
-        if(draw.status !== "validated") continue;
-
-        const matches = buildZoneMatches(categorie, epreuve, draw, offset);
-        all.push(...matches);
-        offset += 30;
-      }
-    }
-
-    if(!all.length){
-      throw new Error("Aucun tirage validé trouvé.");
-    }
-
-    all.sort((a,b) => {
-      if(a.slot !== b.slot) return a.slot - b.slot;
-      return String(a.court).localeCompare(String(b.court));
-    });
-
-    await setDoc(progRef("general"), {
-      eventId:EVENT_ID,
-      key:"general",
-      source:{
-        type:"tirages_valides",
-        generatedAt:new Date().toISOString()
-      },
-      matches:all,
-      updatedAt:serverTimestamp(),
-      updatedBy:auth.currentUser?.uid || null
-    }, { merge:true });
-
-    return all;
-  }
-
-  async function generateCurrent(){
-    if(generalMode){
-      return generateGeneral();
-    }
-
-    return generateZone(currentCategorie, currentEpreuve);
-  }
-
   async function resetProgrammation(){
     await deleteDoc(progRef());
+  }
+
+  function visibleMatches(){
+    const matches = Array.isArray(currentProg?.matches) ? [...currentProg.matches] : [];
+
+    if(generalMode) return matches;
+
+    return matches.filter(m => {
+      return m.categorie === currentCategorie && m.epreuve === currentEpreuve;
+    });
   }
 
   function renderCard(match){
@@ -730,15 +770,15 @@
     return `
       <div class="match-card ${esc(cls)}">
         <div class="match-head">
-          <div class="m-slot">#${esc(match.slot)}</div>
+          <div class="m-slot">#${esc(match.order)}</div>
           <div class="m-time">${esc(match.time)}</div>
           <div class="m-court">${esc(courtLabel(match.court))}</div>
 
           <div class="actions">
             <button class="btnx" data-act="time" data-id="${esc(match.id)}">🕒</button>
             <button class="btnx" data-act="court" data-id="${esc(match.id)}">${match.court === "A" ? "🐝" : "🌶️"}</button>
-            <button class="btnx" data-act="up" data-slot="${esc(match.slot)}">↑</button>
-            <button class="btnx" data-act="down" data-slot="${esc(match.slot)}">↓</button>
+            <button class="btnx" data-act="up" data-order="${esc(match.order)}">↑</button>
+            <button class="btnx" data-act="down" data-order="${esc(match.order)}">↓</button>
           </div>
         </div>
 
@@ -762,27 +802,29 @@
 
   function renderList(){
     if(!currentProg){
-      adminList.innerHTML = `<p class="muted" style="margin:0;">Aucune programmation.</p>`;
+      adminList.innerHTML = `<p class="muted" style="margin:0;">Aucune programmation générale.</p>`;
       schedStatus.textContent = "—";
       return;
     }
 
-    const matches = Array.isArray(currentProg.matches) ? [...currentProg.matches] : [];
+    const matches = visibleMatches();
 
     matches.sort((a,b) => {
-      if(Number(a.slot) !== Number(b.slot)) return Number(a.slot) - Number(b.slot);
+      if(Number(a.order) !== Number(b.order)) return Number(a.order) - Number(b.order);
       return String(a.court).localeCompare(String(b.court));
     });
 
     adminList.innerHTML = matches.length
       ? `<div class="match-list">${matches.map(renderCard).join("")}</div>`
-      : `<p class="muted" style="margin:0;">Aucun match.</p>`;
+      : `<p class="muted" style="margin:0;">Aucun élément pour ce filtre.</p>`;
 
-    schedStatus.textContent = `✅ ${matches.length} élément(s)`;
+    schedStatus.textContent = generalMode
+      ? `✅ ${matches.length} élément(s) dans la programmation générale`
+      : `✅ ${matches.length} élément(s) pour ${zoneText()}`;
   }
 
   async function patchMatches(matches){
-    await updateDoc(progRef(), {
+    await updateDoc(progRef("general"), {
       matches,
       updatedAt:serverTimestamp(),
       updatedBy:auth.currentUser?.uid || null
@@ -817,15 +859,15 @@
     await patchMatches(matches);
   }
 
-  async function swapSlot(slot, dir){
+  async function swapOrder(order, dir){
     if(!currentProg) return;
 
     const matches = [...(currentProg.matches || [])];
-    const target = dir === "up" ? Number(slot) - 1 : Number(slot) + 1;
+    const target = dir === "up" ? Number(order) - 1 : Number(order) + 1;
 
     matches.forEach(m => {
-      if(Number(m.slot) === Number(slot)) m.slot = target;
-      else if(Number(m.slot) === Number(target)) m.slot = Number(slot);
+      if(Number(m.order) === Number(order)) m.order = target;
+      else if(Number(m.order) === Number(target)) m.order = Number(order);
     });
 
     await patchMatches(matches);
@@ -841,12 +883,12 @@
     schedStatus.textContent = "Chargement…";
     adminList.innerHTML = "";
 
-    unsubProg = onSnapshot(progRef(), (snap) => {
+    unsubProg = onSnapshot(progRef("general"), (snap) => {
       currentProg = snap.exists() ? (snap.data() || null) : null;
 
       buildStatus.textContent = currentProg
-        ? "✅ Programmation présente."
-        : "ℹ️ Aucune programmation enregistrée.";
+        ? "✅ Programmation générale présente."
+        : "ℹ️ Aucune programmation générale enregistrée.";
 
       renderList();
     }, (error) => {
@@ -875,15 +917,16 @@
     btnGeneral.classList.toggle("primary", generalMode);
     btnFiltered.classList.toggle("primary", !generalMode);
 
-    btnGenerate.textContent = generalMode
-      ? "🧩 Générer depuis tous les tirages validés"
-      : "🧩 Générer depuis le tirage validé";
+    btnGenerateAll.disabled = !generalMode;
+    btnGenerateAll.textContent = generalMode
+      ? "🌐 Générer programmation générale"
+      : "🌐 Génération disponible uniquement en vue générale";
 
     btnOpenPublic.href = generalMode
       ? "../public/programmation.html?general=1&adminPreview=1"
       : `../public/programmation.html?categorie=${encodeURIComponent(currentCategorie)}&epreuve=${encodeURIComponent(currentEpreuve)}&adminPreview=1`;
 
-    startListeners();
+    renderList();
   }
 
   async function setPublicVisible(value){
@@ -895,25 +938,11 @@
     }, { merge:true });
   }
 
-  btnGenerate.onclick = async () => {
-    btnGenerate.disabled = true;
-    buildStatus.textContent = "Génération…";
-
-    try{
-      const matches = await generateCurrent();
-      buildStatus.textContent = `✅ Programmation générée (${matches.length} élément(s)).`;
-    }catch(error){
-      console.error(error);
-      buildStatus.textContent = "❌ " + (error?.message || "Erreur génération.");
-      alert("Erreur ❌\n\n" + (error?.message || "Impossible."));
-    }finally{
-      btnGenerate.disabled = false;
-    }
-  };
-
   btnGenerateAll.onclick = async () => {
-    generalMode = true;
-    updateZone();
+    if(!generalMode){
+      alert("La génération est uniquement disponible dans l’onglet Programmation générale.");
+      return;
+    }
 
     btnGenerateAll.disabled = true;
     buildStatus.textContent = "Génération générale…";
@@ -931,7 +960,7 @@
   };
 
   btnResetProg.onclick = async () => {
-    const ok = confirm(`Réinitialiser ${zoneText()} ?`);
+    const ok = confirm("Réinitialiser la programmation générale ?");
     if(!ok) return;
 
     try{
@@ -969,8 +998,8 @@
     try{
       if(act === "time") await editTime(btn.dataset.id);
       if(act === "court") await toggleCourt(btn.dataset.id);
-      if(act === "up") await swapSlot(Number(btn.dataset.slot), "up");
-      if(act === "down") await swapSlot(Number(btn.dataset.slot), "down");
+      if(act === "up") await swapOrder(Number(btn.dataset.order), "up");
+      if(act === "down") await swapOrder(Number(btn.dataset.order), "down");
     }catch(error){
       console.error(error);
       alert("Erreur ❌");
@@ -1027,6 +1056,8 @@
       if(EPREUVES.includes(savedEpreuve)) currentEpreuve = savedEpreuve;
     }catch(error){}
 
+    generalMode = true;
+    startListeners();
     updateZone();
   }
 
