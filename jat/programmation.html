@@ -1,0 +1,1157 @@
+<!doctype html>
+<html lang="fr">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>JAT — Programmation — Championnats Guyane Beach Tennis</title>
+
+  <style>
+    :root{
+      --clay:#c65a1e;
+      --clay-dark:#8e3a13;
+      --clay-light:#ee8a3a;
+      --sky:#27bced;
+      --aqua:#00a9c8;
+      --blue:#075b9a;
+      --blue-dark:#063b72;
+      --text:#17212b;
+      --muted:#667085;
+      --card:rgba(255,255,255,.94);
+      --shadow:0 16px 40px rgba(16,24,40,.12);
+      --container:1180px;
+      --modebar-h:64px;
+    }
+
+    *{box-sizing:border-box;}
+    html,body{max-width:100%;overflow-x:hidden;}
+
+    body{
+      margin:0;
+      font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;
+      color:var(--text);
+      background:
+        radial-gradient(circle at 20% 0%, rgba(39,188,237,.22), transparent 28%),
+        radial-gradient(circle at 85% 10%, rgba(0,169,200,.16), transparent 26%),
+        linear-gradient(180deg,#f4fcff 0%,#e9f8ff 48%,#fff 100%);
+    }
+
+    a{color:inherit;text-decoration:none;}
+
+    .container{
+      width:min(var(--container), calc(100% - 20px));
+      margin:0 auto;
+    }
+
+    main{
+      padding-top:calc(var(--jat-total-top, 276px) + var(--modebar-h) + 24px);
+      padding-bottom:42px;
+    }
+
+    .section{margin-top:16px;}
+
+    .panel{
+      background:var(--card);
+      border:1px solid rgba(255,255,255,.6);
+      border-radius:24px;
+      box-shadow:var(--shadow);
+      padding:16px;
+    }
+
+    .panel-head{
+      display:flex;
+      justify-content:space-between;
+      align-items:flex-start;
+      gap:12px;
+      margin-bottom:12px;
+    }
+
+    .panel-title{
+      margin:0;
+      font-size:25px;
+      line-height:1.05;
+      letter-spacing:-.03em;
+    }
+
+    .panel-text{
+      margin:6px 0 0;
+      color:var(--muted);
+      font-size:14px;
+      line-height:1.35;
+    }
+
+    .panel-tag{
+      flex-shrink:0;
+      padding:8px 13px;
+      border-radius:999px;
+      background:#e4f7ff;
+      color:var(--blue-dark);
+      font-size:12px;
+      font-weight:1000;
+      text-transform:uppercase;
+      letter-spacing:.06em;
+    }
+
+    .placeholder{
+      padding:13px 15px;
+      border-radius:18px;
+      background:linear-gradient(135deg,rgba(39,188,237,.12),rgba(198,90,30,.08));
+      border:1px solid rgba(39,188,237,.22);
+      color:#475467;
+      font-size:14px;
+      line-height:1.5;
+    }
+
+    .modebar{
+      position:fixed;
+      top:var(--jat-total-top, 276px);
+      left:0;
+      right:0;
+      z-index:998;
+      background:
+        radial-gradient(circle at 18% 10%, rgba(255,255,255,.42), transparent 24%),
+        radial-gradient(circle at 80% 24%, rgba(255,255,255,.26), transparent 24%),
+        linear-gradient(135deg,#23b7ea 0%,#7fdfff 48%,#f5fdff 100%);
+      box-shadow:0 8px 18px rgba(16,24,40,.08);
+      border-bottom:1px solid rgba(7,91,154,.10);
+      padding:10px 0 12px;
+    }
+
+    .modebar-inner{
+      width:min(var(--container), calc(100% - 20px));
+      margin:0 auto;
+      display:flex;
+      gap:10px;
+    }
+
+    .mode-btn{
+      flex:1;
+      appearance:none;
+      border:1px solid rgba(255,255,255,.36);
+      border-radius:999px;
+      min-height:42px;
+      padding:10px 16px;
+      font-weight:1000;
+      cursor:pointer;
+      background:rgba(255,255,255,.82);
+      color:#1c2430;
+      box-shadow:0 5px 12px rgba(16,24,40,.08);
+      white-space:nowrap;
+    }
+
+    .mode-btn.active{
+      background:linear-gradient(180deg,var(--blue),var(--blue-dark));
+      color:#fff;
+      border-color:var(--blue);
+      box-shadow:0 8px 18px rgba(7,91,154,.24);
+    }
+
+    .schedule-wrap{
+      margin-top:12px;
+      border-radius:20px;
+      overflow:visible;
+    }
+
+    .schedule-grid{
+      display:grid;
+      grid-template-columns:72px minmax(0,1fr) minmax(0,1fr);
+      gap:8px;
+      align-items:stretch;
+    }
+
+    .schedule-head{
+      position:sticky;
+      top:calc(var(--jat-total-top, 276px) + var(--modebar-h));
+      z-index:30;
+      padding:8px 0;
+      background:linear-gradient(180deg,rgba(244,252,255,.98),rgba(244,252,255,.92));
+      backdrop-filter:blur(10px);
+    }
+
+    .head-cell{
+      min-height:42px;
+      border-radius:16px;
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      text-align:center;
+      font-size:13px;
+      font-weight:1000;
+      padding:8px;
+      color:#fff;
+      box-shadow:0 8px 18px rgba(16,24,40,.08);
+    }
+
+    .head-order{
+      background:linear-gradient(180deg,#344054,#111827);
+    }
+
+    .head-a{
+      background:linear-gradient(180deg,#d99b00,#9a6b00);
+    }
+
+    .head-b{
+      background:linear-gradient(180deg,#d7425f,#9b1733);
+    }
+
+    .order-cell{
+      border-radius:16px;
+      background:#fff;
+      border:1px solid rgba(16,24,40,.08);
+      box-shadow:0 6px 14px rgba(16,24,40,.04);
+      display:flex;
+      flex-direction:column;
+      align-items:center;
+      justify-content:center;
+      min-height:104px;
+      padding:8px 6px;
+      text-align:center;
+    }
+
+    .order-num{
+      font-size:18px;
+      font-weight:1000;
+      line-height:1;
+      color:var(--blue-dark);
+    }
+
+    .order-time{
+      margin-top:5px;
+      font-size:12px;
+      font-weight:900;
+      color:#667085;
+    }
+
+    .slot-cell{
+      min-height:104px;
+    }
+
+    .match-mini{
+      height:100%;
+      min-height:104px;
+      border-radius:16px;
+      border:1px solid rgba(16,24,40,.08);
+      background:#fff;
+      box-shadow:0 6px 14px rgba(16,24,40,.05);
+      padding:9px 10px;
+      display:grid;
+      grid-template-rows:auto auto 1fr 1fr;
+      gap:4px;
+    }
+
+    .match-mini.courtA{
+      background:#fff8dd;
+      border-color:rgba(255,196,0,.35);
+    }
+
+    .match-mini.courtB{
+      background:#ffeef2;
+      border-color:rgba(255,0,60,.20);
+    }
+
+    .mini-top{
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      gap:8px;
+      min-width:0;
+    }
+
+    .mini-time{
+      font-size:13px;
+      font-weight:1000;
+      white-space:nowrap;
+      color:#111827;
+    }
+
+    .gear-btn{
+      appearance:none;
+      border:1px solid rgba(16,24,40,.10);
+      background:rgba(255,255,255,.80);
+      border-radius:999px;
+      width:30px;
+      height:30px;
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      cursor:pointer;
+      font-size:16px;
+      flex:0 0 auto;
+      box-shadow:0 4px 10px rgba(16,24,40,.06);
+    }
+
+    .mini-label{
+      font-size:11px;
+      font-weight:1000;
+      color:var(--blue-dark);
+      white-space:nowrap;
+      overflow:hidden;
+      text-overflow:ellipsis;
+      text-transform:uppercase;
+      letter-spacing:.02em;
+    }
+
+    .mini-team{
+      font-size:13px;
+      font-weight:1000;
+      line-height:1.14;
+      white-space:nowrap;
+      overflow:hidden;
+      text-overflow:ellipsis;
+      align-self:center;
+      color:#17212b;
+    }
+
+    .mini-team.placeholder{
+      color:#667085;
+      font-style:italic;
+    }
+
+    .mini-team.winner{
+      color:#15803d;
+    }
+
+    .empty-cell{
+      height:100%;
+      min-height:104px;
+      border-radius:16px;
+      border:1px dashed rgba(16,24,40,.12);
+      background:rgba(255,255,255,.40);
+    }
+
+    .winner-list{
+      display:grid;
+      gap:10px;
+      margin-top:12px;
+    }
+
+    .winner-card{
+      border-radius:18px;
+      border:1px solid rgba(46,204,113,.25);
+      padding:15px 16px;
+      background:linear-gradient(135deg,#f3fff6,#ffffff);
+      box-shadow:0 8px 18px rgba(16,24,40,.06);
+    }
+
+    .winner-card strong{
+      display:block;
+      font-size:16px;
+      color:#14532d;
+      font-weight:1000;
+    }
+
+    .winner-card span{
+      display:block;
+      margin-top:4px;
+      color:#475467;
+      font-size:14px;
+      font-weight:800;
+    }
+
+    .muted{
+      color:var(--muted);
+      font-size:14px;
+      line-height:1.45;
+    }
+
+    .modal-backdrop{
+      position:fixed;
+      inset:0;
+      z-index:3000;
+      background:rgba(15,23,42,.52);
+      display:none;
+      align-items:center;
+      justify-content:center;
+      padding:18px;
+    }
+
+    .modal{
+      width:min(480px,100%);
+      border-radius:24px;
+      background:#fff;
+      box-shadow:0 30px 80px rgba(0,0,0,.28);
+      padding:18px;
+    }
+
+    .modal-title{
+      margin:0;
+      font-size:22px;
+      font-weight:1000;
+      letter-spacing:-.03em;
+    }
+
+    .modal-text{
+      margin:6px 0 14px;
+      color:#667085;
+      font-size:14px;
+      line-height:1.4;
+    }
+
+    .field{
+      display:grid;
+      gap:7px;
+      margin-top:12px;
+    }
+
+    .field label{
+      font-size:13px;
+      font-weight:1000;
+      color:#1c2430;
+    }
+
+    .field input,
+    .field select{
+      min-height:46px;
+      border-radius:15px;
+      border:1px solid rgba(16,24,40,.14);
+      background:#fff;
+      padding:0 12px;
+      font-size:15px;
+      font-weight:900;
+      outline:none;
+    }
+
+    .modal-actions{
+      margin-top:16px;
+      display:flex;
+      gap:10px;
+      justify-content:flex-end;
+      flex-wrap:wrap;
+    }
+
+    .btn{
+      appearance:none;
+      border:1px solid rgba(7,91,154,.14);
+      background:#fff;
+      border-radius:999px;
+      min-height:42px;
+      padding:10px 16px;
+      font-size:14px;
+      font-weight:1000;
+      cursor:pointer;
+      color:#1c2430;
+      text-align:center;
+      box-shadow:0 6px 14px rgba(16,24,40,.05);
+      white-space:nowrap;
+    }
+
+    .btn.primary{
+      background:linear-gradient(180deg,var(--blue),var(--blue-dark));
+      color:#fff;
+      border-color:var(--blue);
+      box-shadow:0 10px 22px rgba(7,91,154,.22);
+    }
+
+    .btn.danger{
+      background:#fff5f5;
+      color:#8a1f1f;
+      border-color:#f1b2b2;
+    }
+
+    @media (max-width:759px){
+      :root{
+        --modebar-h:62px;
+      }
+
+      main{
+        padding-top:calc(var(--jat-total-top, 268px) + var(--modebar-h) + 18px);
+      }
+
+      .panel-title{font-size:23px;}
+
+      .schedule-grid{
+        grid-template-columns:56px minmax(0,1fr) minmax(0,1fr);
+        gap:6px;
+      }
+
+      .head-cell{
+        min-height:38px;
+        font-size:11px;
+        padding:6px 4px;
+      }
+
+      .order-cell{
+        min-height:96px;
+      }
+
+      .order-num{
+        font-size:15px;
+      }
+
+      .order-time{
+        font-size:10px;
+      }
+
+      .match-mini{
+        min-height:96px;
+        padding:8px;
+      }
+
+      .mini-time{font-size:12px;}
+      .mini-label{font-size:10px;}
+      .mini-team{font-size:12px;}
+      .gear-btn{width:28px;height:28px;}
+    }
+
+    @media (orientation:landscape) and (max-height:520px){
+      #jatHeader{
+        display:none !important;
+      }
+
+      :root{
+        --jat-total-top:0px !important;
+        --modebar-h:50px;
+      }
+
+      .modebar{
+        top:0 !important;
+        padding:6px 0;
+      }
+
+      .mode-btn{
+        min-height:36px;
+        padding:7px 12px;
+        font-size:13px;
+      }
+
+      main{
+        padding-top:calc(var(--modebar-h) + 8px) !important;
+      }
+
+      .panel.summary-panel{
+        display:none;
+      }
+
+      .schedule-head{
+        top:var(--modebar-h);
+      }
+
+      .order-cell,
+      .slot-cell,
+      .match-mini,
+      .empty-cell{
+        min-height:82px;
+      }
+
+      .match-mini{
+        padding:7px 8px;
+        gap:2px;
+      }
+
+      .mini-time{font-size:11px;}
+      .mini-label{font-size:9px;}
+      .mini-team{font-size:11px;}
+    }
+  </style>
+</head>
+
+<body data-zone-selector="select">
+
+<div id="jatHeader"></div>
+
+<div class="modebar">
+  <div class="modebar-inner">
+    <button class="mode-btn active" id="btnModeAll" type="button">🌍 Toutes catégories</button>
+    <button class="mode-btn" id="btnModeCategory" type="button">🎾 Par catégorie</button>
+  </div>
+</div>
+
+<main class="container">
+
+  <section class="section panel" id="accessDenied" style="display:none;">
+    <h2 class="panel-title">⛔ Accès refusé</h2>
+    <p class="panel-text">Cette page est réservée au JAT et aux administrateurs.</p>
+  </section>
+
+  <section class="section panel summary-panel" id="pageContent" style="display:none;">
+    <div class="panel-head">
+      <div>
+        <h1 class="panel-title">📅 Programmation JAT</h1>
+        <p class="panel-text">
+          Vue synthétique par ordre de match et par terrain. Les scores ne sont pas affichés ici.
+        </p>
+      </div>
+      <div class="panel-tag">JAT</div>
+    </div>
+
+    <div class="placeholder">
+      <strong id="zoneLabel">Toutes catégories</strong>
+      <div id="statusText" style="margin-top:6px;">Chargement…</div>
+    </div>
+
+    <div id="winnerZone" class="winner-list"></div>
+  </section>
+
+  <section class="section panel" id="panelSchedule" style="display:none;">
+    <div class="panel-head">
+      <div>
+        <h2 class="panel-title">🧭 Vue globale</h2>
+        <p class="panel-text">
+          Clique sur ⚙️ pour modifier l’heure ou le terrain.
+        </p>
+      </div>
+      <div class="panel-tag">Direct</div>
+    </div>
+
+    <div class="schedule-wrap">
+      <div class="schedule-grid schedule-head">
+        <div class="head-cell head-order">Ordre</div>
+        <div class="head-cell head-a">🐝 Manon Queen Bee</div>
+        <div class="head-cell head-b">🌶️ Lisa de Los Pimentos</div>
+      </div>
+
+      <div id="scheduleGrid" class="schedule-grid"></div>
+    </div>
+  </section>
+
+</main>
+
+<div class="modal-backdrop" id="editModal">
+  <div class="modal" role="dialog" aria-modal="true" aria-labelledby="modalTitle">
+    <h2 class="modal-title" id="modalTitle">⚙️ Modifier le match</h2>
+    <p class="modal-text" id="modalSub">—</p>
+
+    <div class="field">
+      <label for="editTime">Horaire</label>
+      <input id="editTime" type="text" placeholder="Ex : 13h30" />
+    </div>
+
+    <div class="field">
+      <label for="editCourt">Terrain</label>
+      <select id="editCourt">
+        <option value="A">🐝 Manon Queen Bee</option>
+        <option value="B">🌶️ Lisa de Los Pimentos</option>
+      </select>
+    </div>
+
+    <div class="modal-actions">
+      <button class="btn danger" id="btnModalCancel" type="button">Annuler</button>
+      <button class="btn primary" id="btnModalSave" type="button">💾 Enregistrer</button>
+    </div>
+  </div>
+</div>
+
+<script type="module" src="../assets/js/jat-header.js"></script>
+
+<script type="module">
+  import { auth, db } from "../assets/js/firebase.js";
+  import { getRoleByUid } from "../assets/js/session.js";
+
+  import { onAuthStateChanged }
+  from "https://www.gstatic.com/firebasejs/10.12.5/firebase-auth.js";
+
+  import {
+    doc,
+    collection,
+    onSnapshot,
+    updateDoc,
+    serverTimestamp
+  } from "https://www.gstatic.com/firebasejs/10.12.5/firebase-firestore.js";
+
+  const EVENT_ID = "championnats-2026";
+
+  const CATEGORIES = ["U14", "U18", "Seniors", "45+"];
+  const EPREUVES = ["DM", "DD"];
+
+  const EPREUVE_LABELS = {
+    DM:"Double Messieurs",
+    DD:"Double Dames"
+  };
+
+  const accessDenied = document.getElementById("accessDenied");
+  const pageContent = document.getElementById("pageContent");
+  const panelSchedule = document.getElementById("panelSchedule");
+
+  const btnModeAll = document.getElementById("btnModeAll");
+  const btnModeCategory = document.getElementById("btnModeCategory");
+
+  const zoneLabel = document.getElementById("zoneLabel");
+  const statusText = document.getElementById("statusText");
+  const winnerZone = document.getElementById("winnerZone");
+  const scheduleGrid = document.getElementById("scheduleGrid");
+
+  const editModal = document.getElementById("editModal");
+  const modalSub = document.getElementById("modalSub");
+  const editTime = document.getElementById("editTime");
+  const editCourt = document.getElementById("editCourt");
+  const btnModalCancel = document.getElementById("btnModalCancel");
+  const btnModalSave = document.getElementById("btnModalSave");
+
+  let mode = "all";
+  let currentCategorie = "Seniors";
+  let currentEpreuve = "DM";
+
+  let currentProg = null;
+  let resultsByMatch = new Map();
+  let currentRole = null;
+  let editMatchId = null;
+
+  let unsubProg = null;
+  let unsubResults = null;
+
+  function esc(s){
+    return (s ?? "").toString()
+      .replaceAll("&","&amp;")
+      .replaceAll("<","&lt;")
+      .replaceAll(">","&gt;")
+      .replaceAll('"',"&quot;")
+      .replaceAll("'","&#039;");
+  }
+
+  function generalProgRef(){
+    return doc(db, "events", EVENT_ID, "programmations", "general");
+  }
+
+  function resultsCol(){
+    return collection(db, "events", EVENT_ID, "resultats", "general", "matches");
+  }
+
+  function zoneText(){
+    if(mode === "all") return "Toutes catégories";
+    return `${currentCategorie} — ${EPREUVE_LABELS[currentEpreuve] || currentEpreuve}`;
+  }
+
+  function allMatches(){
+    return Array.isArray(currentProg?.matches) ? [...currentProg.matches] : [];
+  }
+
+  function visibleMatches(){
+    return allMatches()
+      .filter(m => {
+        if(mode === "all") return true;
+        return String(m.categorie || "") === currentCategorie &&
+               String(m.epreuve || "") === currentEpreuve;
+      })
+      .sort((a,b) => {
+        if(Number(a.order) !== Number(b.order)) return Number(a.order) - Number(b.order);
+        return String(a.court || "").localeCompare(String(b.court || ""));
+      });
+  }
+
+  function normalMatches(){
+    return visibleMatches().filter(m => m.type !== "winner");
+  }
+
+  function winnerOnlyCards(){
+    return visibleMatches().filter(m => m.type === "winner");
+  }
+
+  function getResult(mid){
+    return resultsByMatch.get(mid) || null;
+  }
+
+  function toNum(v){
+    if(v === null || v === undefined || v === "") return null;
+    const n = Number(String(v).replace(",", ".").trim());
+    return Number.isFinite(n) ? n : null;
+  }
+
+  function winnerSide(res){
+    if(!res) return null;
+
+    if(res.winnerSide === "A" || res.winnerSide === "B"){
+      return res.winnerSide;
+    }
+
+    let a = 0;
+    let b = 0;
+
+    [
+      ["s1A","s1B"],
+      ["s2A","s2B"],
+      ["s3A","s3B"]
+    ].forEach(([ka,kb]) => {
+      const na = toNum(res[ka]);
+      const nb = toNum(res[kb]);
+
+      if(na === null || nb === null || na === nb) return;
+
+      if(na > nb) a++;
+      else b++;
+    });
+
+    if(a > b) return "A";
+    if(b > a) return "B";
+
+    return null;
+  }
+
+  function matchById(id){
+    return allMatches().find(m => m.id === id) || null;
+  }
+
+  function resolveDynamicName(match, side, guard = new Set()){
+    if(!match) return "—";
+
+    const raw = side === "A" ? match.teamA : match.teamB;
+    const ref = side === "A" ? match.A : match.B;
+
+    if(ref?.type === "team"){
+      return ref.team?.teamName || raw || "Équipe";
+    }
+
+    if(ref?.type === "winner" || ref?.type === "loser"){
+      const sourceId = ref.matchId;
+
+      if(!sourceId || guard.has(sourceId)){
+        return raw || "Équipe";
+      }
+
+      guard.add(sourceId);
+
+      const source = matchById(sourceId);
+      const res = getResult(sourceId);
+      const w = winnerSide(res);
+
+      if(!source || (w !== "A" && w !== "B")){
+        return ref.type === "winner"
+          ? `Vainqueur ${sourceId}`
+          : `Perdant ${sourceId}`;
+      }
+
+      const wantedSide = ref.type === "winner"
+        ? w
+        : (w === "A" ? "B" : "A");
+
+      return resolveDynamicName(source, wantedSide, guard);
+    }
+
+    if(ref?.type === "poolRank"){
+      return `${ref.rank}${Number(ref.rank) === 1 ? "er" : "e"} poule ${ref.pool}`;
+    }
+
+    return raw || "Équipe";
+  }
+
+  function teamName(match, side){
+    return resolveDynamicName(match, side);
+  }
+
+  function matchWinnerTeamName(match){
+    const w = winnerSide(getResult(match.id));
+    if(w !== "A" && w !== "B") return null;
+    return teamName(match, w);
+  }
+
+  function labelShort(match){
+    const cat = match.categorie || "";
+    const ep = match.epreuve || "";
+    const label = match.label || match.id || "";
+
+    if(cat || ep){
+      return `${cat} ${ep} · ${label}`;
+    }
+
+    return label;
+  }
+
+  function renderWinnerCard(match){
+    return `
+      <div class="winner-card">
+        <strong>🏆 ${esc(match.teamA || "Vainqueur")}</strong>
+        <span>${esc(match.label || "Catégorie avec une seule équipe")}</span>
+      </div>
+    `;
+  }
+
+  function renderWinnerZone(){
+    const winners = winnerOnlyCards();
+
+    winnerZone.innerHTML = winners.length
+      ? winners.map(renderWinnerCard).join("")
+      : "";
+  }
+
+  function groupByOrder(){
+    const rows = normalMatches();
+    const map = new Map();
+
+    rows.forEach(match => {
+      const order = Number(match.order || 9999);
+      const key = Number.isFinite(order) ? order : 9999;
+
+      if(!map.has(key)){
+        map.set(key, { order:key, A:null, B:null, fallback:[] });
+      }
+
+      const row = map.get(key);
+
+      if(match.court === "A" && !row.A){
+        row.A = match;
+      }else if(match.court === "B" && !row.B){
+        row.B = match;
+      }else{
+        row.fallback.push(match);
+      }
+    });
+
+    return Array.from(map.values()).sort((a,b) => a.order - b.order);
+  }
+
+  function orderTime(row){
+    const m = row.A || row.B || row.fallback[0] || null;
+    return m?.time || "—";
+  }
+
+  function renderMatchMini(match){
+    if(!match){
+      return `<div class="empty-cell"></div>`;
+    }
+
+    const winner = matchWinnerTeamName(match);
+    const teamA = teamName(match, "A");
+    const teamB = teamName(match, "B");
+
+    const cls = match.court === "A" ? "courtA" : match.court === "B" ? "courtB" : "";
+
+    return `
+      <div class="match-mini ${esc(cls)}" data-mid="${esc(match.id)}">
+        <div class="mini-top">
+          <div class="mini-time">${esc(match.time || "—")}</div>
+          <button class="gear-btn" data-act="edit" data-id="${esc(match.id)}" type="button" title="Modifier">⚙️</button>
+        </div>
+
+        <div class="mini-label">${esc(labelShort(match))}</div>
+
+        <div class="mini-team ${winner === teamA ? "winner" : ""} ${teamA.startsWith("Vainqueur") || teamA.startsWith("Perdant") ? "placeholder" : ""}">
+          ${esc(teamA)}
+        </div>
+
+        <div class="mini-team ${winner === teamB ? "winner" : ""} ${teamB.startsWith("Vainqueur") || teamB.startsWith("Perdant") ? "placeholder" : ""}">
+          ${esc(teamB)}
+        </div>
+      </div>
+    `;
+  }
+
+  function renderSchedule(){
+    const rows = groupByOrder();
+
+    if(!rows.length){
+      scheduleGrid.innerHTML = `<p class="muted" style="grid-column:1 / -1;margin:0;">Aucun match à afficher.</p>`;
+      return;
+    }
+
+    scheduleGrid.innerHTML = rows.map(row => `
+      <div class="order-cell">
+        <div class="order-num">#${esc(row.order)}</div>
+        <div class="order-time">${esc(orderTime(row))}</div>
+      </div>
+
+      <div class="slot-cell">${renderMatchMini(row.A)}</div>
+      <div class="slot-cell">${renderMatchMini(row.B)}</div>
+
+      ${row.fallback.map(m => `
+        <div class="order-cell">
+          <div class="order-num">#${esc(row.order)}</div>
+          <div class="order-time">${esc(m.time || "—")}</div>
+        </div>
+        <div class="slot-cell" style="grid-column:2 / 4;">${renderMatchMini(m)}</div>
+      `).join("")}
+    `).join("");
+  }
+
+  function render(){
+    zoneLabel.textContent = zoneText();
+
+    btnModeAll.classList.toggle("active", mode === "all");
+    btnModeCategory.classList.toggle("active", mode === "category");
+
+    if(!currentProg){
+      statusText.textContent = "Aucune programmation générale enregistrée.";
+      winnerZone.innerHTML = "";
+      scheduleGrid.innerHTML = `<p class="muted" style="grid-column:1 / -1;margin:0;">Programmation à venir.</p>`;
+      return;
+    }
+
+    const n = normalMatches().length;
+
+    statusText.textContent = mode === "all"
+      ? `✅ ${n} match(s) dans la chronologie générale.`
+      : `✅ ${n} match(s) pour ${zoneText()}.`;
+
+    renderWinnerZone();
+    renderSchedule();
+  }
+
+  function setMode(next){
+    mode = next === "category" ? "category" : "all";
+    render();
+  }
+
+  btnModeAll.onclick = () => setMode("all");
+  btnModeCategory.onclick = () => setMode("category");
+
+  document.addEventListener("jatZoneChange", (event) => {
+    const d = event.detail || {};
+
+    if(CATEGORIES.includes(d.categorie)) currentCategorie = d.categorie;
+    if(EPREUVES.includes(d.epreuve)) currentEpreuve = d.epreuve;
+
+    try{
+      localStorage.setItem("champ_jat_categorie", currentCategorie);
+      localStorage.setItem("champ_jat_epreuve", currentEpreuve);
+      localStorage.setItem("champ_admin_categorie", currentCategorie);
+      localStorage.setItem("champ_admin_epreuve", currentEpreuve);
+    }catch(error){}
+
+    mode = "category";
+    render();
+  });
+
+  function openEditModal(matchId){
+    const match = matchById(matchId);
+    if(!match) return;
+
+    editMatchId = matchId;
+    modalSub.textContent = `${match.id} — ${labelShort(match)}`;
+    editTime.value = match.time || "";
+    editCourt.value = match.court === "B" ? "B" : "A";
+    editModal.style.display = "flex";
+  }
+
+  function closeEditModal(){
+    editMatchId = null;
+    editModal.style.display = "none";
+  }
+
+  async function saveEdit(){
+    if(!editMatchId || !currentProg) return;
+
+    const matches = allMatches();
+    const idx = matches.findIndex(m => m.id === editMatchId);
+
+    if(idx < 0){
+      closeEditModal();
+      return;
+    }
+
+    matches[idx] = {
+      ...matches[idx],
+      time:(editTime.value || "").trim() || "À confirmer",
+      court:editCourt.value === "B" ? "B" : "A"
+    };
+
+    btnModalSave.disabled = true;
+
+    try{
+      await updateDoc(generalProgRef(), {
+        matches,
+        updatedAt:serverTimestamp(),
+        updatedBy:auth.currentUser?.uid || null
+      });
+
+      closeEditModal();
+    }catch(error){
+      console.error(error);
+      alert("Erreur Firestore ❌");
+    }finally{
+      btnModalSave.disabled = false;
+    }
+  }
+
+  scheduleGrid.addEventListener("click", (event) => {
+    const btn = event.target.closest("button[data-act='edit']");
+    if(!btn) return;
+
+    const id = btn.dataset.id;
+    if(id) openEditModal(id);
+  });
+
+  btnModalCancel.onclick = closeEditModal;
+  btnModalSave.onclick = saveEdit;
+
+  editModal.addEventListener("click", (event) => {
+    if(event.target === editModal){
+      closeEditModal();
+    }
+  });
+
+  function startListeners(){
+    if(unsubProg) unsubProg();
+    if(unsubResults) unsubResults();
+
+    unsubProg = onSnapshot(generalProgRef(), (snap) => {
+      currentProg = snap.exists() ? (snap.data() || null) : null;
+      render();
+    }, (error) => {
+      console.error(error);
+      statusText.textContent = "❌ Impossible de charger la programmation.";
+    });
+
+    unsubResults = onSnapshot(resultsCol(), (snap) => {
+      resultsByMatch = new Map();
+
+      snap.forEach(d => {
+        resultsByMatch.set(d.id, d.data() || {});
+      });
+
+      render();
+    }, (error) => {
+      console.error(error);
+      statusText.textContent = "⚠️ Programmation chargée, mais résultats indisponibles.";
+    });
+  }
+
+  function stopListeners(){
+    if(unsubProg){
+      unsubProg();
+      unsubProg = null;
+    }
+
+    if(unsubResults){
+      unsubResults();
+      unsubResults = null;
+    }
+  }
+
+  function showDenied(){
+    accessDenied.style.display = "block";
+    pageContent.style.display = "none";
+    panelSchedule.style.display = "none";
+    stopListeners();
+  }
+
+  function showJat(){
+    accessDenied.style.display = "none";
+    pageContent.style.display = "block";
+    panelSchedule.style.display = "block";
+
+    try{
+      const savedCat = localStorage.getItem("champ_jat_categorie") || localStorage.getItem("champ_admin_categorie");
+      const savedEpreuve = localStorage.getItem("champ_jat_epreuve") || localStorage.getItem("champ_admin_epreuve");
+
+      if(CATEGORIES.includes(savedCat)) currentCategorie = savedCat;
+      if(EPREUVES.includes(savedEpreuve)) currentEpreuve = savedEpreuve;
+    }catch(error){}
+
+    startListeners();
+  }
+
+  onAuthStateChanged(auth, async (user) => {
+    accessDenied.style.display = "none";
+    pageContent.style.display = "none";
+    panelSchedule.style.display = "none";
+
+    if(!user){
+      showDenied();
+      return;
+    }
+
+    try{
+      currentRole = await getRoleByUid(user.uid);
+
+      if(currentRole !== "admin" && currentRole !== "jat"){
+        showDenied();
+        return;
+      }
+
+      showJat();
+    }catch(error){
+      console.error(error);
+      showDenied();
+    }
+  });
+</script>
+
+</body>
+</html>
