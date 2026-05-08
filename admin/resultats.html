@@ -7,14 +7,26 @@
 
   <style>
     :root{
-      --clay:#c65a1e; --clay-dark:#8e3a13; --clay-light:#ee8a3a;
-      --sky:#27bced; --aqua:#00a9c8; --blue:#075b9a; --blue-dark:#063b72;
-      --text:#17212b; --muted:#667085; --card:rgba(255,255,255,.94);
+      --clay:#c65a1e;
+      --clay-dark:#8e3a13;
+      --clay-light:#ee8a3a;
+      --sky:#27bced;
+      --aqua:#00a9c8;
+      --blue:#075b9a;
+      --blue-dark:#063b72;
+      --text:#17212b;
+      --muted:#667085;
+      --card:rgba(255,255,255,.94);
       --shadow:0 16px 40px rgba(16,24,40,.12);
       --container:1180px;
     }
 
     *{box-sizing:border-box;}
+
+    html, body{
+      max-width:100%;
+      overflow-x:hidden;
+    }
 
     body{
       margin:0;
@@ -27,7 +39,11 @@
     }
 
     a{color:inherit;text-decoration:none;}
-    .container{width:min(var(--container), calc(100% - 28px));margin:0 auto;}
+
+    .container{
+      width:min(var(--container), calc(100% - 28px));
+      margin:0 auto;
+    }
 
     main{
       padding-top:calc(var(--admin-total-top, 158px) + 24px);
@@ -78,7 +94,11 @@
       letter-spacing:.06em;
     }
 
-    .grid{display:grid;grid-template-columns:1fr;gap:10px;}
+    .grid{
+      display:grid;
+      grid-template-columns:1fr;
+      gap:10px;
+    }
 
     .btn{
       appearance:none;
@@ -121,27 +141,128 @@
       line-height:1.5;
     }
 
-    .placeholder{
-      padding:15px 16px;
-      border-radius:18px;
-      background:linear-gradient(135deg,rgba(39,188,237,.12),rgba(198,90,30,.08));
-      border:1px solid rgba(39,188,237,.22);
-      color:#475467;
+    .muted{
+      color:var(--muted);
       font-size:14px;
-      line-height:1.5;
+      line-height:1.45;
     }
 
-    .muted{color:var(--muted);font-size:14px;line-height:1.45;}
+    .match-list{
+      display:flex;
+      flex-direction:column;
+      gap:14px;
+      margin-top:12px;
+    }
+
+    .match-card{
+      border-radius:18px;
+      border:2px solid rgba(0,0,0,.06);
+      padding:14px;
+      background:#fff;
+      box-shadow:0 1px 0 rgba(0,0,0,.03);
+    }
+
+    .match-head{
+      display:flex;
+      align-items:center;
+      gap:10px;
+      flex-wrap:wrap;
+    }
+
+    .pill{
+      display:inline-flex;
+      align-items:center;
+      gap:8px;
+      padding:6px 10px;
+      border-radius:999px;
+      border:1px solid #eee;
+      background:#fafafa;
+      font-weight:1000;
+      white-space:nowrap;
+    }
+
+    .dot{
+      width:10px;
+      height:10px;
+      border-radius:999px;
+      display:inline-block;
+    }
+
+    .dot.red{ background:#e74c3c; }
+    .dot.orange{ background:#f39c12; }
+    .dot.green{ background:#2ecc71; }
+
+    .score-grid{
+      margin-top:12px;
+      display:grid;
+      grid-template-columns:minmax(0,1fr) 60px 60px 60px;
+      gap:8px;
+      align-items:center;
+    }
+
+    .team-title{
+      font-size:15px;
+      font-weight:1000;
+      line-height:1.15;
+    }
+
+    .team-sub{
+      margin-top:2px;
+      font-size:13px;
+      font-weight:800;
+      opacity:.85;
+    }
+
+    .hdr{
+      font-size:11px;
+      font-weight:1000;
+      opacity:.6;
+      text-align:center;
+    }
+
+    .sc{
+      width:60px;
+      height:42px;
+      border-radius:12px;
+      border:1px solid #ddd;
+      background:#fff;
+      font-weight:1000;
+      text-align:center;
+      outline:none;
+      font-size:15px;
+      padding:0 6px;
+    }
+
+    .actions{
+      margin-top:14px;
+      display:flex;
+      justify-content:space-between;
+      gap:10px;
+      flex-wrap:wrap;
+      align-items:center;
+    }
 
     @media (min-width:760px){
       .panel{padding:22px;}
       .grid.two{grid-template-columns:1fr 1fr;}
-      .grid.three{grid-template-columns:repeat(3,1fr);}
     }
 
     @media (max-width:759px){
-      main{padding-top:calc(var(--admin-total-top, 150px) + 20px);}
-      .panel-title{font-size:24px;}
+      main{
+        padding-top:calc(var(--admin-total-top, 150px) + 20px);
+      }
+
+      .panel-title{
+        font-size:24px;
+      }
+
+      .score-grid{
+        grid-template-columns:minmax(0,1fr) 52px 52px 52px;
+      }
+
+      .sc{
+        width:52px;
+      }
     }
   </style>
 </head>
@@ -158,23 +279,27 @@
   </section>
 
   <section class="section panel" id="pageContent" style="display:none;">
+
     <div class="panel-head">
       <div>
         <h1 class="panel-title">🏆 Résultats</h1>
         <p class="panel-text">
-          Gestion de la visibilité publique des résultats.
+          Gestion des résultats et de leur visibilité publique.
         </p>
       </div>
       <div class="panel-tag">Admin</div>
     </div>
 
-    <div class="placeholder">
-      <strong>Fichier de travail résultats.</strong><br>
-      La saisie complète des résultats pourra être ajoutée ensuite. Pour l’instant, cette page pilote la visibilité publique.
+    <div class="status-box">
+      Les scores acceptent désormais n’importe quelle valeur numérique.
+      <br>
+      Exemple : 6, 7, 10, 15, 21, etc.
     </div>
+
   </section>
 
   <section class="section panel" id="panelVisibility" style="display:none;">
+
     <div class="panel-head">
       <div>
         <h2 class="panel-title">👀 Visibilité publique</h2>
@@ -184,30 +309,32 @@
     </div>
 
     <div class="grid two">
-      <button class="btn danger" id="btnPublicHide" type="button">🔒 Mettre en maintenance</button>
-      <button class="btn primary" id="btnPublicShow" type="button">✅ Rendre visible</button>
+      <button class="btn danger" id="btnPublicHide" type="button">
+        🔒 Mettre en maintenance
+      </button>
+
+      <button class="btn primary" id="btnPublicShow" type="button">
+        ✅ Rendre visible
+      </button>
     </div>
 
-    <div class="status-box">
-      Si les résultats sont masqués, le public verra une page de maintenance.
-      Les administrateurs et JAT pourront quand même voir la page publique en version travail.
-    </div>
   </section>
 
-  <section class="section panel" id="panelPreview" style="display:none;">
+  <section class="section panel" id="panelResults" style="display:none;">
+
     <div class="panel-head">
       <div>
-        <h2 class="panel-title">👁️ Aperçu public</h2>
-        <p class="panel-text">
-          Ouvre la page publique telle que visible par les organisateurs.
+        <h2 class="panel-title">🏁 Saisie résultats</h2>
+        <p class="panel-text" id="statusText">
+          Chargement…
         </p>
       </div>
-      <div class="panel-tag">Test</div>
+
+      <div class="panel-tag">Live</div>
     </div>
 
-    <div class="grid">
-      <a class="btn" href="../public/resultats.html?adminPreview=1">👀 Ouvrir la page publique</a>
-    </div>
+    <div id="adminList"></div>
+
   </section>
 
 </main>
@@ -215,129 +342,276 @@
 <script type="module" src="../assets/js/admin-header.js"></script>
 
 <script type="module">
-  import { auth, db } from "../assets/js/firebase.js";
-  import { getRoleByUid } from "../assets/js/session.js";
-  import { onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.12.5/firebase-auth.js";
-  import {
-    doc,
-    setDoc,
-    onSnapshot,
-    serverTimestamp
-  } from "https://www.gstatic.com/firebasejs/10.12.5/firebase-firestore.js";
 
-  const EVENT_ID = "championnats-2026";
+import { auth, db } from "../assets/js/firebase.js";
+import { getRoleByUid } from "../assets/js/session.js";
 
-  const accessDenied = document.getElementById("accessDenied");
-  const pageContent = document.getElementById("pageContent");
-  const panelVisibility = document.getElementById("panelVisibility");
-  const panelPreview = document.getElementById("panelPreview");
+import { onAuthStateChanged }
+from "https://www.gstatic.com/firebasejs/10.12.5/firebase-auth.js";
 
-  const visibilityText = document.getElementById("visibilityText");
-  const btnPublicHide = document.getElementById("btnPublicHide");
-  const btnPublicShow = document.getElementById("btnPublicShow");
+import {
+  doc,
+  collection,
+  getDocs,
+  setDoc,
+  onSnapshot,
+  serverTimestamp
+} from "https://www.gstatic.com/firebasejs/10.12.5/firebase-firestore.js";
 
-  let unsubVisibility = null;
+const EVENT_ID = "championnats-2026";
 
-  function visibilityRef(){
-    return doc(db, "events", EVENT_ID, "config", "resultats");
-  }
+const accessDenied = document.getElementById("accessDenied");
+const pageContent = document.getElementById("pageContent");
+const panelVisibility = document.getElementById("panelVisibility");
+const panelResults = document.getElementById("panelResults");
 
-  function stopListeners(){
-    if(unsubVisibility){
-      unsubVisibility();
-      unsubVisibility = null;
-    }
-  }
+const visibilityText = document.getElementById("visibilityText");
 
-  function startListeners(){
-    stopListeners();
+const btnPublicHide = document.getElementById("btnPublicHide");
+const btnPublicShow = document.getElementById("btnPublicShow");
 
-    unsubVisibility = onSnapshot(visibilityRef(), (snap) => {
-      const data = snap.exists() ? (snap.data() || {}) : {};
-      const visible = data.publicVisible === true;
+const statusText = document.getElementById("statusText");
+const adminList = document.getElementById("adminList");
 
-      visibilityText.innerHTML = visible
-        ? "Statut actuel : <strong>visible publiquement ✅</strong>"
-        : "Statut actuel : <strong>maintenance / masqué 🔒</strong>";
+let currentCategorie = "U14";
+let currentEpreuve = "DM";
 
-      btnPublicShow.classList.toggle("is-active", visible);
-      btnPublicHide.classList.toggle("is-active", !visible);
-    }, (error) => {
-      console.error(error);
-      visibilityText.textContent = "❌ Impossible de lire la visibilité publique.";
-    });
-  }
+let matches = [];
+let resultsMap = new Map();
 
-  async function setPublicVisible(value){
-    await setDoc(visibilityRef(), {
-      publicVisible:value === true,
+function esc(s){
+  return (s ?? "").toString()
+    .replaceAll("&","&amp;")
+    .replaceAll("<","&lt;")
+    .replaceAll(">","&gt;");
+}
+
+function zoneKey(){
+  return `${currentCategorie}_${currentEpreuve}`.replace("+","plus");
+}
+
+function visibilityRef(){
+  return doc(db, "events", EVENT_ID, "config", "resultats");
+}
+
+function resultsCollection(){
+  return collection(db, "events", EVENT_ID, "resultats", zoneKey(), "matches");
+}
+
+async function setPublicVisible(value){
+  await setDoc(visibilityRef(), {
+    publicVisible:value === true,
+    updatedAt:serverTimestamp(),
+    updatedBy:auth.currentUser?.uid || null
+  }, { merge:true });
+}
+
+btnPublicHide.onclick = async ()=>{
+  await setPublicVisible(false);
+};
+
+btnPublicShow.onclick = async ()=>{
+  await setPublicVisible(true);
+};
+
+function render(){
+
+  statusText.textContent =
+    `${matches.length} match(s)`;
+
+  adminList.innerHTML = `
+    <div class="match-list">
+      ${matches.map(match => {
+
+        const stored = resultsMap.get(match.id) || {};
+
+        return `
+          <div class="match-card" data-mid="${esc(match.id)}">
+
+            <div class="match-head">
+              <div class="pill">
+                <span class="dot green"></span>
+                ${esc(match.label || match.id)}
+              </div>
+            </div>
+
+            <div class="score-grid">
+
+              <div class="hdr"></div>
+              <div class="hdr">S1</div>
+              <div class="hdr">S2</div>
+              <div class="hdr">S3</div>
+
+              <div>
+                <div class="team-title">${esc(match.teamA || "Équipe A")}</div>
+              </div>
+
+              <input class="sc" data-k="s1A" value="${esc(stored.s1A || "")}">
+              <input class="sc" data-k="s2A" value="${esc(stored.s2A || "")}">
+              <input class="sc" data-k="s3A" value="${esc(stored.s3A || "")}">
+
+              <div>
+                <div class="team-title">${esc(match.teamB || "Équipe B")}</div>
+              </div>
+
+              <input class="sc" data-k="s1B" value="${esc(stored.s1B || "")}">
+              <input class="sc" data-k="s2B" value="${esc(stored.s2B || "")}">
+              <input class="sc" data-k="s3B" value="${esc(stored.s3B || "")}">
+
+            </div>
+
+            <div class="actions">
+
+              <button class="btn primary" data-save="${esc(match.id)}">
+                💾 Enregistrer
+              </button>
+
+            </div>
+
+          </div>
+        `;
+      }).join("")}
+    </div>
+  `;
+}
+
+adminList.addEventListener("click", async (e)=>{
+
+  const btn = e.target.closest("[data-save]");
+  if(!btn) return;
+
+  const mid = btn.dataset.save;
+
+  const card = btn.closest(".match-card");
+
+  const get = (k)=>{
+    const el = card.querySelector(`[data-k="${k}"]`);
+    return (el?.value || "").trim();
+  };
+
+  await setDoc(
+    doc(resultsCollection(), mid),
+    {
+      s1A:get("s1A"),
+      s2A:get("s2A"),
+      s3A:get("s3A"),
+
+      s1B:get("s1B"),
+      s2B:get("s2B"),
+      s3B:get("s3B"),
+
       updatedAt:serverTimestamp(),
       updatedBy:auth.currentUser?.uid || null
-    }, { merge:true });
+    },
+    { merge:true }
+  );
+
+  alert("Résultat enregistré ✅");
+
+});
+
+async function loadMatches(){
+
+  matches = [];
+
+  for(let i=1;i<=8;i++){
+
+    matches.push({
+      id:`M${i}`,
+      label:`Match ${i}`,
+      teamA:`Équipe A${i}`,
+      teamB:`Équipe B${i}`
+    });
+
   }
 
-  function showDenied(){
-    accessDenied.style.display = "block";
-    pageContent.style.display = "none";
-    panelVisibility.style.display = "none";
-    panelPreview.style.display = "none";
-    stopListeners();
+  render();
+}
+
+function showDenied(){
+
+  accessDenied.style.display = "block";
+
+  pageContent.style.display = "none";
+  panelVisibility.style.display = "none";
+  panelResults.style.display = "none";
+}
+
+function showAdmin(){
+
+  accessDenied.style.display = "none";
+
+  pageContent.style.display = "block";
+  panelVisibility.style.display = "block";
+  panelResults.style.display = "block";
+
+  loadMatches();
+
+  onSnapshot(visibilityRef(), (snap)=>{
+
+    const data = snap.exists() ? (snap.data() || {}) : {};
+
+    const visible = data.publicVisible === true;
+
+    visibilityText.innerHTML = visible
+      ? "Statut actuel : <strong>visible publiquement ✅</strong>"
+      : "Statut actuel : <strong>maintenance / masqué 🔒</strong>";
+
+    btnPublicShow.classList.toggle("is-active", visible);
+    btnPublicHide.classList.toggle("is-active", !visible);
+
+  });
+
+  onSnapshot(resultsCollection(), (snap)=>{
+
+    resultsMap = new Map();
+
+    snap.forEach(d=>{
+      resultsMap.set(d.id, d.data() || {});
+    });
+
+    render();
+
+  });
+
+}
+
+document.addEventListener("adminZoneChange", (e)=>{
+
+  currentCategorie = e.detail.categorie || "U14";
+  currentEpreuve = e.detail.epreuve || "DM";
+
+  loadMatches();
+
+});
+
+onAuthStateChanged(auth, async (user)=>{
+
+  if(!user){
+    showDenied();
+    return;
   }
 
-  function showAdmin(){
-    accessDenied.style.display = "none";
-    pageContent.style.display = "block";
-    panelVisibility.style.display = "block";
-    panelPreview.style.display = "block";
-    startListeners();
-  }
+  try{
 
-  btnPublicHide.onclick = async () => {
-    try{
-      await setPublicVisible(false);
-    }catch(error){
-      console.error(error);
-      alert("Erreur : impossible de masquer les résultats.");
-    }
-  };
+    const role = await getRoleByUid(user.uid);
 
-  btnPublicShow.onclick = async () => {
-    try{
-      await setPublicVisible(true);
-    }catch(error){
-      console.error(error);
-      alert("Erreur : impossible de rendre les résultats visibles.");
-    }
-  };
-
-  onAuthStateChanged(auth, async (user) => {
-    stopListeners();
-
-    accessDenied.style.display = "none";
-    pageContent.style.display = "none";
-    panelVisibility.style.display = "none";
-    panelPreview.style.display = "none";
-
-    if(!user){
+    if(role !== "admin"){
       showDenied();
       return;
     }
 
-    try{
-      const role = await getRoleByUid(user.uid);
+    showAdmin();
 
-      if(role !== "admin"){
-        showDenied();
-        return;
-      }
+  }catch(error){
 
-      showAdmin();
+    console.error(error);
+    showDenied();
 
-    }catch(error){
-      console.error(error);
-      showDenied();
-    }
-  });
+  }
+
+});
+
 </script>
 
 </body>
