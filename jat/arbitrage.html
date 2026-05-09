@@ -1011,7 +1011,7 @@
 
       label:match.label || null,
 
-      status:"available",
+      status:"sent",
 
       sentByJat:true,
 
@@ -1023,13 +1023,14 @@
       inputMode:"points",
 
       score:{
-        pointsA:"0",
-        pointsB:"0",
-        s1A:0,
-        s1B:0,
+        pointsA:0,
+        pointsB:0,
+        gamesA:0,
+        gamesB:0,
         stbA:0,
         stbB:0,
-        currentPhase:"set1"
+        currentPhase:"set1",
+        serverSide:"A",
       },
 
       sets:{
