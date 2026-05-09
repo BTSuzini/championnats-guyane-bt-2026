@@ -638,11 +638,11 @@
   }
 
   function liveCol(){
-    return collection(db, "events", EVENT_ID, "arbitrage_live");
+    return collection(db, "events", EVENT_ID, "live_matches");
   }
 
   function liveRef(matchId){
-    return doc(db, "events", EVENT_ID, "arbitrage_live", matchId);
+    return doc(db, "events", EVENT_ID, "live_matches", matchId);
   }
 
   function resultRef(matchId){
