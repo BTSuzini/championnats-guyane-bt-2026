@@ -98,9 +98,7 @@
       line-height:1.5;
     }
 
-    .placeholder strong{
-      color:var(--blue-dark);
-    }
+    .placeholder strong{color:var(--blue-dark);}
 
     .live-list{
       display:grid;
@@ -172,6 +170,18 @@
       white-space:nowrap;
     }
 
+    .live-pill.wait{
+      background:#fff7ed;
+      border-color:rgba(245,158,11,.28);
+      color:#92400e;
+    }
+
+    .live-pill.done{
+      background:#f1f5f9;
+      border-color:rgba(100,116,139,.22);
+      color:#334155;
+    }
+
     .dot{
       width:9px;
       height:9px;
@@ -179,6 +189,9 @@
       background:#22c55e;
       display:inline-block;
     }
+
+    .live-pill.wait .dot{background:#f59e0b;}
+    .live-pill.done .dot{background:#64748b;}
 
     .score-board{
       padding:14px;
@@ -188,13 +201,17 @@
 
     .score-row{
       display:grid;
-      grid-template-columns:minmax(0,1fr) 58px 58px 68px;
+      grid-template-columns:minmax(0,1fr) 58px 58px 58px 68px;
       gap:8px;
       align-items:center;
       border-radius:16px;
       background:rgba(255,255,255,.72);
       border:1px solid rgba(16,24,40,.06);
       padding:10px;
+    }
+
+    .score-row.no-points{
+      grid-template-columns:minmax(0,1fr) 58px 58px 68px;
     }
 
     .score-row.server{
@@ -234,12 +251,15 @@
       justify-content:center;
     }
 
+    .score-cell.hidden{display:none;}
+
     .score-label{
       font-size:10px;
       font-weight:1000;
       color:#667085;
       text-transform:uppercase;
       letter-spacing:.04em;
+      text-align:center;
     }
 
     .score-value{
@@ -277,22 +297,19 @@
       .panel-title{font-size:24px;}
 
       .score-row{
-        grid-template-columns:minmax(0,1fr) 48px 48px 56px;
-        gap:6px;
+        grid-template-columns:minmax(0,1fr) 44px 44px 44px 54px;
+        gap:5px;
         padding:8px;
       }
 
-      .team-name{
-        font-size:15px;
+      .score-row.no-points{
+        grid-template-columns:minmax(0,1fr) 44px 44px 54px;
       }
 
-      .score-cell{
-        min-height:44px;
-      }
-
-      .score-value{
-        font-size:18px;
-      }
+      .team-name{font-size:14px;}
+      .score-cell{min-height:44px;}
+      .score-value{font-size:18px;}
+      .score-label{font-size:8px;}
     }
   </style>
 </head>
@@ -348,6 +365,7 @@
 </main>
 
 <script type="module" src="../assets/js/public-header.js"></script>
+
 <script type="module">
   import { auth, db } from "../assets/js/firebase.js";
   import { getRoleByUid } from "../assets/js/session.js";
@@ -389,7 +407,7 @@
   }
 
   function liveCol(){
-    return collection(db, "events", EVENT_ID, "arbitrage_live");
+    return collection(db, "events", EVENT_ID, "live_matches");
   }
 
   function canSeeLive(){
@@ -405,10 +423,19 @@
   }
 
   function statusLabel(status){
-    if(status === "finished") return "Terminé";
-    if(status === "pending_validation") return "À valider";
-    if(status === "live") return "En direct";
+    if(status === "available") return "Disponible";
+    if(status === "taken") return "En direct";
+    if(status === "finished") return "Score proposé";
+    if(status === "final_sent") return "Score proposé";
+    if(status === "validated") return "Validé";
     return "En attente";
+  }
+
+  function statusClass(status){
+    if(status === "taken") return "";
+    if(status === "finished" || status === "final_sent") return "wait";
+    if(status === "validated") return "done";
+    return "wait";
   }
 
   function scoreValue(v){
@@ -416,19 +443,107 @@
     return String(v);
   }
 
-  function teamName(match, side){
-    if(side === "A"){
-      return match.teamA || "Équipe A";
+  function isPointsMode(match){
+    return (match.inputMode || "points") === "points";
+  }
+
+  function isTieBreak(match){
+    const phase = match.currentPhase || "set1";
+
+    if(phase === "stb") return true;
+
+    if(phase === "set1"){
+      return Number(match.s1A || 0) === 6 && Number(match.s1B || 0) === 6;
     }
 
-    return match.teamB || "Équipe B";
+    if(phase === "set2"){
+      return Number(match.s2A || 0) === 6 && Number(match.s2B || 0) === 6;
+    }
+
+    return false;
+  }
+
+  function pointLabel(v, tieBreak){
+    const n = Number(v || 0);
+
+    if(tieBreak) return String(n);
+
+    if(n <= 0) return "0";
+    if(n === 1) return "15";
+    if(n === 2) return "30";
+    return "40";
+  }
+
+  function teamName(match, side){
+    return side === "A"
+      ? (match.teamA || "Équipe A")
+      : (match.teamB || "Équipe B");
   }
 
   function isServer(match, side){
-    return String(match.serverSide || "") === side;
+    return String(match.servingSide || match.serverSide || "") === side;
   }
 
-  function renderLiveCard(match){
+  function normalizeMatch(match){
+    const m = { ...(match || {}) };
+
+    if(m.serverSide && !m.servingSide) m.servingSide = m.serverSide;
+    if(m.servingSide && !m.serverSide) m.serverSide = m.servingSide;
+
+    if(m.s1A === undefined && m.gamesA !== undefined) m.s1A = m.gamesA;
+    if(m.s1B === undefined && m.gamesB !== undefined) m.s1B = m.gamesB;
+
+    if(m.s2A === undefined && m.games2A !== undefined) m.s2A = m.games2A;
+    if(m.s2B === undefined && m.games2B !== undefined) m.s2B = m.games2B;
+
+    return m;
+  }
+
+  function renderScoreRow(match, side){
+    const pointsMode = isPointsMode(match);
+    const tieBreak = isTieBreak(match);
+
+    return `
+      <div class="score-row ${pointsMode ? "" : "no-points"} ${isServer(match, side) ? "server" : ""}">
+        <div>
+          <div class="team-name">${esc(teamName(match, side))}</div>
+          ${isServer(match, side) ? `<span class="serve">Service</span>` : ""}
+        </div>
+
+        ${
+          pointsMode
+            ? `
+              <div class="score-cell">
+                <div class="score-label">Pts</div>
+                <div class="score-value">
+                  ${esc(pointLabel(side === "A" ? match.pointsA : match.pointsB, tieBreak))}
+                </div>
+              </div>
+            `
+            : ""
+        }
+
+        <div class="score-cell">
+          <div class="score-label">Set 1</div>
+          <div class="score-value">${esc(scoreValue(side === "A" ? match.s1A : match.s1B))}</div>
+        </div>
+
+        <div class="score-cell">
+          <div class="score-label">Set 2</div>
+          <div class="score-value">${esc(scoreValue(side === "A" ? match.s2A : match.s2B))}</div>
+        </div>
+
+        <div class="score-cell">
+          <div class="score-label">STB</div>
+          <div class="score-value">${esc(scoreValue(side === "A" ? match.stbA : match.stbB))}</div>
+        </div>
+      </div>
+    `;
+  }
+
+  function renderLiveCard(rawMatch){
+    const match = normalizeMatch(rawMatch);
+
     const cls =
       match.court === "A"
         ? "courtA"
@@ -436,7 +551,7 @@
           ? "courtB"
           : "";
 
-    const status = match.status || "live";
+    const status = match.status || "available";
 
     return `
       <div class="live-card ${esc(cls)}">
@@ -444,61 +559,22 @@
           <div class="slot">#${esc(match.order || "—")}</div>
           <div class="time">${esc(match.time || "—")}</div>
           <div class="court">${esc(courtLabel(match.court))}</div>
-          <div class="live-pill">
+          <div class="live-pill ${esc(statusClass(status))}">
             <span class="dot"></span>
             ${esc(statusLabel(status))}
           </div>
         </div>
 
         <div class="score-board">
-          <div class="score-row ${isServer(match, "A") ? "server" : ""}">
-            <div>
-              <div class="team-name">${esc(teamName(match, "A"))}</div>
-              ${isServer(match, "A") ? `<span class="serve">Service</span>` : ""}
-            </div>
-
-            <div class="score-cell">
-              <div class="score-label">Pts</div>
-              <div class="score-value">${esc(scoreValue(match.pointsA))}</div>
-            </div>
-
-            <div class="score-cell">
-              <div class="score-label">Set 1</div>
-              <div class="score-value">${esc(scoreValue(match.set1A))}</div>
-            </div>
-
-            <div class="score-cell">
-              <div class="score-label">STB</div>
-              <div class="score-value">${esc(scoreValue(match.stbA))}</div>
-            </div>
-          </div>
-
-          <div class="score-row ${isServer(match, "B") ? "server" : ""}">
-            <div>
-              <div class="team-name">${esc(teamName(match, "B"))}</div>
-              ${isServer(match, "B") ? `<span class="serve">Service</span>` : ""}
-            </div>
-
-            <div class="score-cell">
-              <div class="score-label">Pts</div>
-              <div class="score-value">${esc(scoreValue(match.pointsB))}</div>
-            </div>
-
-            <div class="score-cell">
-              <div class="score-label">Set 1</div>
-              <div class="score-value">${esc(scoreValue(match.set1B))}</div>
-            </div>
-
-            <div class="score-cell">
-              <div class="score-label">STB</div>
-              <div class="score-value">${esc(scoreValue(match.stbB))}</div>
-            </div>
-          </div>
+          ${renderScoreRow(match, "A")}
+          ${renderScoreRow(match, "B")}
         </div>
 
         <div class="meta">
           ${esc(match.label || match.matchId || "Match")}
-          ${match.arbitreName ? ` · Arbitre : ${esc(match.arbitreName)}` : ""}
+          ${match.takenByEmail ? ` · Arbitre : ${esc(match.takenByEmail)}` : ""}
+          ${match.refereeName ? ` · Arbitre : ${esc(match.refereeName)}` : ""}
+          ${match.inputMode === "games" ? " · Saisie jeu par jeu" : " · Saisie point par point"}
         </div>
       </div>
     `;
@@ -509,7 +585,7 @@
       .filter(m => m.publicHidden !== true)
       .filter(m => m.status !== "closed")
       .sort((a,b)=>{
-        if(Number(a.order) !== Number(b.order)){
+        if(Number(a.order || 9999) !== Number(b.order || 9999)){
           return Number(a.order || 9999) - Number(b.order || 9999);
         }
 
