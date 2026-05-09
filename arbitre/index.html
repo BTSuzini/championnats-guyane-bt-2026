@@ -224,13 +224,6 @@
       cursor:not-allowed;
     }
 
-    .actions{
-      display:flex;
-      gap:10px;
-      flex-wrap:wrap;
-      margin-top:12px;
-    }
-
     .score-board{
       display:grid;
       gap:12px;
@@ -243,8 +236,8 @@
       background:#fff;
       padding:14px;
       display:grid;
-      grid-template-columns:minmax(0,1fr) 62px 62px 74px;
-      gap:8px;
+      grid-template-columns:minmax(0,1fr) 52px 52px 52px 62px;
+      gap:7px;
       align-items:center;
       box-shadow:0 8px 18px rgba(16,24,40,.06);
     }
@@ -252,6 +245,10 @@
     .team-score.server{
       border-color:#16a34a;
       background:linear-gradient(135deg,#ecfdf5,#fff);
+    }
+
+    .team-score.games-mode{
+      grid-template-columns:minmax(0,1fr) 52px 52px 62px;
     }
 
     .team-name{
@@ -287,39 +284,23 @@
       font-weight:1000;
     }
 
+    .score-box.hidden{
+      display:none;
+    }
+
     .score-label{
-      font-size:10px;
+      font-size:9px;
       color:#667085;
       text-transform:uppercase;
-      letter-spacing:.06em;
+      letter-spacing:.04em;
       margin-bottom:3px;
+      text-align:center;
     }
 
     .score-value{
-      font-size:22px;
+      font-size:20px;
       line-height:1;
       color:#111827;
-    }
-
-    .mode-toggle{
-      display:grid;
-      grid-template-columns:1fr 1fr;
-      gap:10px;
-      margin-top:14px;
-    }
-
-    .mode-btn{
-      border:1px solid rgba(7,91,154,.14);
-      background:#fff;
-      border-radius:18px;
-      padding:12px;
-      font-weight:1000;
-      cursor:pointer;
-    }
-
-    .mode-btn.active{
-      background:linear-gradient(180deg,var(--blue),var(--blue-dark));
-      color:#fff;
     }
 
     .controls{
@@ -373,6 +354,34 @@
       border-color:#f1b2b2;
     }
 
+    .mode-toggle{
+      display:grid;
+      grid-template-columns:1fr 1fr;
+      gap:10px;
+      margin-top:14px;
+    }
+
+    .mode-btn{
+      border:1px solid rgba(7,91,154,.14);
+      background:#fff;
+      border-radius:18px;
+      padding:12px;
+      font-weight:1000;
+      cursor:pointer;
+    }
+
+    .mode-btn.active{
+      background:linear-gradient(180deg,var(--blue),var(--blue-dark));
+      color:#fff;
+    }
+
+    .actions{
+      display:flex;
+      gap:10px;
+      flex-wrap:wrap;
+      margin-top:12px;
+    }
+
     .muted{
       color:var(--muted);
       font-size:14px;
@@ -395,18 +404,26 @@
         width:min(var(--container), calc(100% - 18px));
       }
 
+      .panel{
+        padding:14px;
+      }
+
       .panel-title{font-size:23px;}
 
       .team-score{
-        grid-template-columns:minmax(0,1fr) 50px 50px 62px;
-        gap:6px;
-        padding:12px;
+        grid-template-columns:minmax(0,1fr) 44px 44px 44px 52px;
+        gap:5px;
+        padding:11px;
+      }
+
+      .team-score.games-mode{
+        grid-template-columns:minmax(0,1fr) 44px 44px 52px;
       }
 
       .team-name{font-size:14px;}
-      .score-box{min-height:48px;}
-      .score-value{font-size:19px;}
-      .score-label{font-size:9px;}
+      .score-box{min-height:46px;}
+      .score-value{font-size:18px;}
+      .score-label{font-size:8px;}
 
       .controls{
         grid-template-columns:1fr;
@@ -414,6 +431,10 @@
 
       .mode-btn{
         font-size:13px;
+      }
+
+      .actions .btn{
+        flex:1 1 auto;
       }
     }
   </style>
@@ -462,41 +483,75 @@
     <div id="scoreUI" style="display:none;">
 
       <div class="score-board">
-        <div class="team-score" id="teamBoxA">
+        <div class="team-score" id="teamBoxTop">
           <div class="team-name">
-            <span id="teamAName">Équipe A</span>
-            <div class="serve-label" id="serveA" style="display:none;">Service</div>
+            <span id="teamTopName">Équipe haut</span>
+            <div class="serve-label" id="serveTop" style="display:none;">Service</div>
           </div>
-          <div class="score-box" id="pointsBoxA">
-            <div class="score-label">Points</div>
-            <div class="score-value" id="pointsA">0</div>
+
+          <div class="score-box" id="pointsBoxTop">
+            <div class="score-label">Pts</div>
+            <div class="score-value" id="pointsTop">0</div>
           </div>
+
           <div class="score-box">
             <div class="score-label">Set 1</div>
-            <div class="score-value" id="setA">0</div>
+            <div class="score-value" id="set1Top">0</div>
           </div>
+
+          <div class="score-box">
+            <div class="score-label">Set 2</div>
+            <div class="score-value" id="set2Top">0</div>
+          </div>
+
           <div class="score-box">
             <div class="score-label">STB</div>
-            <div class="score-value" id="stbA">0</div>
+            <div class="score-value" id="stbTop">0</div>
           </div>
         </div>
 
-        <div class="team-score" id="teamBoxB">
+        <div class="team-score" id="teamBoxBottom">
           <div class="team-name">
-            <span id="teamBName">Équipe B</span>
-            <div class="serve-label" id="serveB" style="display:none;">Service</div>
+            <span id="teamBottomName">Équipe bas</span>
+            <div class="serve-label" id="serveBottom" style="display:none;">Service</div>
           </div>
-          <div class="score-box" id="pointsBoxB">
-            <div class="score-label">Points</div>
-            <div class="score-value" id="pointsB">0</div>
+
+          <div class="score-box" id="pointsBoxBottom">
+            <div class="score-label">Pts</div>
+            <div class="score-value" id="pointsBottom">0</div>
           </div>
+
           <div class="score-box">
             <div class="score-label">Set 1</div>
-            <div class="score-value" id="setB">0</div>
+            <div class="score-value" id="set1Bottom">0</div>
           </div>
+
+          <div class="score-box">
+            <div class="score-label">Set 2</div>
+            <div class="score-value" id="set2Bottom">0</div>
+          </div>
+
           <div class="score-box">
             <div class="score-label">STB</div>
-            <div class="score-value" id="stbB">0</div>
+            <div class="score-value" id="stbBottom">0</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="controls">
+        <div class="control-card">
+          <div class="control-title" id="controlTitleTop">Équipe haut</div>
+          <div class="control-row">
+            <button class="big-btn plus" id="btnPlusTop" type="button">+1</button>
+            <button class="big-btn minus" id="btnMinusTop" type="button">−1</button>
+          </div>
+        </div>
+
+        <div class="control-card">
+          <div class="control-title" id="controlTitleBottom">Équipe bas</div>
+          <div class="control-row">
+            <button class="big-btn plus" id="btnPlusBottom" type="button">+1</button>
+            <button class="big-btn minus" id="btnMinusBottom" type="button">−1</button>
           </div>
         </div>
       </div>
@@ -508,43 +563,26 @@
 
       <div class="actions">
         <button class="btn green" id="btnTakeMatch" type="button">🙋 Prendre ce match</button>
-        <button class="btn" id="btnServerA" type="button">Service équipe du haut</button>
-        <button class="btn" id="btnServerB" type="button">Service équipe du bas</button>
+        <button class="btn" id="btnServerTop" type="button">Service équipe du haut</button>
+        <button class="btn" id="btnServerBottom" type="button">Service équipe du bas</button>
         <button class="btn danger" id="btnResetLocal" type="button">↩️ Remettre ce score à zéro</button>
       </div>
 
-      <div class="controls">
-        <div class="control-card">
-          <div class="control-title" id="controlTitleA">Équipe A</div>
-          <div class="control-row">
-            <button class="big-btn plus" id="btnPlusA" type="button">+1</button>
-            <button class="big-btn minus" id="btnMinusA" type="button">−1</button>
-          </div>
-        </div>
-
-        <div class="control-card">
-          <div class="control-title" id="controlTitleB">Équipe B</div>
-          <div class="control-row">
-            <button class="big-btn plus" id="btnPlusB" type="button">+1</button>
-            <button class="big-btn minus" id="btnMinusB" type="button">−1</button>
-          </div>
-        </div>
-      </div>
-
       <div class="actions">
-        <button class="btn primary" id="btnValidateSet1" type="button">✅ Valider le set 1</button>
-        <button class="btn primary" id="btnValidateSTB" type="button">✅ Valider le super tie-break</button>
+        <button class="btn primary" id="btnValidateSet1" type="button">✅ Valider set 1</button>
+        <button class="btn primary" id="btnValidateSet2" type="button">✅ Valider set 2</button>
+        <button class="btn primary" id="btnValidateSTB" type="button">✅ Valider STB</button>
         <button class="btn primary" id="btnSendFinal" type="button">📤 Envoyer score final au JAT</button>
       </div>
 
       <p class="muted" style="margin-top:12px;">
-        Le JAT garde la validation finale du résultat. Cette page alimente le live et prépare le score.
+        L’équipe au service est toujours affichée en haut. Le JAT garde la validation finale du résultat.
       </p>
     </div>
   </section>
 
 </main>
-  <script type="module">
+<script type="module">
   import { auth, db } from "../assets/js/firebase.js";
   import { getRoleByUid } from "../assets/js/session.js";
 
@@ -571,44 +609,48 @@
   const emptyBox = document.getElementById("emptyBox");
   const scoreUI = document.getElementById("scoreUI");
 
-  const teamBoxA = document.getElementById("teamBoxA");
-  const teamBoxB = document.getElementById("teamBoxB");
+  const teamBoxTop = document.getElementById("teamBoxTop");
+  const teamBoxBottom = document.getElementById("teamBoxBottom");
 
-  const teamAName = document.getElementById("teamAName");
-  const teamBName = document.getElementById("teamBName");
+  const teamTopName = document.getElementById("teamTopName");
+  const teamBottomName = document.getElementById("teamBottomName");
 
-  const serveA = document.getElementById("serveA");
-  const serveB = document.getElementById("serveB");
+  const serveTop = document.getElementById("serveTop");
+  const serveBottom = document.getElementById("serveBottom");
 
-  const pointsBoxA = document.getElementById("pointsBoxA");
-  const pointsBoxB = document.getElementById("pointsBoxB");
+  const pointsBoxTop = document.getElementById("pointsBoxTop");
+  const pointsBoxBottom = document.getElementById("pointsBoxBottom");
 
-  const pointsA = document.getElementById("pointsA");
-  const pointsB = document.getElementById("pointsB");
-  const setA = document.getElementById("setA");
-  const setB = document.getElementById("setB");
-  const stbA = document.getElementById("stbA");
-  const stbB = document.getElementById("stbB");
+  const pointsTop = document.getElementById("pointsTop");
+  const pointsBottom = document.getElementById("pointsBottom");
+
+  const set1Top = document.getElementById("set1Top");
+  const set1Bottom = document.getElementById("set1Bottom");
+  const set2Top = document.getElementById("set2Top");
+  const set2Bottom = document.getElementById("set2Bottom");
+  const stbTop = document.getElementById("stbTop");
+  const stbBottom = document.getElementById("stbBottom");
 
   const btnModePoints = document.getElementById("btnModePoints");
   const btnModeGames = document.getElementById("btnModeGames");
 
   const btnTakeMatch = document.getElementById("btnTakeMatch");
-  const btnServerA = document.getElementById("btnServerA");
-  const btnServerB = document.getElementById("btnServerB");
+  const btnServerTop = document.getElementById("btnServerTop");
+  const btnServerBottom = document.getElementById("btnServerBottom");
   const btnResetLocal = document.getElementById("btnResetLocal");
 
-  const btnPlusA = document.getElementById("btnPlusA");
-  const btnMinusA = document.getElementById("btnMinusA");
-  const btnPlusB = document.getElementById("btnPlusB");
-  const btnMinusB = document.getElementById("btnMinusB");
+  const btnPlusTop = document.getElementById("btnPlusTop");
+  const btnMinusTop = document.getElementById("btnMinusTop");
+  const btnPlusBottom = document.getElementById("btnPlusBottom");
+  const btnMinusBottom = document.getElementById("btnMinusBottom");
 
   const btnValidateSet1 = document.getElementById("btnValidateSet1");
+  const btnValidateSet2 = document.getElementById("btnValidateSet2");
   const btnValidateSTB = document.getElementById("btnValidateSTB");
   const btnSendFinal = document.getElementById("btnSendFinal");
 
-  const controlTitleA = document.getElementById("controlTitleA");
-  const controlTitleB = document.getElementById("controlTitleB");
+  const controlTitleTop = document.getElementById("controlTitleTop");
+  const controlTitleBottom = document.getElementById("controlTitleBottom");
 
   let currentRole = null;
   let currentUser = null;
@@ -620,6 +662,9 @@
 
   let inputMode = "points";
   let currentPhase = "set1";
+
+  let topSide = "A";
+  let bottomSide = "B";
 
   let unsubProg = null;
   let unsubLive = null;
@@ -663,20 +708,37 @@
     return {
       eventId:EVENT_ID,
       matchId:match.id,
-      status:"sent",
+      status:"available",
+
       takenBy:null,
       takenByEmail:null,
+
+      servingSide:"A",
       serverSide:"A",
+
       inputMode:"points",
       currentPhase:"set1",
+
       pointsA:0,
       pointsB:0,
+
+      s1A:0,
+      s1B:0,
       gamesA:0,
       gamesB:0,
+
+      s2A:0,
+      s2B:0,
+      games2A:0,
+      games2B:0,
+
       stbA:0,
       stbB:0,
+
       set1Validated:false,
+      set2Validated:false,
       stbValidated:false,
+
       teamA:match.teamA || "Équipe A",
       teamB:match.teamB || "Équipe B",
       label:match.label || match.id,
@@ -696,9 +758,15 @@
     return null;
   }
 
+  function liveStatusOk(live){
+    return live
+      && live.status !== "closed"
+      && live.status !== "validated";
+  }
+
   function sentMatches(){
     return allMatches()
-      .filter(match => liveMatches.has(match.id))
+      .filter(match => liveStatusOk(liveMatches.get(match.id)))
       .sort((a,b)=>{
         if(Number(a.order) !== Number(b.order)){
           return Number(a.order) - Number(b.order);
@@ -717,7 +785,7 @@
 
     matchStrip.innerHTML = list.map(match => {
       const live = getLive(match.id);
-      const mine = live?.takenBy === currentUser?.uid;
+      const mine = live?.takenBy === currentUser?.uid || live?.refereeUid === currentUser?.uid;
       const active = selectedMatchId === match.id;
 
       return `
@@ -734,6 +802,33 @@
     }).join("");
   }
 
+  function sideName(live, side){
+    if(side === "A") return live?.teamA || "Équipe A";
+    return live?.teamB || "Équipe B";
+  }
+
+  function sideValue(live, side, keyA, keyB, fallback = 0){
+    const key = side === "A" ? keyA : keyB;
+    return live?.[key] ?? fallback;
+  }
+
+  function currentSetKeys(){
+    if(currentPhase === "set2") return ["s2A", "s2B"];
+    return ["s1A", "s1B"];
+  }
+
+  function getCurrentGames(live, side){
+    if(currentPhase === "set2"){
+      return Number(sideValue(live, side, "s2A", "s2B", 0) || 0);
+    }
+
+    if(currentPhase === "set1"){
+      return Number(sideValue(live, side, "s1A", "s1B", 0) || 0);
+    }
+
+    return Number(sideValue(live, side, "stbA", "stbB", 0) || 0);
+  }
+
   function pointLabel(v, tieBreak = false){
     const n = Number(v || 0);
 
@@ -745,8 +840,35 @@
     return "40";
   }
 
-  function isTieBreakSet1(live){
-    return Number(live?.gamesA || 0) === 6 && Number(live?.gamesB || 0) === 6;
+  function isTieBreakCurrentSet(live){
+    if(currentPhase !== "set1" && currentPhase !== "set2") return false;
+
+    const a = getCurrentGames(live, "A");
+    const b = getCurrentGames(live, "B");
+
+    return a === 6 && b === 6;
+  }
+
+  function normalizeLive(live){
+    const x = { ...(live || {}) };
+
+    if(x.servingSide && !x.serverSide) x.serverSide = x.servingSide;
+    if(x.serverSide && !x.servingSide) x.servingSide = x.serverSide;
+
+    if(x.s1A === undefined && x.gamesA !== undefined) x.s1A = x.gamesA;
+    if(x.s1B === undefined && x.gamesB !== undefined) x.s1B = x.gamesB;
+
+    if(x.s2A === undefined) x.s2A = x.games2A || 0;
+    if(x.s2B === undefined) x.s2B = x.games2B || 0;
+
+    return x;
+  }
+
+  function updateTopBottomFromServer(live){
+    const server = live?.servingSide || live?.serverSide || "A";
+
+    topSide = server === "B" ? "B" : "A";
+    bottomSide = topSide === "A" ? "B" : "A";
   }
 
   function renderScore(){
@@ -761,7 +883,7 @@
     }
 
     const match = matchById(selectedMatchId);
-    const live = getLive(selectedMatchId);
+    let live = getLive(selectedMatchId);
 
     if(!match || !live){
       emptyBox.style.display = "block";
@@ -771,6 +893,7 @@
       return;
     }
 
+    live = normalizeLive(live);
     selectedLive = live;
 
     emptyBox.style.display = "none";
@@ -779,41 +902,60 @@
     inputMode = live.inputMode || inputMode || "points";
     currentPhase = live.currentPhase || currentPhase || "set1";
 
-    const teamA = live.teamA || match.teamA || "Équipe A";
-    const teamB = live.teamB || match.teamB || "Équipe B";
+    updateTopBottomFromServer(live);
 
-    teamAName.textContent = teamA;
-    teamBName.textContent = teamB;
-    controlTitleA.textContent = teamA;
-    controlTitleB.textContent = teamB;
+    const topName = sideName(live, topSide);
+    const bottomName = sideName(live, bottomSide);
+
+    teamTopName.textContent = topName;
+    teamBottomName.textContent = bottomName;
+    controlTitleTop.textContent = topName;
+    controlTitleBottom.textContent = bottomName;
+
+    btnServerTop.textContent = `🎾 Service : ${topName}`;
+    btnServerBottom.textContent = `🎾 Service : ${bottomName}`;
 
     matchInfo.textContent = `#${match.order || "—"} · ${match.time || "—"} · ${match.label || match.id}`;
-    matchStatus.textContent = live.status === "final_sent" ? "Score envoyé" : "Live";
+    matchStatus.textContent = live.status === "final_sent" || live.status === "finished"
+      ? "Score envoyé"
+      : "Live";
 
-    const tb = currentPhase === "stb" || isTieBreakSet1(live);
+    const tieBreak = currentPhase === "stb" || isTieBreakCurrentSet(live);
 
-    pointsA.textContent = pointLabel(live.pointsA, tb);
-    pointsB.textContent = pointLabel(live.pointsB, tb);
-    setA.textContent = String(live.gamesA || 0);
-    setB.textContent = String(live.gamesB || 0);
-    stbA.textContent = String(live.stbA || 0);
-    stbB.textContent = String(live.stbB || 0);
+    pointsTop.textContent = pointLabel(sideValue(live, topSide, "pointsA", "pointsB", 0), tieBreak);
+    pointsBottom.textContent = pointLabel(sideValue(live, bottomSide, "pointsA", "pointsB", 0), tieBreak);
 
-    const server = live.serverSide === "B" ? "B" : "A";
+    set1Top.textContent = String(sideValue(live, topSide, "s1A", "s1B", 0));
+    set1Bottom.textContent = String(sideValue(live, bottomSide, "s1A", "s1B", 0));
 
-    teamBoxA.classList.toggle("server", server === "A");
-    teamBoxB.classList.toggle("server", server === "B");
-    serveA.style.display = server === "A" ? "inline-flex" : "none";
-    serveB.style.display = server === "B" ? "inline-flex" : "none";
+    set2Top.textContent = String(sideValue(live, topSide, "s2A", "s2B", 0));
+    set2Bottom.textContent = String(sideValue(live, bottomSide, "s2A", "s2B", 0));
+
+    stbTop.textContent = String(sideValue(live, topSide, "stbA", "stbB", 0));
+    stbBottom.textContent = String(sideValue(live, bottomSide, "stbA", "stbB", 0));
+
+    teamBoxTop.classList.add("server");
+    teamBoxBottom.classList.remove("server");
+    serveTop.style.display = "inline-flex";
+    serveBottom.style.display = "none";
 
     btnModePoints.classList.toggle("active", inputMode === "points");
     btnModeGames.classList.toggle("active", inputMode === "games");
 
-    pointsBoxA.style.display = inputMode === "points" ? "flex" : "none";
-    pointsBoxB.style.display = inputMode === "points" ? "flex" : "none";
+    pointsBoxTop.classList.toggle("hidden", inputMode !== "points");
+    pointsBoxBottom.classList.toggle("hidden", inputMode !== "points");
 
-    btnTakeMatch.textContent = live.takenBy
-      ? (live.takenBy === currentUser?.uid ? "✅ Match pris par toi" : `👀 Pris par ${live.takenByEmail || "un arbitre"}`)
+    teamBoxTop.classList.toggle("games-mode", inputMode !== "points");
+    teamBoxBottom.classList.toggle("games-mode", inputMode !== "points");
+
+    btnValidateSet1.disabled = currentPhase !== "set1";
+    btnValidateSet2.disabled = currentPhase !== "set2";
+    btnValidateSTB.disabled = currentPhase !== "stb";
+
+    btnTakeMatch.textContent = live.takenBy || live.refereeUid
+      ? ((live.takenBy === currentUser?.uid || live.refereeUid === currentUser?.uid)
+          ? "✅ Match pris par toi"
+          : `👀 Pris par ${live.takenByEmail || live.refereeName || "un arbitre"}`)
       : "🙋 Prendre ce match";
   }
 
@@ -834,11 +976,17 @@
     const match = matchById(selectedMatchId);
     if(!match) return;
 
+    const existing = liveMatches.get(selectedMatchId) || {};
+    const base = defaultLiveFor(match);
+
     await setDoc(liveRef(selectedMatchId), {
-      ...defaultLiveFor(match),
+      ...base,
+      ...existing,
+      status:"taken",
       takenBy:currentUser?.uid || null,
       takenByEmail:currentUser?.email || null,
-      status:"taken",
+      refereeUid:currentUser?.uid || null,
+      refereeName:currentUser?.email || null,
       updatedAt:serverTimestamp(),
       updatedBy:currentUser?.uid || null
     }, { merge:true });
@@ -848,8 +996,15 @@
     return side === "A" ? "B" : "A";
   }
 
+  async function setServer(side){
+    await patchLive({
+      servingSide:side,
+      serverSide:side
+    });
+  }
+
   async function addGame(side){
-    const live = selectedLive;
+    const live = normalizeLive(selectedLive);
     if(!live) return;
 
     if(currentPhase === "stb"){
@@ -858,17 +1013,34 @@
       return;
     }
 
-    const key = side === "A" ? "gamesA" : "gamesB";
-    await patchLive({
+    const [keyA, keyB] = currentSetKeys();
+    const key = side === "A" ? keyA : keyB;
+
+    const currentServer = live.servingSide || live.serverSide || "A";
+
+    const patch = {
       [key]:Math.min(7, Number(live[key] || 0) + 1),
       pointsA:0,
       pointsB:0,
-      serverSide:nextServer(live.serverSide === "B" ? "B" : "A")
-    });
+      servingSide:nextServer(currentServer),
+      serverSide:nextServer(currentServer)
+    };
+
+    if(currentPhase === "set1"){
+      patch.gamesA = side === "A" ? patch[key] : Number(live.s1A || 0);
+      patch.gamesB = side === "B" ? patch[key] : Number(live.s1B || 0);
+    }
+
+    if(currentPhase === "set2"){
+      patch.games2A = side === "A" ? patch[key] : Number(live.s2A || 0);
+      patch.games2B = side === "B" ? patch[key] : Number(live.s2B || 0);
+    }
+
+    await patchLive(patch);
   }
 
   async function removeGame(side){
-    const live = selectedLive;
+    const live = normalizeLive(selectedLive);
     if(!live) return;
 
     if(currentPhase === "stb"){
@@ -877,12 +1049,27 @@
       return;
     }
 
-    const key = side === "A" ? "gamesA" : "gamesB";
-    await patchLive({ [key]:Math.max(0, Number(live[key] || 0) - 1) });
+    const [keyA, keyB] = currentSetKeys();
+    const key = side === "A" ? keyA : keyB;
+    const next = Math.max(0, Number(live[key] || 0) - 1);
+
+    const patch = { [key]:next };
+
+    if(currentPhase === "set1"){
+      patch.gamesA = side === "A" ? next : Number(live.s1A || 0);
+      patch.gamesB = side === "B" ? next : Number(live.s1B || 0);
+    }
+
+    if(currentPhase === "set2"){
+      patch.games2A = side === "A" ? next : Number(live.s2A || 0);
+      patch.games2B = side === "B" ? next : Number(live.s2B || 0);
+    }
+
+    await patchLive(patch);
   }
 
   async function addPoint(side){
-    const live = selectedLive;
+    const live = normalizeLive(selectedLive);
     if(!live) return;
 
     if(inputMode === "games"){
@@ -890,7 +1077,7 @@
       return;
     }
 
-    if(currentPhase === "stb" || isTieBreakSet1(live)){
+    if(currentPhase === "stb" || isTieBreakCurrentSet(live)){
       const key = side === "A" ? "pointsA" : "pointsB";
       await patchLive({ [key]:Number(live[key] || 0) + 1 });
       return;
@@ -907,7 +1094,7 @@
   }
 
   async function removePoint(side){
-    const live = selectedLive;
+    const live = normalizeLive(selectedLive);
     if(!live) return;
 
     if(inputMode === "games"){
@@ -920,11 +1107,17 @@
   }
 
   async function validateSet1(){
-    const live = selectedLive;
-    if(!live) return;
-
     await patchLive({
       set1Validated:true,
+      pointsA:0,
+      pointsB:0,
+      currentPhase:"set2"
+    });
+  }
+
+  async function validateSet2(){
+    await patchLive({
+      set2Validated:true,
       pointsA:0,
       pointsB:0,
       currentPhase:"stb"
@@ -939,14 +1132,14 @@
   }
 
   async function sendFinalToJat(){
-    const live = selectedLive;
+    const live = normalizeLive(selectedLive);
     if(!live || !selectedMatchId) return;
 
     const payload = {
-      s1A:String(live.gamesA || 0),
-      s1B:String(live.gamesB || 0),
-      s2A:"",
-      s2B:"",
+      s1A:String(live.s1A || 0),
+      s1B:String(live.s1B || 0),
+      s2A:String(live.s2A || 0),
+      s2B:String(live.s2B || 0),
       s3A:String(live.stbA || 0),
       s3B:String(live.stbB || 0),
       proposedByArbitre:true,
@@ -955,20 +1148,24 @@
       updatedBy:currentUser?.uid || null
     };
 
-    const setsA =
-      Number(payload.s1A) > Number(payload.s1B) ? 1 : 0
-      + (Number(payload.s3A) > Number(payload.s3B) ? 1 : 0);
+    let setsA = 0;
+    let setsB = 0;
 
-    const setsB =
-      Number(payload.s1B) > Number(payload.s1A) ? 1 : 0
-      + (Number(payload.s3B) > Number(payload.s3A) ? 1 : 0);
+    if(Number(payload.s1A) > Number(payload.s1B)) setsA++;
+    else if(Number(payload.s1B) > Number(payload.s1A)) setsB++;
+
+    if(Number(payload.s2A) > Number(payload.s2B)) setsA++;
+    else if(Number(payload.s2B) > Number(payload.s2A)) setsB++;
+
+    if(Number(payload.s3A) > Number(payload.s3B)) setsA++;
+    else if(Number(payload.s3B) > Number(payload.s3A)) setsB++;
 
     payload.winnerSide = setsA > setsB ? "A" : setsB > setsA ? "B" : null;
 
     await setDoc(resultRef(selectedMatchId), payload, { merge:true });
 
     await patchLive({
-      status:"final_sent",
+      status:"finished",
       sentToJatAt:serverTimestamp()
     });
 
@@ -982,13 +1179,21 @@
     await patchLive({
       pointsA:0,
       pointsB:0,
+      s1A:0,
+      s1B:0,
       gamesA:0,
       gamesB:0,
+      s2A:0,
+      s2B:0,
+      games2A:0,
+      games2B:0,
       stbA:0,
       stbB:0,
+      servingSide:"A",
       serverSide:"A",
       currentPhase:"set1",
       set1Validated:false,
+      set2Validated:false,
       stbValidated:false,
       status:"taken"
     });
@@ -1004,18 +1209,19 @@
 
   btnTakeMatch.onclick = takeMatch;
 
-  btnServerA.onclick = () => patchLive({ serverSide:"A" });
-  btnServerB.onclick = () => patchLive({ serverSide:"B" });
+  btnServerTop.onclick = () => setServer(topSide);
+  btnServerBottom.onclick = () => setServer(bottomSide);
 
   btnModePoints.onclick = () => patchLive({ inputMode:"points" });
   btnModeGames.onclick = () => patchLive({ inputMode:"games" });
 
-  btnPlusA.onclick = () => addPoint("A");
-  btnMinusA.onclick = () => removePoint("A");
-  btnPlusB.onclick = () => addPoint("B");
-  btnMinusB.onclick = () => removePoint("B");
+  btnPlusTop.onclick = () => addPoint(topSide);
+  btnMinusTop.onclick = () => removePoint(topSide);
+  btnPlusBottom.onclick = () => addPoint(bottomSide);
+  btnMinusBottom.onclick = () => removePoint(bottomSide);
 
   btnValidateSet1.onclick = validateSet1;
+  btnValidateSet2.onclick = validateSet2;
   btnValidateSTB.onclick = validateSTB;
   btnSendFinal.onclick = sendFinalToJat;
   btnResetLocal.onclick = resetLocal;
@@ -1069,6 +1275,7 @@
   function showArbitre(){
     accessDenied.style.display = "none";
     pageContent.style.display = "block";
+
     rolePill.textContent = currentRole === "admin"
       ? "Admin"
       : currentRole === "jat"
