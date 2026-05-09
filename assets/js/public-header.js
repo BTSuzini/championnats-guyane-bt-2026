@@ -289,16 +289,16 @@ function renderHeader(){
         <div class="public-nav-wrap">
           <span class="public-nav-arrow left">‹</span>
           <nav class="public-nav" aria-label="Navigation publique">
-            <a class="public-nav-link" href="../index.html">🏠 Accueil</a>
-            <a class="${navClass("inscriptions.html")}" href="inscriptions.html">📝 Inscriptions</a>
-            <a class="${navClass("equipes.html")}" href="equipes.html">👥 Équipes</a>
-            <a class="${navClass("tirage.html")}" href="tirage.html">🎲 Tirage</a>
-            <a class="${navClass("programmation.html")}" href="programmation.html">📅 Programmation</a>
-            <a class="${navClass("resultats.html")}" href="resultats.html">🏆 Résultats</a>
-            <a class="${navClass("reglement.html")}" href="reglement.html">📘 Règlement</a>
-            <a class="${navClass("restauration.html")}" href="restauration.html">🍽️ Restauration</a>
-            <a class="${navClass("contact.html")}" href="contact.html">📩 Contact</a>
-          </nav>
+  <a class="public-nav-link" href="../index.html">🏠 Accueil</a>
+  <a class="${navClass("matchs-direct.html")}" href="matchs-direct.html">🔴 Matchs en direct</a>
+  <a class="${navClass("programmation.html")}" href="programmation.html">📅 Programmation</a>
+  <a class="${navClass("resultats.html")}" href="resultats.html">🏆 Résultats</a>
+  <a class="${navClass("equipes.html")}" href="equipes.html">👥 Équipes</a>
+  <a class="${navClass("tirage.html")}" href="tirage.html">🎲 Tirage</a>
+  <a class="${navClass("reglement.html")}" href="reglement.html">📘 Règlement</a>
+  <a class="${navClass("restauration.html")}" href="restauration.html">🍽️ Restauration</a>
+  <a class="${navClass("contact.html")}" href="contact.html">📩 Contact</a>
+</nav>
           <span class="public-nav-arrow right">›</span>
         </div>
       </div>
