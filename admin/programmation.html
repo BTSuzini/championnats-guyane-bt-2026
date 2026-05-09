@@ -222,6 +222,11 @@
       line-height:1.15;
     }
 
+    .team-name.placeholder{
+      color:#667085;
+      font-style:italic;
+    }
+
     .team-sub{
       margin-top:3px;
       font-size:13px;
@@ -269,13 +274,14 @@
     <div class="panel-head">
       <div>
         <h1 class="panel-title">📅 Programmation</h1>
-        <p class="panel-text">La génération se fait uniquement depuis la programmation générale.bbb</p>
+        <p class="panel-text">La génération se fait uniquement depuis la programmation générale.</p>
       </div>
       <div class="panel-tag">Admin</div>
     </div>
 
     <div class="status-box">
-      Vue actuelle : <strong id="zoneLabel">Chargement…</strong>
+      Vue actuelle : <strong id="zoneLabel">Chargement…</strong><br>
+      Les équipes issues des poules et des phases finales sont affichées dès que les résultats nécessaires sont saisis.
     </div>
 
     <div class="general-toggle">
@@ -368,34 +374,10 @@
   };
 
   const ORDER_TIMES = {
-    "-100":"Info",
-    "-99":"Info",
-    "-98":"Info",
-    "-97":"Info",
-    "-96":"Info",
-    "-95":"Info",
-    "-94":"Info",
-    "-93":"Info",
-    1:"09h00",
-    2:"09h45",
-    3:"10h30",
-    4:"11h15",
-    5:"12h00",
-    6:"12h45",
-    7:"13h30",
-    8:"14h00",
-    9:"14h30",
-    10:"15h00",
-    11:"15h30",
-    12:"16h00",
-    13:"16h30",
-    14:"17h30",
-    15:"18h30",
-    16:"19h00",
-    17:"19h30",
-    18:"20h00",
-    19:"20h30",
-    20:"21h30"
+    "-100":"Info", "-99":"Info", "-98":"Info", "-97":"Info", "-96":"Info", "-95":"Info", "-94":"Info", "-93":"Info",
+    1:"09h00", 2:"09h45", 3:"10h30", 4:"11h15", 5:"12h00", 6:"12h45", 7:"13h30",
+    8:"14h00", 9:"14h30", 10:"15h00", 11:"15h30", 12:"16h00", 13:"16h30",
+    14:"17h30", 15:"18h30", 16:"19h00", 17:"19h30", 18:"20h00", 19:"20h30", 20:"21h30"
   };
 
   const accessDenied = document.getElementById("accessDenied");
@@ -422,8 +404,11 @@
   let currentEpreuve = "DM";
   let generalMode = true;
   let currentProg = null;
+  let resultsMap = new Map();
+
   let unsubProg = null;
   let unsubVisibility = null;
+  let unsubResults = null;
 
   function esc(s){
     return (s ?? "").toString()
@@ -459,6 +444,10 @@
     return collection(db, "events", EVENT_ID, "equipes");
   }
 
+  function resultsCollection(){
+    return collection(db, "events", EVENT_ID, "resultats", "general", "matches");
+  }
+
   function visibilityRef(){
     return doc(db, "events", EVENT_ID, "config", "programmation");
   }
@@ -466,6 +455,7 @@
   function courtLabel(court){
     if(court === "A") return "🐝 Manon Queen Bee";
     if(court === "B") return "🌶️ Lisa de Los Pimentos";
+    if(court === "AUTO") return "🏆 Vainqueur";
     return "🎾 terrain";
   }
 
@@ -483,6 +473,33 @@
     if(v === null || v === undefined || v === "") return null;
     const n = typeof v === "number" ? v : Number(String(v).replace(",", ".").trim());
     return Number.isFinite(n) ? n : null;
+  }
+
+  function getResult(mid){
+    return resultsMap.get(mid) || null;
+  }
+
+    function computeWinnerSideFromScore(res){
+    if(!res) return null;
+
+    const sets = [
+      [toNum(res.s1A), toNum(res.s1B)],
+      [toNum(res.s2A), toNum(res.s2B)],
+      [toNum(res.s3A), toNum(res.s3B)]
+    ];
+
+    let setsA = 0;
+    let setsB = 0;
+
+    for(const [a,b] of sets){
+      if(a === null || b === null) continue;
+      if(a > b) setsA++;
+      else if(b > a) setsB++;
+    }
+
+    if(setsA > setsB) return "A";
+    if(setsB > setsA) return "B";
+    return null;
   }
 
   function teamRank(t){
@@ -724,21 +741,8 @@
     addMatch(matches, "MEN_SF1", 14, "A", {teamName:"1er Poule A"}, {teamName:"2e Poule B"}, "Seniors DM · 1/2 finale", {categorie:"Seniors", epreuve:"DM"});
     addMatch(matches, "MEN_SF2", 14, "B", {teamName:"1er Poule B"}, {teamName:"2e Poule A"}, "Seniors DM · 1/2 finale", {categorie:"Seniors", epreuve:"DM"});
 
-    /*
-      Poule seniors hommes places 5 à 7.
-      Les équipes sont :
-      - 3e Poule A
-      - 4e Poule A
-      - 3e Poule B
-
-      Matchs :
-      1) 4e Poule A vs 3e Poule B
-      2) 3e Poule A vs 3e Poule B
-      3) 3e Poule A vs 4e Poule A
-    */
-
     addMatch(matches, "MEN_5_7_A", 15, "A", {teamName:"4e Poule A"}, {teamName:"3e Poule B"}, "Seniors DM · Poule 5-7", {categorie:"Seniors", epreuve:"DM", phase:"poule_5_7"});
-    addMatch(matches, "GIRLS_5_6", 15, "B", {teamName:"5e filles"}, {teamName:"6e filles"}, "Seniors DD · Place 5-6", {categorie:"Seniors", epreuve:"DD"});
+    addMatch(matches, "GIRLS_5_6", 15, "B", {teamName:"3e Poule A"}, {teamName:"3e Poule B"}, "Seniors DD · Place 5-6", {categorie:"Seniors", epreuve:"DD"});
 
     addMatch(matches, "MEN_5_7_B", 16, "A", {teamName:"3e Poule A"}, {teamName:"3e Poule B"}, "Seniors DM · Poule 5-7", {categorie:"Seniors", epreuve:"DM", phase:"poule_5_7"});
     addMatch(matches, "GIRLS_3_4", 16, "B", {teamName:"Perdante DF1"}, {teamName:"Perdante DF2"}, "Seniors DD · Place 3-4", {categorie:"Seniors", epreuve:"DD"});
@@ -788,8 +792,12 @@
     await deleteDoc(generalProgRef());
   }
 
+  function allMatches(){
+    return Array.isArray(currentProg?.matches) ? [...currentProg.matches] : [];
+  }
+
   function visibleMatches(){
-    const matches = Array.isArray(currentProg?.matches) ? [...currentProg.matches] : [];
+    const matches = allMatches();
 
     if(generalMode) return matches;
 
@@ -797,6 +805,239 @@
       String(m.categorie || "") === currentCategorie &&
       String(m.epreuve || "") === currentEpreuve
     );
+  }
+
+  function findMatch(id){
+    return allMatches().find(m => m.id === id) || null;
+  }
+
+  function poolKeyFromMatch(match){
+    const label = String(match?.label || "");
+
+    if(label.includes("Poule 5-7")) return "Seniors_DM_5_7";
+    if(label.includes("Poule A")) return `${match.categorie}_${match.epreuve}_A`;
+    if(label.includes("Poule B")) return `${match.categorie}_${match.epreuve}_B`;
+    if(label.includes("Poule unique")) return `${match.categorie}_${match.epreuve}_U`;
+
+    return null;
+  }
+
+  function getPoolMatches(poolKey){
+    return allMatches().filter(m => poolKeyFromMatch(m) === poolKey);
+  }
+
+  function isPoolComplete(poolKey){
+    const list = getPoolMatches(poolKey);
+    if(!list.length) return false;
+    return list.every(m => computeWinnerSideFromScore(getResult(m.id)) !== null);
+  }
+
+  function poolTeamNameFromMatch(match, side){
+    if(!match) return "Équipe";
+
+    const raw = side === "A" ? match.teamA : match.teamB;
+    const sub = side === "A" ? match.subA : match.subB;
+    const resolved = resolveDynamicText(raw, match);
+
+    return resolved?.teamName || raw || sub || "Équipe";
+  }
+
+  function buildPoolRanking(poolKey){
+    const list = getPoolMatches(poolKey);
+    const stats = new Map();
+
+    function ensure(name){
+      const key = String(name || "Équipe").trim() || "Équipe";
+
+      if(!stats.has(key)){
+        stats.set(key, {
+          teamName:key,
+          points:0,
+          setsWon:0,
+          setsLost:0,
+          gamesWon:0,
+          gamesLost:0
+        });
+      }
+
+      return stats.get(key);
+    }
+
+    for(const match of list){
+      const res = getResult(match.id);
+      const winnerSide = computeWinnerSideFromScore(res);
+
+      const nameA = poolTeamNameFromMatch(match, "A");
+      const nameB = poolTeamNameFromMatch(match, "B");
+
+      const A = ensure(nameA);
+      const B = ensure(nameB);
+
+      if(!winnerSide) continue;
+
+      const sets = [
+        [toNum(res.s1A), toNum(res.s1B)],
+        [toNum(res.s2A), toNum(res.s2B)],
+        [toNum(res.s3A), toNum(res.s3B)]
+      ];
+
+      let setsA = 0;
+      let setsB = 0;
+
+      for(const [ga, gb] of sets){
+        if(ga === null || gb === null) continue;
+
+        A.gamesWon += ga;
+        A.gamesLost += gb;
+        B.gamesWon += gb;
+        B.gamesLost += ga;
+
+        if(ga > gb) setsA++;
+        else if(gb > ga) setsB++;
+      }
+
+      A.setsWon += setsA;
+      A.setsLost += setsB;
+      B.setsWon += setsB;
+      B.setsLost += setsA;
+
+      if(winnerSide === "A"){
+        A.points += 2;
+        B.points += 1;
+      }else{
+        B.points += 2;
+        A.points += 1;
+      }
+    }
+
+    return Array.from(stats.values()).sort((x,y)=>{
+      if(y.points !== x.points) return y.points - x.points;
+
+      const sdX = x.setsWon - x.setsLost;
+      const sdY = y.setsWon - y.setsLost;
+      if(sdY !== sdX) return sdY - sdX;
+
+      const gdX = x.gamesWon - x.gamesLost;
+      const gdY = y.gamesWon - y.gamesLost;
+      if(gdY !== gdX) return gdY - gdX;
+
+      return x.teamName.localeCompare(y.teamName, "fr");
+    });
+  }
+
+  function resolvePoolRank(categorie, epreuve, pool, rank){
+    const poolKey = `${categorie}_${epreuve}_${pool}`;
+
+    if(!isPoolComplete(poolKey)) return null;
+
+    const ranking = buildPoolRanking(poolKey);
+    return ranking[Number(rank) - 1] || null;
+  }
+
+  function resolveMatchWinnerOrLoser(matchId, want){
+    const source = findMatch(matchId);
+    const side = computeWinnerSideFromScore(getResult(matchId));
+
+    if(!source || (side !== "A" && side !== "B")) return null;
+
+    const targetSide = want === "winner"
+      ? side
+      : (side === "A" ? "B" : "A");
+
+    return displayTeam(
+      targetSide === "A" ? source.teamA : source.teamB,
+      targetSide === "A" ? source.subA : source.subB,
+      source
+    );
+  }
+
+  function resolveDynamicText(text, match){
+    const raw = String(text || "").trim();
+    if(!raw) return null;
+
+    const poolA1 = raw.match(/^1(?:er|re)?\s+Poule A$/i);
+    const poolA2 = raw.match(/^2e\s+Poule A$/i);
+    const poolA3 = raw.match(/^3e\s+Poule A$/i);
+    const poolA4 = raw.match(/^4e\s+Poule A$/i);
+
+    const poolB1 = raw.match(/^1(?:er|re)?\s+Poule B$/i);
+    const poolB2 = raw.match(/^2e\s+Poule B$/i);
+    const poolB3 = raw.match(/^3e\s+Poule B$/i);
+    const poolB4 = raw.match(/^4e\s+Poule B$/i);
+
+    if(poolA1) return resolvePoolRank(match.categorie, match.epreuve, "A", 1);
+    if(poolA2) return resolvePoolRank(match.categorie, match.epreuve, "A", 2);
+    if(poolA3) return resolvePoolRank(match.categorie, match.epreuve, "A", 3);
+    if(poolA4) return resolvePoolRank(match.categorie, match.epreuve, "A", 4);
+
+    if(poolB1) return resolvePoolRank(match.categorie, match.epreuve, "B", 1);
+    if(poolB2) return resolvePoolRank(match.categorie, match.epreuve, "B", 2);
+    if(poolB3) return resolvePoolRank(match.categorie, match.epreuve, "B", 3);
+    if(poolB4) return resolvePoolRank(match.categorie, match.epreuve, "B", 4);
+
+    const winnerDf1 = raw.match(/^Vainqueur(?:e)? DF1$/i);
+    const winnerDf2 = raw.match(/^Vainqueur(?:e)? DF2$/i);
+    const loserDf1 = raw.match(/^Perdant(?:e)? DF1$/i);
+    const loserDf2 = raw.match(/^Perdant(?:e)? DF2$/i);
+
+    const prefix =
+      match.epreuve === "DD"
+        ? "GIRLS"
+        : match.epreuve === "DM"
+          ? "MEN"
+          : "";
+
+    if(prefix && (winnerDf1 || loserDf1)){
+      const resolved = resolveMatchWinnerOrLoser(
+        `${prefix}_SF1`,
+        winnerDf1 ? "winner" : "loser"
+      );
+
+      if(resolved) return { teamName:resolved.title };
+    }
+
+    if(prefix && (winnerDf2 || loserDf2)){
+      const resolved = resolveMatchWinnerOrLoser(
+        `${prefix}_SF2`,
+        winnerDf2 ? "winner" : "loser"
+      );
+
+      if(resolved) return { teamName:resolved.title };
+    }
+
+    return null;
+  }
+
+  function displayTeam(text, sub, match){
+    const resolved = resolveDynamicText(text, match);
+
+    if(resolved){
+      return {
+        title:resolved.teamName || "Équipe",
+        sub:"",
+        placeholder:false
+      };
+    }
+
+    const raw = String(text || "").trim();
+
+    const isPlaceholder =
+      raw === "" ||
+      raw === "Équipe" ||
+      raw.includes("Poule") ||
+      raw.includes("Vainqueur") ||
+      raw.includes("Vainqueure") ||
+      raw.includes("Perdant") ||
+      raw.includes("Perdante") ||
+      raw.includes("Finaliste") ||
+      raw.includes("filles") ||
+      raw.includes("hommes");
+
+    return {
+      title:raw || "Équipe",
+      sub:sub || "",
+      placeholder:isPlaceholder
+    };
   }
 
   function renderCard(match){
@@ -808,6 +1049,9 @@
           : match.court === "B"
             ? "courtB"
             : "";
+
+    const teamA = displayTeam(match.teamA, match.subA, match);
+    const teamB = displayTeam(match.teamB, match.subB, match);
 
     return `
       <div class="match-card ${esc(cls)}">
@@ -825,15 +1069,15 @@
         </div>
 
         <div class="team-row">
-          <div class="team-name">${esc(match.teamA)}</div>
-          ${match.subA ? `<div class="team-sub">${esc(match.subA)}</div>` : ""}
+          <div class="team-name ${teamA.placeholder ? "placeholder" : ""}">${esc(teamA.title)}</div>
+          ${teamA.sub ? `<div class="team-sub">${esc(teamA.sub)}</div>` : ""}
         </div>
 
         ${match.type === "winner" ? "" : `
           <div class="vs-line">VS</div>
           <div class="team-row">
-            <div class="team-name">${esc(match.teamB)}</div>
-            ${match.subB ? `<div class="team-sub">${esc(match.subB)}</div>` : ""}
+            <div class="team-name ${teamB.placeholder ? "placeholder" : ""}">${esc(teamB.title)}</div>
+            ${teamB.sub ? `<div class="team-sub">${esc(teamB.sub)}</div>` : ""}
           </div>
         `}
 
@@ -927,6 +1171,11 @@
       unsubProg = null;
     }
 
+    if(unsubResults){
+      unsubResults();
+      unsubResults = null;
+    }
+
     buildStatus.textContent = "Chargement…";
     schedStatus.textContent = "Chargement…";
     adminList.innerHTML = "";
@@ -942,6 +1191,18 @@
     }, (error) => {
       console.error(error);
       buildStatus.textContent = "❌ Erreur Firestore.";
+    });
+
+    unsubResults = onSnapshot(resultsCollection(), (snap) => {
+      resultsMap = new Map();
+
+      snap.forEach(d => {
+        resultsMap.set(d.id, d.data() || {});
+      });
+
+      renderList();
+    }, (error) => {
+      console.error(error);
     });
 
     if(!unsubVisibility){
@@ -1072,6 +1333,11 @@
     if(unsubProg){
       unsubProg();
       unsubProg = null;
+    }
+
+    if(unsubResults){
+      unsubResults();
+      unsubResults = null;
     }
 
     if(unsubVisibility){
