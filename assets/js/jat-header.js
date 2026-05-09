@@ -363,6 +363,7 @@ function renderHeader(){
             <a class="${navClass("index.html")}" href="index.html">⚖️ JAT</a>
             <a class="${navClass("verification.html")}" href="verification.html">✅ Vérification</a>
             <a class="${navClass("programmation.html")}" href="programmation.html">📅 Programmation</a>
+            <a class="${navClass("arbitrage.html")}" href="arbitrage.html">🎾 Arbitrage</a>
             <a class="${navClass("resultats.html")}" href="resultats.html">🏆 Résultats</a>
             <a class="${navClass("classement.html")}" href="classement.html">📊 Classements</a>
             <a class="jat-nav-link" href="#" id="jatBtnLogout">🚪 Déconnexion</a>
