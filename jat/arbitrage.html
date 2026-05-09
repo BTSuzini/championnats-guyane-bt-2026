@@ -230,7 +230,6 @@
       height:10px;
       border-radius:999px;
       display:inline-block;
-      background:#f59e0b;
     }
 
     .dot.gray{background:#94a3b8;}
@@ -272,7 +271,7 @@
 
     .score-live{
       display:grid;
-      grid-template-columns:48px 48px 58px;
+      grid-template-columns:42px 42px 42px 52px;
       gap:6px;
       flex:0 0 auto;
       text-align:center;
@@ -361,14 +360,101 @@
       line-height:1.45;
     }
 
+    .modal-backdrop{
+      position:fixed;
+      inset:0;
+      z-index:3000;
+      display:none;
+      align-items:center;
+      justify-content:center;
+      padding:18px;
+      background:rgba(15,23,42,.52);
+    }
+
+    .modal{
+      width:min(560px,100%);
+      border-radius:24px;
+      background:#fff;
+      box-shadow:0 30px 80px rgba(0,0,0,.28);
+      padding:18px;
+    }
+
+    .modal-title{
+      margin:0;
+      font-size:22px;
+      font-weight:1000;
+      letter-spacing:-.03em;
+    }
+
+    .modal-text{
+      margin:6px 0 14px;
+      color:#667085;
+      font-size:14px;
+      line-height:1.4;
+    }
+
+    .modal-score-grid{
+      display:grid;
+      grid-template-columns:minmax(0,1fr) 64px 64px 64px;
+      gap:8px;
+      align-items:center;
+      margin-top:12px;
+    }
+
+    .modal-hdr{
+      text-align:center;
+      font-size:11px;
+      font-weight:1000;
+      color:#667085;
+      text-transform:uppercase;
+    }
+
+    .modal-team{
+      font-size:14px;
+      font-weight:1000;
+      line-height:1.15;
+      overflow:hidden;
+      text-overflow:ellipsis;
+      white-space:nowrap;
+    }
+
+    .modal-input{
+      width:64px;
+      height:44px;
+      border-radius:12px;
+      border:1px solid rgba(16,24,40,.16);
+      text-align:center;
+      font-size:16px;
+      font-weight:1000;
+      outline:none;
+    }
+
+    .modal-result{
+      margin-top:12px;
+      padding:12px 14px;
+      border-radius:16px;
+      background:#f8fafc;
+      border:1px solid rgba(16,24,40,.08);
+      font-size:13px;
+      font-weight:900;
+      color:#475467;
+      line-height:1.4;
+    }
+
+    .modal-actions{
+      margin-top:16px;
+      display:flex;
+      gap:10px;
+      justify-content:flex-end;
+      flex-wrap:wrap;
+    }
+
     @media (min-width:760px){
       .panel{padding:22px;}
     }
 
     @media (max-width:759px){
-      :root{
-        --modebar-h:62px;
-      }
+      :root{--modebar-h:62px;}
 
       main{
         padding-top:calc(var(--jat-total-top, 268px) + var(--modebar-h) + 18px);
@@ -383,7 +469,7 @@
 
       .score-live{
         width:100%;
-        grid-template-columns:1fr 1fr 1fr;
+        grid-template-columns:1fr 1fr 1fr 1fr;
       }
 
       .actions{
@@ -392,6 +478,14 @@
 
       .actions .btn{
         flex:1 1 auto;
+      }
+
+      .modal-score-grid{
+        grid-template-columns:minmax(0,1fr) 54px 54px 54px;
+      }
+
+      .modal-input{
+        width:54px;
       }
     }
 
@@ -465,7 +559,7 @@
       <div>
         <h2 class="panel-title">📡 Matchs arbitrables</h2>
         <p class="panel-text">
-          Un match envoyé au live devient disponible pour un profil arbitre.
+          Un match envoyé au live devient disponible pour un profil arbitre. Le JAT valide ensuite le résultat officiel.
         </p>
       </div>
       <div class="panel-tag">Live</div>
@@ -476,7 +570,40 @@
 
 </main>
 
-<script type="module" src="../assets/js/jat-header.js"></script>
+<div class="modal-backdrop" id="scoreModal">
+  <div class="modal" role="dialog" aria-modal="true">
+    <h2 class="modal-title">✅ Valider / modifier le résultat</h2>
+    <p class="modal-text" id="scoreModalSub">—</p>
+
+    <div class="modal-score-grid">
+      <div></div>
+      <div class="modal-hdr">Set 1</div>
+      <div class="modal-hdr">Set 2</div>
+      <div class="modal-hdr">STB</div>
+
+      <div class="modal-team" id="modalTeamA">Équipe A</div>
+      <input class="modal-input" id="modalS1A" inputmode="numeric">
+      <input class="modal-input" id="modalS2A" inputmode="numeric">
+      <input class="modal-input" id="modalS3A" inputmode="numeric">
+
+      <div class="modal-team" id="modalTeamB">Équipe B</div>
+      <input class="modal-input" id="modalS1B" inputmode="numeric">
+      <input class="modal-input" id="modalS2B" inputmode="numeric">
+      <input class="modal-input" id="modalS3B" inputmode="numeric">
+    </div>
+
+    <div class="modal-result" id="modalWinnerText">
+      Vainqueur calculé automatiquement selon les sets gagnés.
+    </div>
+
+    <div class="modal-actions">
+      <button class="btn danger" id="btnScoreCancel" type="button">Annuler</button>
+      <button class="btn ok" id="btnScoreConfirm" type="button">✅ Valider résultat officiel</button>
+    </div>
+  </div>
+</div>
+
+  <script type="module" src="../assets/js/jat-header.js"></script>
 
 <script type="module">
   import { auth, db } from "../assets/js/firebase.js";
@@ -497,8 +624,8 @@
 
   const EVENT_ID = "championnats-2026";
 
-  const CATEGORIES = ["U14", "U18", "Seniors", "45+"];
-  const EPREUVES = ["DM", "DD"];
+  const CATEGORIES = ["U14","U18","Seniors","45+"];
+  const EPREUVES = ["DM","DD"];
 
   const EPREUVE_LABELS = {
     DM:"Double Messieurs",
@@ -516,6 +643,25 @@
   const statusText = document.getElementById("statusText");
   const matchList = document.getElementById("matchList");
 
+  const scoreModal = document.getElementById("scoreModal");
+  const scoreModalSub = document.getElementById("scoreModalSub");
+
+  const modalTeamA = document.getElementById("modalTeamA");
+  const modalTeamB = document.getElementById("modalTeamB");
+
+  const modalS1A = document.getElementById("modalS1A");
+  const modalS2A = document.getElementById("modalS2A");
+  const modalS3A = document.getElementById("modalS3A");
+
+  const modalS1B = document.getElementById("modalS1B");
+  const modalS2B = document.getElementById("modalS2B");
+  const modalS3B = document.getElementById("modalS3B");
+
+  const modalWinnerText = document.getElementById("modalWinnerText");
+
+  const btnScoreCancel = document.getElementById("btnScoreCancel");
+  const btnScoreConfirm = document.getElementById("btnScoreConfirm");
+
   let mode = "all";
   let currentCategorie = "Seniors";
   let currentEpreuve = "DM";
@@ -524,6 +670,8 @@
   let resultsByMatch = new Map();
   let liveByMatch = new Map();
   let currentRole = null;
+
+  let modalMatchId = null;
 
   let unsubProg = null;
   let unsubResults = null;
@@ -572,8 +720,12 @@
 
   function toNum(v){
     if(v === null || v === undefined || v === "") return null;
+
     const n = Number(String(v).replace(",", ".").trim());
-    return Number.isFinite(n) ? n : null;
+
+    return Number.isFinite(n)
+      ? n
+      : null;
   }
 
   function getResult(mid){
@@ -584,38 +736,34 @@
     return liveByMatch.get(mid) || null;
   }
 
-  function winnerSide(res){
-    if(!res) return null;
+  function computeWinner(payload){
 
-    if(res.winnerSide === "A" || res.winnerSide === "B"){
-      return res.winnerSide;
+    const sets = [
+      [toNum(payload.s1A), toNum(payload.s1B)],
+      [toNum(payload.s2A), toNum(payload.s2B)],
+      [toNum(payload.s3A), toNum(payload.s3B)]
+    ];
+
+    let setsA = 0;
+    let setsB = 0;
+
+    for(const [a,b] of sets){
+
+      if(a === null || b === null) continue;
+
+      if(a > b) setsA++;
+      else if(b > a) setsB++;
     }
 
-    let a = 0;
-    let b = 0;
-
-    [
-      ["s1A","s1B"],
-      ["s2A","s2B"],
-      ["s3A","s3B"]
-    ].forEach(([ka,kb]) => {
-      const na = toNum(res[ka]);
-      const nb = toNum(res[kb]);
-
-      if(na === null || nb === null || na === nb) return;
-
-      if(na > nb) a++;
-      else b++;
-    });
-
-    if(a > b) return "A";
-    if(b > a) return "B";
+    if(setsA > setsB) return "A";
+    if(setsB > setsA) return "B";
 
     return null;
   }
-    function allMatches(){
+
+  function allMatches(){
     return Array.isArray(currentProg?.matches)
-      ? [...currentProg.matches]
+      ? [...currentProg.matches].filter(m => m.type !== "winner")
       : [];
   }
 
@@ -623,73 +771,20 @@
     return allMatches().find(m => m.id === id) || null;
   }
 
-  function resolveDynamicName(match, side, guard = new Set()){
-    if(!match) return "—";
-
-    const raw = side === "A"
-      ? match.teamA
-      : match.teamB;
-
-    const ref = side === "A"
-      ? match.A
-      : match.B;
-
-    if(ref?.type === "team"){
-      return ref.team?.teamName
-        || raw
-        || "Équipe";
-    }
-
-    if(ref?.type === "winner" || ref?.type === "loser"){
-
-      const sourceId = ref.matchId;
-
-      if(!sourceId || guard.has(sourceId)){
-        return raw || "Équipe";
-      }
-
-      guard.add(sourceId);
-
-      const source = matchById(sourceId);
-      const res = getResult(sourceId);
-      const w = winnerSide(res);
-
-      if(!source || (w !== "A" && w !== "B")){
-        return ref.type === "winner"
-          ? `Vainqueur ${sourceId}`
-          : `Perdant ${sourceId}`;
-      }
-
-      const wantedSide = ref.type === "winner"
-        ? w
-        : (w === "A" ? "B" : "A");
-
-      return resolveDynamicName(source, wantedSide, guard);
-    }
-
-    if(ref?.type === "poolRank"){
-      return `${ref.rank}${Number(ref.rank) === 1 ? "er" : "e"} poule ${ref.pool}`;
-    }
-
-    return raw || "Équipe";
-  }
-
-  function teamName(match, side){
-    return resolveDynamicName(match, side);
-  }
-
   function visibleMatches(){
+
     return allMatches()
-      .filter(m => m.type !== "winner")
       .filter(m => {
+
         if(mode === "all") return true;
 
         return String(m.categorie || "") === currentCategorie
           && String(m.epreuve || "") === currentEpreuve;
       })
       .sort((a,b)=>{
+
         if(Number(a.order) !== Number(b.order)){
-          return Number(a.order) - Number(b.order);
+          return Number(a.order || 9999) - Number(b.order || 9999);
         }
 
         return String(a.court || "")
@@ -698,6 +793,7 @@
   }
 
   function statusInfo(live){
+
     if(!live){
       return {
         cls:"gray",
@@ -722,7 +818,7 @@
     if(live.status === "finished"){
       return {
         cls:"red",
-        text:"En attente validation"
+        text:"Score proposé"
       };
     }
 
@@ -735,11 +831,12 @@
 
     return {
       cls:"gray",
-      text:"Inconnu"
+      text:"Live"
     };
   }
 
   function scoreCell(v){
+
     if(v === null || v === undefined || v === ""){
       return "—";
     }
@@ -759,10 +856,8 @@
           ? "courtB"
           : "";
 
-    const teamA = teamName(match, "A");
-    const teamB = teamName(match, "B");
-
-    const score = live?.score || {};
+    const teamA = match.teamA || "Équipe A";
+    const teamB = match.teamB || "Équipe B";
 
     return `
       <div class="match-card ${esc(cls)}">
@@ -796,7 +891,7 @@
 
           <div class="team-row">
 
-            <div class="team-name ${teamA.includes("Vainqueur") || teamA.includes("Perdant") ? "placeholder" : ""}">
+            <div class="team-name">
               ${esc(teamA)}
             </div>
 
@@ -805,21 +900,28 @@
               <div>
                 <div class="score-head">Pts</div>
                 <div class="score-cell">
-                  ${esc(scoreCell(score.pointsA))}
+                  ${esc(scoreCell(live?.pointsA))}
                 </div>
               </div>
 
               <div>
-                <div class="score-head">Set</div>
+                <div class="score-head">S1</div>
                 <div class="score-cell">
-                  ${esc(scoreCell(score.s1A))}
+                  ${esc(scoreCell(live?.s1A))}
+                </div>
+              </div>
+
+              <div>
+                <div class="score-head">S2</div>
+                <div class="score-cell">
+                  ${esc(scoreCell(live?.s2A))}
                 </div>
               </div>
 
               <div>
                 <div class="score-head">STB</div>
                 <div class="score-cell">
-                  ${esc(scoreCell(score.stbA))}
+                  ${esc(scoreCell(live?.stbA))}
                 </div>
               </div>
 
@@ -829,7 +931,7 @@
 
           <div class="team-row">
 
-            <div class="team-name ${teamB.includes("Vainqueur") || teamB.includes("Perdant") ? "placeholder" : ""}">
+            <div class="team-name">
               ${esc(teamB)}
             </div>
 
@@ -838,21 +940,28 @@
               <div>
                 <div class="score-head">Pts</div>
                 <div class="score-cell">
-                  ${esc(scoreCell(score.pointsB))}
+                  ${esc(scoreCell(live?.pointsB))}
                 </div>
               </div>
 
               <div>
-                <div class="score-head">Set</div>
+                <div class="score-head">S1</div>
                 <div class="score-cell">
-                  ${esc(scoreCell(score.s1B))}
+                  ${esc(scoreCell(live?.s1B))}
+                </div>
+              </div>
+
+              <div>
+                <div class="score-head">S2</div>
+                <div class="score-cell">
+                  ${esc(scoreCell(live?.s2B))}
                 </div>
               </div>
 
               <div>
                 <div class="score-head">STB</div>
                 <div class="score-cell">
-                  ${esc(scoreCell(score.stbB))}
+                  ${esc(scoreCell(live?.stbB))}
                 </div>
               </div>
 
@@ -865,20 +974,28 @@
         <div class="live-meta">
 
           ${
-            live?.refereeName
-              ? `<div>🧑‍⚖️ Arbitre : <strong>${esc(live.refereeName)}</strong></div>`
+            live?.takenByEmail
+              ? `<div>🧑‍⚖️ Arbitre : <strong>${esc(live.takenByEmail)}</strong></div>`
               : `<div>🧑‍⚖️ Aucun arbitre connecté</div>`
           }
 
           ${
-            live?.servingSide
-              ? `<div>🎾 Service : <strong>${esc(live.servingSide === "A" ? teamA : teamB)}</strong></div>`
+            live?.serverSide
+              ? `<div>🎾 Service : <strong>${
+                  live.serverSide === "A"
+                    ? esc(teamA)
+                    : esc(teamB)
+                }</strong></div>`
               : ``
           }
 
           ${
             live?.inputMode
-              ? `<div>⌨️ Saisie : <strong>${esc(live.inputMode === "points" ? "Points" : "Jeux")}</strong></div>`
+              ? `<div>⌨️ Saisie : <strong>${
+                  live.inputMode === "points"
+                    ? "Points"
+                    : "Jeux"
+                }</strong></div>`
               : ``
           }
 
@@ -932,7 +1049,7 @@
           }
 
           ${
-            live?.status === "finished"
+            live && live.status !== "validated"
               ? `
                 <button
                   class="btn ok"
@@ -940,7 +1057,7 @@
                   data-act="validate"
                   data-id="${esc(match.id)}"
                 >
-                  ✅ Valider score
+                  ✅ Valider / modifier le résultat
                 </button>
               `
               : ""
@@ -1010,33 +1127,34 @@
       epreuve:match.epreuve || null,
 
       label:match.label || null,
+      order:match.order || null,
+      time:match.time || null,
+      court:match.court || null,
 
-      status:"sent",
+      teamA:match.teamA || "Équipe A",
+      teamB:match.teamB || "Équipe B",
 
-      sentByJat:true,
+      status:"available",
 
-      refereeUid:null,
-      refereeName:null,
-
-      servingSide:"A",
+      takenBy:null,
+      takenByEmail:null,
 
       inputMode:"points",
+      currentPhase:"set1",
 
-      score:{
-        pointsA:0,
-        pointsB:0,
-        gamesA:0,
-        gamesB:0,
-        stbA:0,
-        stbB:0,
-        currentPhase:"set1",
-        serverSide:"A",
-      },
+      serverSide:"A",
 
-      sets:{
-        set1Validated:false,
-        superTieBreakValidated:false
-      },
+      pointsA:0,
+      pointsB:0,
+
+      s1A:0,
+      s1B:0,
+
+      s2A:0,
+      s2B:0,
+
+      stbA:0,
+      stbB:0,
 
       createdAt:serverTimestamp(),
       updatedAt:serverTimestamp(),
@@ -1056,75 +1174,111 @@
     await deleteDoc(liveRef(matchId));
   }
 
-  async function validateScore(matchId){
+  function openValidationModal(matchId){
 
+    const match = matchById(matchId);
     const live = getLive(matchId);
 
-    if(!live){
-      alert("Live introuvable ❌");
-      return;
+    if(!match || !live) return;
+
+    modalMatchId = matchId;
+
+    modalTeamA.textContent = match.teamA || "Équipe A";
+    modalTeamB.textContent = match.teamB || "Équipe B";
+
+    scoreModalSub.textContent =
+      `${match.label || match.id} · ${match.time || "—"} · ${courtLabel(match.court)}`;
+
+    modalS1A.value = live.s1A ?? "";
+    modalS1B.value = live.s1B ?? "";
+
+    modalS2A.value = live.s2A ?? "";
+    modalS2B.value = live.s2B ?? "";
+
+    modalS3A.value = live.stbA ?? "";
+    modalS3B.value = live.stbB ?? "";
+
+    refreshModalWinner();
+
+    scoreModal.style.display = "flex";
+  }
+
+  function closeModal(){
+    scoreModal.style.display = "none";
+    modalMatchId = null;
+  }
+
+  function refreshModalWinner(){
+
+    const payload = {
+      s1A:modalS1A.value,
+      s1B:modalS1B.value,
+      s2A:modalS2A.value,
+      s2B:modalS2B.value,
+      s3A:modalS3A.value,
+      s3B:modalS3B.value
+    };
+
+    const winner = computeWinner(payload);
+
+    if(winner === "A"){
+      modalWinnerText.textContent =
+        `✅ Vainqueur calculé : ${modalTeamA.textContent}`;
     }
 
-    const ok = confirm(
-      "Valider ce score comme résultat officiel ?"
-    );
-
-    if(!ok) return;
-
-    const s = live.score || {};
-
-    const s1A = Number(s.s1A || 0);
-    const s1B = Number(s.s1B || 0);
-
-    const s3A = Number(s.stbA || 0);
-    const s3B = Number(s.stbB || 0);
-
-    let winnerSide = null;
-
-    let setsA = 0;
-    let setsB = 0;
-
-    if(s1A > s1B) setsA++;
-    else if(s1B > s1A) setsB++;
-
-    if(s3A > s3B) setsA++;
-    else if(s3B > s3A) setsB++;
-
-    if(setsA > setsB){
-      winnerSide = "A";
-    }else if(setsB > setsA){
-      winnerSide = "B";
+    else if(winner === "B"){
+      modalWinnerText.textContent =
+        `✅ Vainqueur calculé : ${modalTeamB.textContent}`;
     }
 
-    await setDoc(resultRef(matchId), {
+    else{
+      modalWinnerText.textContent =
+        "⏳ Résultat incomplet ou égalité.";
+    }
+  }
 
-      s1A,
-      s1B,
+  async function confirmValidation(){
 
-      s2A:"",
-      s2B:"",
+    if(!modalMatchId) return;
 
-      s3A,
-      s3B,
+    const payload = {
+      s1A:modalS1A.value.trim(),
+      s1B:modalS1B.value.trim(),
 
-      winnerSide,
+      s2A:modalS2A.value.trim(),
+      s2B:modalS2B.value.trim(),
+
+      s3A:modalS3A.value.trim(),
+      s3B:modalS3B.value.trim(),
 
       updatedAt:serverTimestamp(),
       updatedBy:
         auth.currentUser?.email
         || auth.currentUser?.uid
         || null
+    };
 
-    }, { merge:true });
+    payload.winnerSide = computeWinner(payload);
 
-    await updateDoc(liveRef(matchId), {
-      status:"validated",
-      validatedAt:serverTimestamp(),
-      validatedBy:
-        auth.currentUser?.email
-        || auth.currentUser?.uid
-        || null
-    });
+    await setDoc(
+      resultRef(modalMatchId),
+      payload,
+      { merge:true }
+    );
+
+    await updateDoc(
+      liveRef(modalMatchId),
+      {
+        status:"validated",
+        validatedAt:serverTimestamp(),
+        validatedBy:
+          auth.currentUser?.email
+          || auth.currentUser?.uid
+          || null
+      }
+    );
+
+    closeModal();
   }
 
   matchList.addEventListener("click", async (event) => {
@@ -1153,7 +1307,7 @@
       }
 
       else if(act === "validate"){
-        await validateScore(id);
+        openValidationModal(id);
       }
 
     }catch(error){
@@ -1164,7 +1318,22 @@
     }
   });
 
+  [
+    modalS1A,
+    modalS1B,
+    modalS2A,
+    modalS2B,
+    modalS3A,
+    modalS3B
+  ].forEach(el => {
+    el.addEventListener("input", refreshModalWinner);
+  });
+
+  btnScoreCancel.onclick = closeModal;
+  btnScoreConfirm.onclick = confirmValidation;
+
   function setMode(next){
+
     mode = next === "category"
       ? "category"
       : "all";
@@ -1188,6 +1357,7 @@
     }
 
     try{
+
       localStorage.setItem(
         "champ_jat_categorie",
         currentCategorie
@@ -1219,12 +1389,6 @@
 
       render();
 
-    }, (error) => {
-
-      console.error(error);
-
-      statusText.textContent =
-        "Impossible de charger la programmation.";
     });
 
     unsubResults = onSnapshot(resultsCol(), (snap) => {
@@ -1236,10 +1400,6 @@
       });
 
       render();
-
-    }, (error) => {
-
-      console.error(error);
     });
 
     unsubLive = onSnapshot(liveCol(), (snap) => {
@@ -1251,10 +1411,6 @@
       });
 
       render();
-
-    }, (error) => {
-
-      console.error(error);
     });
   }
 
