@@ -1036,58 +1036,275 @@
   }
 
   function matchById(id){
-    return allMatches().find(m => m.id === id);
-  }
+  return allMatches().find(m => m.id === id) || null;
+}
 
-  function resolveDynamicName(match, side, guard = new Set()){
-    if(!match) return "—";
+function computeWinnerSideFromScore(res){
+  return winnerSide(res);
+}
 
-    const raw = side === "A" ? match.teamA : match.teamB;
-    const ref = side === "A" ? match.A : match.B;
+function poolKeyFromMatch(match){
+  const label = String(match?.label || "");
 
-    if(ref?.type === "team"){
-      return ref.team?.teamName || raw || "Équipe";
+  if(label.includes("Poule places 5-7")) return "Seniors_DM_5_7";
+  if(label.includes("Poule 5-7")) return "Seniors_DM_5_7";
+  if(label.includes("Poule A")) return `${match.categorie}_${match.epreuve}_A`;
+  if(label.includes("Poule B")) return `${match.categorie}_${match.epreuve}_B`;
+  if(label.includes("Poule unique")) return `${match.categorie}_${match.epreuve}_U`;
+
+  return null;
+}
+
+function getPoolMatches(poolKey){
+  return allMatches()
+    .filter(m => m.type !== "winner")
+    .filter(m => poolKeyFromMatch(m) === poolKey);
+}
+
+function isPoolComplete(poolKey){
+  const list = getPoolMatches(poolKey);
+  if(!list.length) return false;
+
+  return list.every(m => winnerSide(getResult(m.id)) !== null);
+}
+
+function poolTeamNameFromMatch(match, side){
+  const raw = side === "A" ? match.teamA : match.teamB;
+  const sub = side === "A" ? match.subA : match.subB;
+  const resolved = resolveDynamicText(raw, match);
+
+  return resolved?.teamName || raw || sub || "Équipe";
+}
+
+function buildPoolRanking(poolKey){
+  const list = getPoolMatches(poolKey);
+  const stats = new Map();
+
+  function ensure(name){
+    const key = String(name || "Équipe").trim() || "Équipe";
+
+    if(!stats.has(key)){
+      stats.set(key, {
+        teamName:key,
+        points:0,
+        wins:0,
+        losses:0,
+        setsWon:0,
+        setsLost:0,
+        gamesWon:0,
+        gamesLost:0
+      });
     }
 
-    if(ref?.type === "winner" || ref?.type === "loser"){
-      const sourceId = ref.matchId;
+    return stats.get(key);
+  }
 
-      if(!sourceId || guard.has(sourceId)) return raw || "Équipe";
+  for(const match of list){
+    const res = getResult(match.id);
+    const w = winnerSide(res);
 
-      guard.add(sourceId);
+    const nameA = poolTeamNameFromMatch(match, "A");
+    const nameB = poolTeamNameFromMatch(match, "B");
 
-      const source = matchById(sourceId);
-      const res = getResult(sourceId);
-      const w = winnerSide(res);
+    const A = ensure(nameA);
+    const B = ensure(nameB);
 
-      if(!source || (w !== "A" && w !== "B")){
-        return ref.type === "winner"
-          ? `Vainqueur ${sourceId}`
-          : `Perdant ${sourceId}`;
-      }
+    if(w !== "A" && w !== "B") continue;
 
-      const wantedSide = ref.type === "winner" ? w : (w === "A" ? "B" : "A");
+    let setsA = 0;
+    let setsB = 0;
 
-      return resolveDynamicName(source, wantedSide, guard);
+    [
+      ["s1A","s1B"],
+      ["s2A","s2B"],
+      ["s3A","s3B"]
+    ].forEach(([ka,kb]) => {
+      const ga = toNum(res?.[ka]);
+      const gb = toNum(res?.[kb]);
+
+      if(ga === null || gb === null) return;
+
+      A.gamesWon += ga;
+      A.gamesLost += gb;
+      B.gamesWon += gb;
+      B.gamesLost += ga;
+
+      if(ga > gb) setsA++;
+      else if(gb > ga) setsB++;
+    });
+
+    A.setsWon += setsA;
+    A.setsLost += setsB;
+    B.setsWon += setsB;
+    B.setsLost += setsA;
+
+    if(w === "A"){
+      A.wins++;
+      A.points += 2;
+      B.losses++;
+      B.points += 1;
+    }else{
+      B.wins++;
+      B.points += 2;
+      A.losses++;
+      A.points += 1;
+    }
+  }
+
+  return Array.from(stats.values()).sort((a,b)=>{
+    if(b.points !== a.points) return b.points - a.points;
+    if(b.wins !== a.wins) return b.wins - a.wins;
+
+    const sdA = a.setsWon - a.setsLost;
+    const sdB = b.setsWon - b.setsLost;
+    if(sdB !== sdA) return sdB - sdA;
+
+    const gdA = a.gamesWon - a.gamesLost;
+    const gdB = b.gamesWon - b.gamesLost;
+    if(gdB !== gdA) return gdB - gdA;
+
+    return a.teamName.localeCompare(b.teamName, "fr");
+  });
+}
+
+function resolvePoolRank(categorie, epreuve, pool, rank){
+  const poolKey = `${categorie}_${epreuve}_${pool}`;
+
+  if(!isPoolComplete(poolKey)) return null;
+
+  const ranking = buildPoolRanking(poolKey);
+  return ranking[Number(rank) - 1] || null;
+}
+
+function resolveMatchWinnerOrLoser(matchId, want){
+  const source = matchById(matchId);
+  const side = winnerSide(getResult(matchId));
+
+  if(!source || (side !== "A" && side !== "B")) return null;
+
+  const targetSide = want === "winner"
+    ? side
+    : (side === "A" ? "B" : "A");
+
+  return {
+    teamName: teamName(source, targetSide)
+  };
+}
+
+function resolveDynamicText(text, match){
+  const raw = String(text || "").trim();
+  if(!raw || !match) return null;
+
+  const poolA1 = raw.match(/^1(?:er|re)?\s+Poule A$/i);
+  const poolA2 = raw.match(/^2e\s+Poule A$/i);
+  const poolA3 = raw.match(/^3e\s+Poule A$/i);
+  const poolA4 = raw.match(/^4e\s+Poule A$/i);
+
+  const poolB1 = raw.match(/^1(?:er|re)?\s+Poule B$/i);
+  const poolB2 = raw.match(/^2e\s+Poule B$/i);
+  const poolB3 = raw.match(/^3e\s+Poule B$/i);
+  const poolB4 = raw.match(/^4e\s+Poule B$/i);
+
+  if(poolA1) return resolvePoolRank(match.categorie, match.epreuve, "A", 1);
+  if(poolA2) return resolvePoolRank(match.categorie, match.epreuve, "A", 2);
+  if(poolA3) return resolvePoolRank(match.categorie, match.epreuve, "A", 3);
+  if(poolA4) return resolvePoolRank(match.categorie, match.epreuve, "A", 4);
+
+  if(poolB1) return resolvePoolRank(match.categorie, match.epreuve, "B", 1);
+  if(poolB2) return resolvePoolRank(match.categorie, match.epreuve, "B", 2);
+  if(poolB3) return resolvePoolRank(match.categorie, match.epreuve, "B", 3);
+  if(poolB4) return resolvePoolRank(match.categorie, match.epreuve, "B", 4);
+
+  const winnerDf1 = raw.match(/^Vainqueur(?:e)? DF1$/i);
+  const winnerDf2 = raw.match(/^Vainqueur(?:e)? DF2$/i);
+  const loserDf1 = raw.match(/^Perdant(?:e)? DF1$/i);
+  const loserDf2 = raw.match(/^Perdant(?:e)? DF2$/i);
+
+  const prefix =
+    match.epreuve === "DD"
+      ? "GIRLS"
+      : match.epreuve === "DM"
+        ? "MEN"
+        : "";
+
+  if(prefix && (winnerDf1 || loserDf1)){
+    return resolveMatchWinnerOrLoser(
+      `${prefix}_SF1`,
+      winnerDf1 ? "winner" : "loser"
+    );
+  }
+
+  if(prefix && (winnerDf2 || loserDf2)){
+    return resolveMatchWinnerOrLoser(
+      `${prefix}_SF2`,
+      winnerDf2 ? "winner" : "loser"
+    );
+  }
+
+  return null;
+}
+
+function resolveDynamicName(match, side, guard = new Set()){
+  if(!match) return "—";
+
+  const raw = side === "A" ? match.teamA : match.teamB;
+  const ref = side === "A" ? match.A : match.B;
+
+  const resolvedRaw = resolveDynamicText(raw, match);
+  if(resolvedRaw?.teamName) return resolvedRaw.teamName;
+
+  if(ref?.type === "team"){
+    return ref.team?.teamName || raw || "Équipe";
+  }
+
+  if(ref?.type === "winner" || ref?.type === "loser"){
+    const sourceId = ref.matchId;
+
+    if(!sourceId || guard.has(sourceId)) return raw || "Équipe";
+
+    guard.add(sourceId);
+
+    const source = matchById(sourceId);
+    const res = getResult(sourceId);
+    const w = winnerSide(res);
+
+    if(!source || (w !== "A" && w !== "B")){
+      return ref.type === "winner"
+        ? `Vainqueur ${sourceId}`
+        : `Perdant ${sourceId}`;
     }
 
-    if(ref?.type === "poolRank"){
-      return `${ref.rank}${Number(ref.rank) === 1 ? "er" : "e"} poule ${ref.pool}`;
-    }
+    const wantedSide = ref.type === "winner"
+      ? w
+      : (w === "A" ? "B" : "A");
 
-    return raw || "Équipe";
+    return resolveDynamicName(source, wantedSide, guard);
   }
 
-  function teamName(match, side){
-    return resolveDynamicName(match, side);
+  if(ref?.type === "poolRank"){
+    const resolved = resolvePoolRank(
+      match.categorie,
+      match.epreuve,
+      ref.pool,
+      ref.rank
+    );
+
+    return resolved?.teamName
+      || `${ref.rank}${Number(ref.rank) === 1 ? "er" : "e"} poule ${ref.pool}`;
   }
 
-  function matchWinnerTeamName(match){
-    const w = winnerSide(getResult(match.id));
-    if(w !== "A" && w !== "B") return null;
-    return teamName(match, w);
-  }
+  return raw || "Équipe";
+}
 
+function teamName(match, side){
+  return resolveDynamicName(match, side);
+}
+
+function matchWinnerTeamName(match){
+  const w = winnerSide(getResult(match.id));
+  if(w !== "A" && w !== "B") return null;
+  return teamName(match, w);
+}
   function labelShort(match){
     return match.label || match.id || "Match";
   }
@@ -1421,12 +1638,12 @@
       const B = ensure(nameB);
 
       if(winner === "A" || winner === "B"){
-        A.played++;
-        B.played++;
+  A.played++;
+  B.played++;
 
-        if(winner === "A") A.wins++;
-        if(winner === "B") B.wins++;
-      }
+  if(winner === "A") A.wins++;
+  if(winner === "B") B.wins++;
+}
 
       [
         ["s1A","s1B"],
