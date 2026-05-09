@@ -1,1 +1,1107 @@
+<!doctype html>
+<html lang="fr">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Arbitre — Live scores</title>
 
+  <style>
+    :root{
+      --blue:#075b9a;
+      --blue-dark:#063b72;
+      --text:#17212b;
+      --muted:#667085;
+      --card:rgba(255,255,255,.96);
+      --shadow:0 16px 40px rgba(16,24,40,.12);
+      --container:1180px;
+      --top-h:74px;
+    }
+
+    *{box-sizing:border-box;}
+    html,body{max-width:100%;overflow-x:hidden;}
+
+    body{
+      margin:0;
+      font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;
+      color:var(--text);
+      background:
+        radial-gradient(circle at 20% 0%, rgba(39,188,237,.22), transparent 28%),
+        radial-gradient(circle at 85% 10%, rgba(0,169,200,.16), transparent 26%),
+        linear-gradient(180deg,#f4fcff 0%,#e9f8ff 48%,#fff 100%);
+    }
+
+    .container{
+      width:min(var(--container), calc(100% - 24px));
+      margin:0 auto;
+    }
+
+    .topbar{
+      position:fixed;
+      top:0;
+      left:0;
+      right:0;
+      z-index:1000;
+      background:linear-gradient(135deg,#23b7ea,#f5fdff);
+      box-shadow:0 8px 18px rgba(16,24,40,.10);
+      padding:10px 0;
+    }
+
+    .topbar-row{
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      gap:12px;
+    }
+
+    .title{
+      font-weight:1000;
+      font-size:18px;
+      line-height:1.1;
+    }
+
+    .subtitle{
+      color:#475467;
+      font-size:12px;
+      font-weight:800;
+      margin-top:3px;
+    }
+
+    .role-pill{
+      padding:8px 12px;
+      border-radius:999px;
+      background:#fff;
+      color:var(--blue-dark);
+      font-size:12px;
+      font-weight:1000;
+      white-space:nowrap;
+    }
+
+    .match-strip{
+      position:fixed;
+      top:var(--top-h);
+      left:0;
+      right:0;
+      z-index:999;
+      background:rgba(255,255,255,.94);
+      backdrop-filter:blur(10px);
+      border-bottom:1px solid rgba(16,24,40,.08);
+      box-shadow:0 6px 14px rgba(16,24,40,.05);
+      padding:9px 0;
+    }
+
+    .strip-scroll{
+      display:flex;
+      gap:8px;
+      overflow-x:auto;
+      padding-bottom:2px;
+      -webkit-overflow-scrolling:touch;
+    }
+
+    .strip-btn{
+      flex:0 0 auto;
+      border:1px solid rgba(7,91,154,.14);
+      background:#fff;
+      border-radius:999px;
+      padding:9px 12px;
+      font-size:12px;
+      font-weight:1000;
+      color:#1c2430;
+      cursor:pointer;
+      box-shadow:0 5px 12px rgba(16,24,40,.06);
+      max-width:230px;
+      white-space:nowrap;
+      overflow:hidden;
+      text-overflow:ellipsis;
+    }
+
+    .strip-btn.active{
+      background:linear-gradient(180deg,var(--blue),var(--blue-dark));
+      color:#fff;
+      border-color:var(--blue);
+    }
+
+    .strip-btn.mine{
+      border-color:rgba(22,163,74,.35);
+      background:#f0fdf4;
+    }
+
+    .strip-btn.mine.active{
+      background:linear-gradient(180deg,#15803d,#166534);
+      color:#fff;
+    }
+
+    .strip-empty{
+      color:var(--muted);
+      font-size:13px;
+      font-weight:800;
+      padding:8px 0;
+    }
+
+    main{
+      padding-top:calc(var(--top-h) + 62px + 18px);
+      padding-bottom:46px;
+    }
+
+    .panel{
+      background:var(--card);
+      border:1px solid rgba(255,255,255,.7);
+      border-radius:24px;
+      box-shadow:var(--shadow);
+      padding:18px;
+      margin-top:16px;
+    }
+
+    .panel-head{
+      display:flex;
+      justify-content:space-between;
+      align-items:flex-start;
+      gap:12px;
+      margin-bottom:14px;
+    }
+
+    .panel-title{
+      margin:0;
+      font-size:25px;
+      line-height:1.05;
+      letter-spacing:-.03em;
+    }
+
+    .panel-text{
+      margin:6px 0 0;
+      color:var(--muted);
+      font-size:14px;
+      line-height:1.4;
+    }
+
+    .tag{
+      flex-shrink:0;
+      padding:8px 12px;
+      border-radius:999px;
+      background:#e4f7ff;
+      color:var(--blue-dark);
+      font-size:12px;
+      font-weight:1000;
+      text-transform:uppercase;
+      letter-spacing:.06em;
+    }
+
+    .btn{
+      appearance:none;
+      border:1px solid rgba(7,91,154,.14);
+      background:#fff;
+      border-radius:999px;
+      min-height:42px;
+      padding:10px 16px;
+      font-size:14px;
+      font-weight:1000;
+      cursor:pointer;
+      color:#1c2430;
+      text-align:center;
+      box-shadow:0 6px 14px rgba(16,24,40,.05);
+      white-space:nowrap;
+    }
+
+    .btn.primary{
+      background:linear-gradient(180deg,var(--blue),var(--blue-dark));
+      color:#fff;
+      border-color:var(--blue);
+    }
+
+    .btn.danger{
+      background:#fff5f5;
+      color:#8a1f1f;
+      border-color:#f1b2b2;
+    }
+
+    .btn.green{
+      background:#ecfdf5;
+      color:#166534;
+      border-color:#bbf7d0;
+    }
+
+    .btn:disabled{
+      opacity:.5;
+      cursor:not-allowed;
+    }
+
+    .actions{
+      display:flex;
+      gap:10px;
+      flex-wrap:wrap;
+      margin-top:12px;
+    }
+
+    .score-board{
+      display:grid;
+      gap:12px;
+      margin-top:14px;
+    }
+
+    .team-score{
+      border-radius:22px;
+      border:2px solid rgba(16,24,40,.08);
+      background:#fff;
+      padding:14px;
+      display:grid;
+      grid-template-columns:minmax(0,1fr) 62px 62px 74px;
+      gap:8px;
+      align-items:center;
+      box-shadow:0 8px 18px rgba(16,24,40,.06);
+    }
+
+    .team-score.server{
+      border-color:#16a34a;
+      background:linear-gradient(135deg,#ecfdf5,#fff);
+    }
+
+    .team-name{
+      min-width:0;
+      font-size:17px;
+      font-weight:1000;
+      line-height:1.15;
+      white-space:nowrap;
+      overflow:hidden;
+      text-overflow:ellipsis;
+    }
+
+    .serve-label{
+      display:inline-flex;
+      margin-top:5px;
+      padding:4px 8px;
+      border-radius:999px;
+      background:#dcfce7;
+      color:#166534;
+      font-size:11px;
+      font-weight:1000;
+    }
+
+    .score-box{
+      min-height:52px;
+      border-radius:16px;
+      background:#f8fafc;
+      border:1px solid rgba(16,24,40,.08);
+      display:flex;
+      flex-direction:column;
+      align-items:center;
+      justify-content:center;
+      font-weight:1000;
+    }
+
+    .score-label{
+      font-size:10px;
+      color:#667085;
+      text-transform:uppercase;
+      letter-spacing:.06em;
+      margin-bottom:3px;
+    }
+
+    .score-value{
+      font-size:22px;
+      line-height:1;
+      color:#111827;
+    }
+
+    .mode-toggle{
+      display:grid;
+      grid-template-columns:1fr 1fr;
+      gap:10px;
+      margin-top:14px;
+    }
+
+    .mode-btn{
+      border:1px solid rgba(7,91,154,.14);
+      background:#fff;
+      border-radius:18px;
+      padding:12px;
+      font-weight:1000;
+      cursor:pointer;
+    }
+
+    .mode-btn.active{
+      background:linear-gradient(180deg,var(--blue),var(--blue-dark));
+      color:#fff;
+    }
+
+    .controls{
+      display:grid;
+      grid-template-columns:1fr 1fr;
+      gap:12px;
+      margin-top:14px;
+    }
+
+    .control-card{
+      border-radius:20px;
+      background:#fff;
+      border:1px solid rgba(16,24,40,.08);
+      padding:14px;
+      box-shadow:0 8px 18px rgba(16,24,40,.05);
+    }
+
+    .control-title{
+      font-weight:1000;
+      margin-bottom:10px;
+      white-space:nowrap;
+      overflow:hidden;
+      text-overflow:ellipsis;
+    }
+
+    .control-row{
+      display:grid;
+      grid-template-columns:1fr 1fr;
+      gap:8px;
+    }
+
+    .big-btn{
+      min-height:58px;
+      border-radius:18px;
+      border:1px solid rgba(16,24,40,.10);
+      background:#f8fafc;
+      font-size:20px;
+      font-weight:1000;
+      cursor:pointer;
+    }
+
+    .big-btn.plus{
+      background:#ecfdf5;
+      color:#166534;
+      border-color:#bbf7d0;
+    }
+
+    .big-btn.minus{
+      background:#fff5f5;
+      color:#8a1f1f;
+      border-color:#f1b2b2;
+    }
+
+    .muted{
+      color:var(--muted);
+      font-size:14px;
+      line-height:1.45;
+    }
+
+    .empty{
+      padding:16px;
+      border-radius:18px;
+      background:linear-gradient(135deg,rgba(39,188,237,.12),rgba(198,90,30,.08));
+      border:1px solid rgba(39,188,237,.22);
+      color:#475467;
+      font-weight:800;
+    }
+
+    @media (max-width:759px){
+      :root{--top-h:72px;}
+
+      .container{
+        width:min(var(--container), calc(100% - 18px));
+      }
+
+      .panel-title{font-size:23px;}
+
+      .team-score{
+        grid-template-columns:minmax(0,1fr) 50px 50px 62px;
+        gap:6px;
+        padding:12px;
+      }
+
+      .team-name{font-size:14px;}
+      .score-box{min-height:48px;}
+      .score-value{font-size:19px;}
+      .score-label{font-size:9px;}
+
+      .controls{
+        grid-template-columns:1fr;
+      }
+
+      .mode-btn{
+        font-size:13px;
+      }
+    }
+  </style>
+</head>
+
+<body>
+
+<header class="topbar">
+  <div class="container topbar-row">
+    <div>
+      <div class="title">🎾 Mode arbitre</div>
+      <div class="subtitle">Scores live — Championnats Guyane Beach Tennis</div>
+    </div>
+    <div class="role-pill" id="rolePill">Connexion…</div>
+  </div>
+</header>
+
+<div class="match-strip">
+  <div class="container">
+    <div class="strip-scroll" id="matchStrip">
+      <div class="strip-empty">Chargement des matchs envoyés…</div>
+    </div>
+  </div>
+</div>
+
+<main class="container">
+
+  <section class="panel" id="accessDenied" style="display:none;">
+    <h1 class="panel-title">⛔ Accès refusé</h1>
+    <p class="panel-text">Cette page est réservée aux arbitres, JAT et administrateurs.</p>
+  </section>
+
+  <section class="panel" id="pageContent" style="display:none;">
+    <div class="panel-head">
+      <div>
+        <h1 class="panel-title">Match en direct</h1>
+        <p class="panel-text" id="matchInfo">Sélectionne un match dans le bandeau.</p>
+      </div>
+      <div class="tag" id="matchStatus">Live</div>
+    </div>
+
+    <div id="emptyBox" class="empty">
+      Aucun match sélectionné. Utilise le bandeau en haut pour prendre ou afficher un match.
+    </div>
+
+    <div id="scoreUI" style="display:none;">
+
+      <div class="score-board">
+        <div class="team-score" id="teamBoxA">
+          <div class="team-name">
+            <span id="teamAName">Équipe A</span>
+            <div class="serve-label" id="serveA" style="display:none;">Service</div>
+          </div>
+          <div class="score-box" id="pointsBoxA">
+            <div class="score-label">Points</div>
+            <div class="score-value" id="pointsA">0</div>
+          </div>
+          <div class="score-box">
+            <div class="score-label">Set 1</div>
+            <div class="score-value" id="setA">0</div>
+          </div>
+          <div class="score-box">
+            <div class="score-label">STB</div>
+            <div class="score-value" id="stbA">0</div>
+          </div>
+        </div>
+
+        <div class="team-score" id="teamBoxB">
+          <div class="team-name">
+            <span id="teamBName">Équipe B</span>
+            <div class="serve-label" id="serveB" style="display:none;">Service</div>
+          </div>
+          <div class="score-box" id="pointsBoxB">
+            <div class="score-label">Points</div>
+            <div class="score-value" id="pointsB">0</div>
+          </div>
+          <div class="score-box">
+            <div class="score-label">Set 1</div>
+            <div class="score-value" id="setB">0</div>
+          </div>
+          <div class="score-box">
+            <div class="score-label">STB</div>
+            <div class="score-value" id="stbB">0</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="mode-toggle">
+        <button class="mode-btn active" id="btnModePoints" type="button">Saisie point par point</button>
+        <button class="mode-btn" id="btnModeGames" type="button">Saisie jeu par jeu</button>
+      </div>
+
+      <div class="actions">
+        <button class="btn green" id="btnTakeMatch" type="button">🙋 Prendre ce match</button>
+        <button class="btn" id="btnServerA" type="button">Service équipe du haut</button>
+        <button class="btn" id="btnServerB" type="button">Service équipe du bas</button>
+        <button class="btn danger" id="btnResetLocal" type="button">↩️ Remettre ce score à zéro</button>
+      </div>
+
+      <div class="controls">
+        <div class="control-card">
+          <div class="control-title" id="controlTitleA">Équipe A</div>
+          <div class="control-row">
+            <button class="big-btn plus" id="btnPlusA" type="button">+1</button>
+            <button class="big-btn minus" id="btnMinusA" type="button">−1</button>
+          </div>
+        </div>
+
+        <div class="control-card">
+          <div class="control-title" id="controlTitleB">Équipe B</div>
+          <div class="control-row">
+            <button class="big-btn plus" id="btnPlusB" type="button">+1</button>
+            <button class="big-btn minus" id="btnMinusB" type="button">−1</button>
+          </div>
+        </div>
+      </div>
+
+      <div class="actions">
+        <button class="btn primary" id="btnValidateSet1" type="button">✅ Valider le set 1</button>
+        <button class="btn primary" id="btnValidateSTB" type="button">✅ Valider le super tie-break</button>
+        <button class="btn primary" id="btnSendFinal" type="button">📤 Envoyer score final au JAT</button>
+      </div>
+
+      <p class="muted" style="margin-top:12px;">
+        Le JAT garde la validation finale du résultat. Cette page alimente le live et prépare le score.
+      </p>
+    </div>
+  </section>
+
+</main>
+  <script type="module">
+  import { auth, db } from "../assets/js/firebase.js";
+  import { getRoleByUid } from "../assets/js/session.js";
+
+  import { onAuthStateChanged }
+  from "https://www.gstatic.com/firebasejs/10.12.5/firebase-auth.js";
+
+  import {
+    doc,
+    collection,
+    onSnapshot,
+    setDoc,
+    serverTimestamp
+  } from "https://www.gstatic.com/firebasejs/10.12.5/firebase-firestore.js";
+
+  const EVENT_ID = "championnats-2026";
+
+  const accessDenied = document.getElementById("accessDenied");
+  const pageContent = document.getElementById("pageContent");
+  const rolePill = document.getElementById("rolePill");
+  const matchStrip = document.getElementById("matchStrip");
+
+  const matchInfo = document.getElementById("matchInfo");
+  const matchStatus = document.getElementById("matchStatus");
+  const emptyBox = document.getElementById("emptyBox");
+  const scoreUI = document.getElementById("scoreUI");
+
+  const teamBoxA = document.getElementById("teamBoxA");
+  const teamBoxB = document.getElementById("teamBoxB");
+
+  const teamAName = document.getElementById("teamAName");
+  const teamBName = document.getElementById("teamBName");
+
+  const serveA = document.getElementById("serveA");
+  const serveB = document.getElementById("serveB");
+
+  const pointsBoxA = document.getElementById("pointsBoxA");
+  const pointsBoxB = document.getElementById("pointsBoxB");
+
+  const pointsA = document.getElementById("pointsA");
+  const pointsB = document.getElementById("pointsB");
+  const setA = document.getElementById("setA");
+  const setB = document.getElementById("setB");
+  const stbA = document.getElementById("stbA");
+  const stbB = document.getElementById("stbB");
+
+  const btnModePoints = document.getElementById("btnModePoints");
+  const btnModeGames = document.getElementById("btnModeGames");
+
+  const btnTakeMatch = document.getElementById("btnTakeMatch");
+  const btnServerA = document.getElementById("btnServerA");
+  const btnServerB = document.getElementById("btnServerB");
+  const btnResetLocal = document.getElementById("btnResetLocal");
+
+  const btnPlusA = document.getElementById("btnPlusA");
+  const btnMinusA = document.getElementById("btnMinusA");
+  const btnPlusB = document.getElementById("btnPlusB");
+  const btnMinusB = document.getElementById("btnMinusB");
+
+  const btnValidateSet1 = document.getElementById("btnValidateSet1");
+  const btnValidateSTB = document.getElementById("btnValidateSTB");
+  const btnSendFinal = document.getElementById("btnSendFinal");
+
+  const controlTitleA = document.getElementById("controlTitleA");
+  const controlTitleB = document.getElementById("controlTitleB");
+
+  let currentRole = null;
+  let currentUser = null;
+
+  let currentProg = null;
+  let liveMatches = new Map();
+  let selectedMatchId = null;
+  let selectedLive = null;
+
+  let inputMode = "points";
+  let currentPhase = "set1";
+
+  let unsubProg = null;
+  let unsubLive = null;
+
+  function esc(s){
+    return (s ?? "").toString()
+      .replaceAll("&","&amp;")
+      .replaceAll("<","&lt;")
+      .replaceAll(">","&gt;")
+      .replaceAll('"',"&quot;")
+      .replaceAll("'","&#039;");
+  }
+
+  function generalProgRef(){
+    return doc(db, "events", EVENT_ID, "programmations", "general");
+  }
+
+  function liveCol(){
+    return collection(db, "events", EVENT_ID, "arbitrage_live");
+  }
+
+  function liveRef(matchId){
+    return doc(db, "events", EVENT_ID, "arbitrage_live", matchId);
+  }
+
+  function resultRef(matchId){
+    return doc(db, "events", EVENT_ID, "resultats", "general", "matches", matchId);
+  }
+
+  function allMatches(){
+    return Array.isArray(currentProg?.matches)
+      ? [...currentProg.matches].filter(m => m.type !== "winner")
+      : [];
+  }
+
+  function matchById(id){
+    return allMatches().find(m => m.id === id) || null;
+  }
+
+  function defaultLiveFor(match){
+    return {
+      eventId:EVENT_ID,
+      matchId:match.id,
+      status:"sent",
+      takenBy:null,
+      takenByEmail:null,
+      serverSide:"A",
+      inputMode:"points",
+      currentPhase:"set1",
+      pointsA:0,
+      pointsB:0,
+      gamesA:0,
+      gamesB:0,
+      stbA:0,
+      stbB:0,
+      set1Validated:false,
+      stbValidated:false,
+      teamA:match.teamA || "Équipe A",
+      teamB:match.teamB || "Équipe B",
+      label:match.label || match.id,
+      order:match.order ?? null,
+      time:match.time || null,
+      court:match.court || null
+    };
+  }
+
+  function getLive(matchId){
+    const match = matchById(matchId);
+    const live = liveMatches.get(matchId);
+
+    if(live) return live;
+    if(match) return defaultLiveFor(match);
+
+    return null;
+  }
+
+  function sentMatches(){
+    return allMatches()
+      .filter(match => liveMatches.has(match.id))
+      .sort((a,b)=>{
+        if(Number(a.order) !== Number(b.order)){
+          return Number(a.order) - Number(b.order);
+        }
+        return String(a.court || "").localeCompare(String(b.court || ""));
+      });
+  }
+
+  function renderStrip(){
+    const list = sentMatches();
+
+    if(!list.length){
+      matchStrip.innerHTML = `<div class="strip-empty">Aucun match envoyé par le JAT pour le moment.</div>`;
+      return;
+    }
+
+    matchStrip.innerHTML = list.map(match => {
+      const live = getLive(match.id);
+      const mine = live?.takenBy === currentUser?.uid;
+      const active = selectedMatchId === match.id;
+
+      return `
+        <button
+          class="strip-btn ${mine ? "mine" : ""} ${active ? "active" : ""}"
+          type="button"
+          data-match="${esc(match.id)}"
+          title="${esc(match.label || match.id)}"
+        >
+          #${esc(match.order || "—")} · ${esc(match.time || "—")} · ${esc(match.court || "—")}
+          — ${esc(match.label || match.id)}
+        </button>
+      `;
+    }).join("");
+  }
+
+  function pointLabel(v, tieBreak = false){
+    const n = Number(v || 0);
+
+    if(tieBreak) return String(n);
+
+    if(n <= 0) return "0";
+    if(n === 1) return "15";
+    if(n === 2) return "30";
+    return "40";
+  }
+
+  function isTieBreakSet1(live){
+    return Number(live?.gamesA || 0) === 6 && Number(live?.gamesB || 0) === 6;
+  }
+
+  function renderScore(){
+    renderStrip();
+
+    if(!selectedMatchId){
+      emptyBox.style.display = "block";
+      scoreUI.style.display = "none";
+      matchInfo.textContent = "Sélectionne un match dans le bandeau.";
+      matchStatus.textContent = "Live";
+      return;
+    }
+
+    const match = matchById(selectedMatchId);
+    const live = getLive(selectedMatchId);
+
+    if(!match || !live){
+      emptyBox.style.display = "block";
+      scoreUI.style.display = "none";
+      matchInfo.textContent = "Match introuvable.";
+      matchStatus.textContent = "Erreur";
+      return;
+    }
+
+    selectedLive = live;
+
+    emptyBox.style.display = "none";
+    scoreUI.style.display = "block";
+
+    inputMode = live.inputMode || inputMode || "points";
+    currentPhase = live.currentPhase || currentPhase || "set1";
+
+    const teamA = live.teamA || match.teamA || "Équipe A";
+    const teamB = live.teamB || match.teamB || "Équipe B";
+
+    teamAName.textContent = teamA;
+    teamBName.textContent = teamB;
+    controlTitleA.textContent = teamA;
+    controlTitleB.textContent = teamB;
+
+    matchInfo.textContent = `#${match.order || "—"} · ${match.time || "—"} · ${match.label || match.id}`;
+    matchStatus.textContent = live.status === "final_sent" ? "Score envoyé" : "Live";
+
+    const tb = currentPhase === "stb" || isTieBreakSet1(live);
+
+    pointsA.textContent = pointLabel(live.pointsA, tb);
+    pointsB.textContent = pointLabel(live.pointsB, tb);
+    setA.textContent = String(live.gamesA || 0);
+    setB.textContent = String(live.gamesB || 0);
+    stbA.textContent = String(live.stbA || 0);
+    stbB.textContent = String(live.stbB || 0);
+
+    const server = live.serverSide === "B" ? "B" : "A";
+
+    teamBoxA.classList.toggle("server", server === "A");
+    teamBoxB.classList.toggle("server", server === "B");
+    serveA.style.display = server === "A" ? "inline-flex" : "none";
+    serveB.style.display = server === "B" ? "inline-flex" : "none";
+
+    btnModePoints.classList.toggle("active", inputMode === "points");
+    btnModeGames.classList.toggle("active", inputMode === "games");
+
+    pointsBoxA.style.display = inputMode === "points" ? "flex" : "none";
+    pointsBoxB.style.display = inputMode === "points" ? "flex" : "none";
+
+    btnTakeMatch.textContent = live.takenBy
+      ? (live.takenBy === currentUser?.uid ? "✅ Match pris par toi" : `👀 Pris par ${live.takenByEmail || "un arbitre"}`)
+      : "🙋 Prendre ce match";
+  }
+
+  async function patchLive(patch){
+    if(!selectedMatchId) return;
+
+    await setDoc(liveRef(selectedMatchId), {
+      ...patch,
+      updatedAt:serverTimestamp(),
+      updatedBy:currentUser?.uid || null,
+      updatedByEmail:currentUser?.email || null
+    }, { merge:true });
+  }
+
+  async function takeMatch(){
+    if(!selectedMatchId) return;
+
+    const match = matchById(selectedMatchId);
+    if(!match) return;
+
+    await setDoc(liveRef(selectedMatchId), {
+      ...defaultLiveFor(match),
+      takenBy:currentUser?.uid || null,
+      takenByEmail:currentUser?.email || null,
+      status:"taken",
+      updatedAt:serverTimestamp(),
+      updatedBy:currentUser?.uid || null
+    }, { merge:true });
+  }
+
+  function nextServer(side){
+    return side === "A" ? "B" : "A";
+  }
+
+  async function addGame(side){
+    const live = selectedLive;
+    if(!live) return;
+
+    if(currentPhase === "stb"){
+      const key = side === "A" ? "stbA" : "stbB";
+      await patchLive({ [key]:Math.min(99, Number(live[key] || 0) + 1) });
+      return;
+    }
+
+    const key = side === "A" ? "gamesA" : "gamesB";
+    await patchLive({
+      [key]:Math.min(7, Number(live[key] || 0) + 1),
+      pointsA:0,
+      pointsB:0,
+      serverSide:nextServer(live.serverSide === "B" ? "B" : "A")
+    });
+  }
+
+  async function removeGame(side){
+    const live = selectedLive;
+    if(!live) return;
+
+    if(currentPhase === "stb"){
+      const key = side === "A" ? "stbA" : "stbB";
+      await patchLive({ [key]:Math.max(0, Number(live[key] || 0) - 1) });
+      return;
+    }
+
+    const key = side === "A" ? "gamesA" : "gamesB";
+    await patchLive({ [key]:Math.max(0, Number(live[key] || 0) - 1) });
+  }
+
+  async function addPoint(side){
+    const live = selectedLive;
+    if(!live) return;
+
+    if(inputMode === "games"){
+      await addGame(side);
+      return;
+    }
+
+    if(currentPhase === "stb" || isTieBreakSet1(live)){
+      const key = side === "A" ? "pointsA" : "pointsB";
+      await patchLive({ [key]:Number(live[key] || 0) + 1 });
+      return;
+    }
+
+    const key = side === "A" ? "pointsA" : "pointsB";
+    const next = Number(live[key] || 0) + 1;
+
+    if(next >= 4){
+      await addGame(side);
+    }else{
+      await patchLive({ [key]:next });
+    }
+  }
+
+  async function removePoint(side){
+    const live = selectedLive;
+    if(!live) return;
+
+    if(inputMode === "games"){
+      await removeGame(side);
+      return;
+    }
+
+    const key = side === "A" ? "pointsA" : "pointsB";
+    await patchLive({ [key]:Math.max(0, Number(live[key] || 0) - 1) });
+  }
+
+  async function validateSet1(){
+    const live = selectedLive;
+    if(!live) return;
+
+    await patchLive({
+      set1Validated:true,
+      pointsA:0,
+      pointsB:0,
+      currentPhase:"stb"
+    });
+  }
+
+  async function validateSTB(){
+    await patchLive({
+      stbValidated:true,
+      currentPhase:"done"
+    });
+  }
+
+  async function sendFinalToJat(){
+    const live = selectedLive;
+    if(!live || !selectedMatchId) return;
+
+    const payload = {
+      s1A:String(live.gamesA || 0),
+      s1B:String(live.gamesB || 0),
+      s2A:"",
+      s2B:"",
+      s3A:String(live.stbA || 0),
+      s3B:String(live.stbB || 0),
+      proposedByArbitre:true,
+      pendingJatValidation:true,
+      updatedAt:serverTimestamp(),
+      updatedBy:currentUser?.uid || null
+    };
+
+    const setsA =
+      Number(payload.s1A) > Number(payload.s1B) ? 1 : 0
+      + (Number(payload.s3A) > Number(payload.s3B) ? 1 : 0);
+
+    const setsB =
+      Number(payload.s1B) > Number(payload.s1A) ? 1 : 0
+      + (Number(payload.s3B) > Number(payload.s3A) ? 1 : 0);
+
+    payload.winnerSide = setsA > setsB ? "A" : setsB > setsA ? "B" : null;
+
+    await setDoc(resultRef(selectedMatchId), payload, { merge:true });
+
+    await patchLive({
+      status:"final_sent",
+      sentToJatAt:serverTimestamp()
+    });
+
+    alert("Score envoyé au JAT ✅");
+  }
+
+  async function resetLocal(){
+    const ok = confirm("Remettre le score live de ce match à zéro ?");
+    if(!ok) return;
+
+    await patchLive({
+      pointsA:0,
+      pointsB:0,
+      gamesA:0,
+      gamesB:0,
+      stbA:0,
+      stbB:0,
+      serverSide:"A",
+      currentPhase:"set1",
+      set1Validated:false,
+      stbValidated:false,
+      status:"taken"
+    });
+  }
+
+  matchStrip.addEventListener("click", (event)=>{
+    const btn = event.target.closest("[data-match]");
+    if(!btn) return;
+
+    selectedMatchId = btn.dataset.match;
+    renderScore();
+  });
+
+  btnTakeMatch.onclick = takeMatch;
+
+  btnServerA.onclick = () => patchLive({ serverSide:"A" });
+  btnServerB.onclick = () => patchLive({ serverSide:"B" });
+
+  btnModePoints.onclick = () => patchLive({ inputMode:"points" });
+  btnModeGames.onclick = () => patchLive({ inputMode:"games" });
+
+  btnPlusA.onclick = () => addPoint("A");
+  btnMinusA.onclick = () => removePoint("A");
+  btnPlusB.onclick = () => addPoint("B");
+  btnMinusB.onclick = () => removePoint("B");
+
+  btnValidateSet1.onclick = validateSet1;
+  btnValidateSTB.onclick = validateSTB;
+  btnSendFinal.onclick = sendFinalToJat;
+  btnResetLocal.onclick = resetLocal;
+
+  function startListeners(){
+    if(unsubProg) unsubProg();
+    if(unsubLive) unsubLive();
+
+    unsubProg = onSnapshot(generalProgRef(), (snap)=>{
+      currentProg = snap.exists() ? (snap.data() || null) : null;
+      renderScore();
+    });
+
+    unsubLive = onSnapshot(liveCol(), (snap)=>{
+      liveMatches = new Map();
+
+      snap.forEach(d=>{
+        liveMatches.set(d.id, {
+          id:d.id,
+          ...(d.data() || {})
+        });
+      });
+
+      if(!selectedMatchId && liveMatches.size){
+        selectedMatchId = Array.from(liveMatches.keys())[0];
+      }
+
+      renderScore();
+    });
+  }
+
+  function stopListeners(){
+    if(unsubProg){
+      unsubProg();
+      unsubProg = null;
+    }
+
+    if(unsubLive){
+      unsubLive();
+      unsubLive = null;
+    }
+  }
+
+  function showDenied(){
+    accessDenied.style.display = "block";
+    pageContent.style.display = "none";
+    rolePill.textContent = "Accès refusé";
+    stopListeners();
+  }
+
+  function showArbitre(){
+    accessDenied.style.display = "none";
+    pageContent.style.display = "block";
+    rolePill.textContent = currentRole === "admin"
+      ? "Admin"
+      : currentRole === "jat"
+        ? "JAT"
+        : "Arbitre";
+
+    startListeners();
+  }
+
+  onAuthStateChanged(auth, async (user)=>{
+    currentUser = user || null;
+    currentRole = null;
+
+    if(!user){
+      showDenied();
+      return;
+    }
+
+    try{
+      currentRole = await getRoleByUid(user.uid);
+
+      if(!["admin","jat","arbitre"].includes(currentRole)){
+        showDenied();
+        return;
+      }
+
+      showArbitre();
+    }catch(error){
+      console.error(error);
+      showDenied();
+    }
+  });
+</script>
+
+</body>
+</html>
